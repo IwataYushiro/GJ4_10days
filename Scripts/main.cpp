@@ -12,7 +12,7 @@ const char kWindowTitle[] = "GJ202409";
 const float pi = 3.14159f;
 
 // ウィンドウ横幅
-const int WIN_WIDTH = 1200;
+const int WIN_WIDTH = 1000;
 
 // ウィンドウ縦幅
 const int WIN_HEIGHT = 800;
