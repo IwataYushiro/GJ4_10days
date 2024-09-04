@@ -1,13 +1,13 @@
 #include "DxLib.h"
 #include "KxLib.h"
 
-// ƒEƒBƒ“ƒhƒE‚Ìƒ^ƒCƒgƒ‹‚É•\¦‚·‚é•¶š—ñ
-const char TITLE[] = "xx2x_xx_ƒiƒ}ƒG: ƒ^ƒCƒgƒ‹";
+// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®ã‚¿ã‚¤ãƒˆãƒ«ã«è¡¨ç¤ºã™ã‚‹æ–‡å­—åˆ—
+const char TITLE[] = "GJ4_Gamejam";
 
-// ƒEƒBƒ“ƒhƒE‰¡•
+// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦æ¨ªå¹…
 const int WIN_WIDTH = 1280;
 
-// ƒEƒBƒ“ƒhƒEc•
+// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ç¸¦å¹…
 const int WIN_HEIGHT = 720;
 
 struct Player
@@ -19,35 +19,53 @@ struct Player
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine,
 	_In_ int nCmdShow) {
-	// ƒEƒBƒ“ƒhƒEƒ‚[ƒh‚Éİ’è
+	// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒ¢ãƒ¼ãƒ‰ã«è¨­å®š
 	ChangeWindowMode(TRUE);
 
-	// ƒEƒBƒ“ƒhƒEƒTƒCƒY‚ğè“®‚Å‚Í•ÏX‚³‚¹‚¸A
-	// ‚©‚ÂƒEƒBƒ“ƒhƒEƒTƒCƒY‚É‡‚í‚¹‚ÄŠg‘å‚Å‚«‚È‚¢‚æ‚¤‚É‚·‚é
+	// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºã‚’æ‰‹å‹•ã§ã¯å¤‰æ›´ã•ã›ãšã€
+	// ã‹ã¤ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºã«åˆã‚ã›ã¦æ‹¡å¤§ã§ããªã„ã‚ˆã†ã«ã™ã‚‹
 	SetWindowSizeChangeEnableFlag(FALSE, FALSE);
 
-	// ƒ^ƒCƒgƒ‹‚ğ•ÏX
+	// ã‚¿ã‚¤ãƒˆãƒ«ã‚’å¤‰æ›´
 	SetMainWindowText(TITLE);
 
-	// ‰æ–ÊƒTƒCƒY‚ÌÅ‘åƒTƒCƒYAƒJƒ‰[ƒrƒbƒg”‚ğİ’è(ƒ‚ƒjƒ^[‚Ì‰ğ‘œ“x‚É‡‚í‚¹‚é)
+	// ç”»é¢ã‚µã‚¤ã‚ºã®æœ€å¤§ã‚µã‚¤ã‚ºã€ã‚«ãƒ©ãƒ¼ãƒ“ãƒƒãƒˆæ•°ã‚’è¨­å®š(ãƒ¢ãƒ‹ã‚¿ãƒ¼ã®è§£åƒåº¦ã«åˆã‚ã›ã‚‹)
 	SetGraphMode(WIN_WIDTH, WIN_HEIGHT, 32);
 
-	// ‰æ–ÊƒTƒCƒY‚ğİ’è(‰ğ‘œ“x‚Æ‚Ì”ä—¦‚Åİ’è)
+	// ç”»é¢ã‚µã‚¤ã‚ºã‚’è¨­å®š(è§£åƒåº¦ã¨ã®æ¯”ç‡ã§è¨­å®š)
 	SetWindowSizeExtendRate(1.0);
 
-	// ‰æ–Ê‚Ì”wŒiF‚ğİ’è‚·‚é
+	// ç”»é¢ã®èƒŒæ™¯è‰²ã‚’è¨­å®šã™ã‚‹
 	SetBackgroundColor(0x00, 0x00, 0x00);
 
-	// DXlib‚Ì‰Šú‰»
+	// DXlibã®åˆæœŸåŒ–
 	if (DxLib_Init() == -1) { return -1; }
 
-	// (ƒ_ƒuƒ‹ƒoƒbƒtƒ@)•`‰ææƒOƒ‰ƒtƒBƒbƒN—Ìˆæ‚Í— –Ê‚ğw’è
+	// (ãƒ€ãƒ–ãƒ«ãƒãƒƒãƒ•ã‚¡)æç”»å…ˆã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯é ˜åŸŸã¯è£é¢ã‚’æŒ‡å®š
 	SetDrawScreen(DX_SCREEN_BACK);
 
-	// ‰æ‘œ‚È‚Ç‚ÌƒŠƒ\[ƒXƒf[ƒ^‚Ì•Ï”éŒ¾‚Æ“Ç‚İ‚İ
+	// ç”»åƒãªã©ã®ãƒªã‚½ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿ã®å¤‰æ•°å®£è¨€ã¨èª­ã¿è¾¼ã¿
+	//ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢(ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢ã‹ã‚‰ã‚·ãƒ¥ãƒ¼ãƒ†ã‚£ãƒ³ã‚°ã‚²ãƒ¼ãƒ )ã¨BGM
+	int titleGraph;
+	titleGraph = LoadGraph("Resources/Textures/title.png");
+	//ã‚²ãƒ¼ãƒ ã‚·ãƒ¼ãƒ³ç”»é¢ã¨BGM
+	int gameUiGraph;
+	gameUiGraph = LoadGraph("Resources/Textures/gemeui.png");
+	//ã‚¯ãƒªã‚¢ç”»é¢(ã‚·ãƒ¥ãƒ¼ãƒ†ã‚£ãƒ³ã‚°ã‚²ãƒ¼ãƒ ã‹ã‚‰ã‚¯ãƒªã‚¢ç”»é¢)ã¨BGM
+	int clearGraph;
+	clearGraph = LoadGraph("Resources/Textures/clear.png");
 
+	// ã‚²ãƒ¼ãƒ ãƒ«ãƒ¼ãƒ—ã§ä½¿ã†å¤‰æ•°ã®å®£è¨€
 
-	// ƒQ[ƒ€ƒ‹[ƒv‚Åg‚¤•Ï”‚ÌéŒ¾
+	//ã‚·ãƒ¼ãƒ³ç®¡ç†
+	int title = 0;
+	int gamemode = 1;
+	int clear = 2;
+	int sceneNo = title;
+	
+	//ã‚·ãƒ¼ãƒ³ç”¨ã®ã‚¿ã‚¤ãƒãƒ¼
+	int sceneTimer[3] = {0};
+
 
 	const Vector2D mapScale = {8,100};
 
@@ -64,88 +82,127 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	vector<vector<int>> map = { {} };
 
 
-	// ÅV‚ÌƒL[ƒ{[ƒhî•ñ—p
+	// æœ€æ–°ã®ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰æƒ…å ±ç”¨
 	char keys[256] = { 0 };
 
-	// 1ƒ‹[ƒv(ƒtƒŒ[ƒ€)‘O‚ÌƒL[ƒ{[ƒhî•ñ
+	// 1ãƒ«ãƒ¼ãƒ—(ãƒ•ãƒ¬ãƒ¼ãƒ )å‰ã®ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰æƒ…å ±
 	char oldkeys[256] = { 0 };
 
-	// ƒQ[ƒ€ƒ‹[ƒv
+	// ã‚²ãƒ¼ãƒ ãƒ«ãƒ¼ãƒ—
 	while (true) {
-		// ÅV‚ÌƒL[ƒ{[ƒhî•ñ‚¾‚Á‚½‚à‚Ì‚Í1ƒtƒŒ[ƒ€‘O‚ÌƒL[ƒ{[ƒhî•ñ‚Æ‚µ‚Ä•Û‘¶
-		// ÅV‚ÌƒL[ƒ{[ƒhî•ñ‚ğæ“¾
+		// æœ€æ–°ã®ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰æƒ…å ±ã ã£ãŸã‚‚ã®ã¯1ãƒ•ãƒ¬ãƒ¼ãƒ å‰ã®ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰æƒ…å ±ã¨ã—ã¦ä¿å­˜
+		// æœ€æ–°ã®ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰æƒ…å ±ã‚’å–å¾—
 		GetHitKeyStateAll(keys);
-
-		// ‰æ–ÊƒNƒŠƒA
+		// ç”»é¢ã‚¯ãƒªã‚¢
 		ClearDrawScreen();
-		//---------  ‚±‚±‚©‚çƒvƒƒOƒ‰ƒ€‚ğ‹Lq  ----------//
+		//---------  ã“ã“ã‹ã‚‰ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚’è¨˜è¿°  ----------//
 
-		// XVˆ—
+		// æ›´æ–°å‡¦ç†
+		//ã‚·ãƒ¼ãƒ³ç§»è¡Œç®¡ç†
+		if (keys[KEY_INPUT_RETURN] == 1) {
+			if (sceneNo == title) {
+				sceneTimer[title]++;
+				sceneTimer[clear] = 0;
+			}
+			else if (sceneNo == gamemode) {
+				sceneTimer[gamemode]++;
+				sceneTimer[title] = 0;
+			}
+			else if (sceneNo == clear) {
+				sceneTimer[clear]++;
+				sceneTimer[gamemode] = 0;
+			}
+		}
+		if (sceneTimer[title] >= 30) {
+			sceneNo = gamemode;
+		}
+		else if (sceneTimer[gamemode] >= 30) {
+			sceneNo = clear;
+		}
+		else if (sceneTimer[clear] >= 30) {
+			sceneNo = title;
+		}
 
 
-
-		//ƒvƒŒƒCƒ„[‚Ì•¨—‹““®
-		RigidBodyBehaviour(player.rigidBody, {0,1}, {0.5,1}, edgeWall);
-		//ƒvƒŒƒCƒ„[‚ª’…’n‚µ‚Ä‚¢‚½‚ç
-		if (player.rigidBody.landing)
-		{
-			//‚µ‚Î‚ç‚­‘O•û‚Éi‚ß‚È‚¯‚ê‚Î”½“]
-			if ((player.direction
-				&& player.rigidBody.gameObject.beforePos.x >= player.rigidBody.gameObject.entity.x)
-				|| (!player.direction
-				&& player.rigidBody.gameObject.beforePos.x <= player.rigidBody.gameObject.entity.x))
+		if (sceneNo == gamemode) {
+			//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ç‰©ç†æŒ™å‹•
+			RigidBodyBehaviour(player.rigidBody, { 0,1 }, { 0.5,1 }, edgeWall);
+			//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒç€åœ°ã—ã¦ã„ãŸã‚‰
+			if (player.rigidBody.landing)
 			{
-				player.stuckFrameCount++;
+				//ã—ã°ã‚‰ãå‰æ–¹ã«é€²ã‚ãªã‘ã‚Œã°åè»¢
+				if ((player.direction
+					&& player.rigidBody.gameObject.beforePos.x >= player.rigidBody.gameObject.entity.x)
+					|| (!player.direction
+						&& player.rigidBody.gameObject.beforePos.x <= player.rigidBody.gameObject.entity.x))
+				{
+					player.stuckFrameCount++;
+				}
+				else
+				{
+					player.stuckFrameCount--;
+				}
+				player.stuckFrameCount = min(max(0, player.stuckFrameCount), 3);
+
+				if (player.stuckFrameCount >= 3)
+				{
+					player.direction = !player.direction;
+					player.stuckFrameCount = 0;
+				}
+
+				//å‰é€²
+				float playerMoveForce = 3;
+				if (!player.direction)
+				{
+					playerMoveForce *= -1;
+				}
+				player.rigidBody.movement.x += playerMoveForce;
 			}
 			else
 			{
-				player.stuckFrameCount--;
-			}
-			player.stuckFrameCount = min(max(0, player.stuckFrameCount), 3);
-
-			if (player.stuckFrameCount >= 3)
-			{
-				player.direction = !player.direction;
 				player.stuckFrameCount = 0;
 			}
-
-			//‘Oi
-			float playerMoveForce = 3;
-			if (!player.direction)
-			{
-				playerMoveForce *= -1;
-			}
-			player.rigidBody.movement.x += playerMoveForce;
-		}
-		else
-		{
-			player.stuckFrameCount = 0;
 		}
 
-		// •`‰æˆ—
+		// æç”»å‡¦ç†
+		if (sceneNo == 0) {
+			DrawGraph(0, 0, titleGraph, true);
+		}
+		else if (sceneNo == 1) {
+			DrawGraph(0, 0, gameUiGraph, true);
+		}
+		else if (sceneNo == 2) {
+			DrawGraph(0, 0, clearGraph, true);
+		}
 
-		RenderObject(player.rigidBody.gameObject, Vector2D{ -WIN_WIDTH / 2,WIN_HEIGHT / 2 });
+		DrawFormatString(0, 0, GetColor(122, 122, 122), "sceneTimer[title] : %d", sceneTimer[title]);
+		DrawFormatString(0, 30, GetColor(122, 122, 122), "sceneTimer[gamemode] : %d", sceneTimer[gamemode]);
+		DrawFormatString(0, 60, GetColor(122, 122, 122), "sceneTimer[clear] : %d", sceneTimer[clear]);
 
-		//---------  ‚±‚±‚Ü‚Å‚ÉƒvƒƒOƒ‰ƒ€‚ğ‹Lq  ---------//
-		// (ƒ_ƒuƒ‹ƒoƒbƒtƒ@)— –Ê
+		if (sceneNo == gamemode) {
+			RenderObject(player.rigidBody.gameObject, Vector2D{ -WIN_WIDTH / 2,WIN_HEIGHT / 2 });
+		}
+
+		//---------  ã“ã“ã¾ã§ã«ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚’è¨˜è¿°  ---------//
+		// (ãƒ€ãƒ–ãƒ«ãƒãƒƒãƒ•ã‚¡)è£é¢
 		ScreenFlip();
 
-		// 20ƒ~ƒŠ•b‘Ò‹@(‹^—60FPS)
+		// 20ãƒŸãƒªç§’å¾…æ©Ÿ(ç–‘ä¼¼60FPS)
 		WaitTimer(20);
 
-		// WindowsƒVƒXƒeƒ€‚©‚ç‚­‚éî•ñ‚ğˆ—‚·‚é
+		// Windowsã‚·ã‚¹ãƒ†ãƒ ã‹ã‚‰ãã‚‹æƒ…å ±ã‚’å‡¦ç†ã™ã‚‹
 		if (ProcessMessage() == -1) {
 			break;
 		}
 
-		// ESCƒL[‚ª‰Ÿ‚³‚ê‚½‚çƒ‹[ƒv‚©‚ç”²‚¯‚é
+		// ESCã‚­ãƒ¼ãŒæŠ¼ã•ã‚ŒãŸã‚‰ãƒ«ãƒ¼ãƒ—ã‹ã‚‰æŠœã‘ã‚‹
 		if (CheckHitKey(KEY_INPUT_ESCAPE) == 1) {
 			break;
 		}
 	}
-	// Dxƒ‰ƒCƒuƒ‰ƒŠI—¹ˆ—
+	// Dxãƒ©ã‚¤ãƒ–ãƒ©ãƒªçµ‚äº†å‡¦ç†
 	DxLib_End();
 
-	// ³íI—¹
+	// æ­£å¸¸çµ‚äº†
 	return 0;
 }
