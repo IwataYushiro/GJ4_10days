@@ -2,7 +2,7 @@
 #include "KxLib.h"
 
 // ウィンドウのタイトルに表示する文字列
-const char TITLE[] = "xx2x_xx_ナマエ: タイトル";
+const char TITLE[] = "GJ4_Gamejam";
 
 // ウィンドウ横幅
 const int WIN_WIDTH = 1280;
