@@ -1,4 +1,5 @@
 #include "DxLib.h"
+#include "KxLib.h"
 
 // ウィンドウのタイトルに表示する文字列
 const char TITLE[] = "xx2x_xx_ナマエ: タイトル";
@@ -8,6 +9,13 @@ const int WIN_WIDTH = 1280;
 
 // ウィンドウ縦幅
 const int WIN_HEIGHT = 720;
+
+struct Player
+{
+	RigidBody rigidBody;
+	bool direction;
+	int stuckFrameCount;
+};
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine,
 	_In_ int nCmdShow) {
@@ -41,6 +49,20 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	// ゲームループで使う変数の宣言
 
+	const Vector2D mapScale = {8,100};
+
+	const int playerSprite = LoadGraph("Resources/Textures/napnose.png");
+
+
+	Player player = Player{ RigidBody{ GameObject{ rect{0,0,64,64}, playerSprite} } };
+	vector<GameObject> edgeWall = {
+		GameObject{rect{-WIN_WIDTH / 2,0,0,WIN_HEIGHT}},
+		GameObject{rect{WIN_WIDTH / 2,0,0,WIN_HEIGHT}},
+		GameObject{rect{0,-WIN_HEIGHT / 2,WIN_WIDTH,0}},
+		GameObject{rect{0,WIN_HEIGHT / 2,WIN_WIDTH,0}},
+	};
+	vector<vector<int>> map = { {} };
+
 
 	// 最新のキーボード情報用
 	char keys[256] = { 0 };
@@ -61,7 +83,48 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		// 更新処理
 
 
+
+		//プレイヤーの物理挙動
+		RigidBodyBehaviour(player.rigidBody, {0,1}, {0.5,1}, edgeWall);
+		//プレイヤーが着地していたら
+		if (player.rigidBody.landing)
+		{
+			//しばらく前方に進めなければ反転
+			if ((player.direction
+				&& player.rigidBody.gameObject.beforePos.x >= player.rigidBody.gameObject.entity.x)
+				|| (!player.direction
+				&& player.rigidBody.gameObject.beforePos.x <= player.rigidBody.gameObject.entity.x))
+			{
+				player.stuckFrameCount++;
+			}
+			else
+			{
+				player.stuckFrameCount--;
+			}
+			player.stuckFrameCount = min(max(0, player.stuckFrameCount), 3);
+
+			if (player.stuckFrameCount >= 3)
+			{
+				player.direction = !player.direction;
+				player.stuckFrameCount = 0;
+			}
+
+			//前進
+			float playerMoveForce = 3;
+			if (!player.direction)
+			{
+				playerMoveForce *= -1;
+			}
+			player.rigidBody.movement.x += playerMoveForce;
+		}
+		else
+		{
+			player.stuckFrameCount = 0;
+		}
+
 		// 描画処理
+
+		RenderObject(player.rigidBody.gameObject, Vector2D{ -WIN_WIDTH / 2,WIN_HEIGHT / 2 });
 
 		//---------  ここまでにプログラムを記述  ---------//
 		// (ダブルバッファ)裏面
