@@ -124,43 +124,44 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		}
 
 
-
-		//プレイヤーの物理挙動
-		RigidBodyBehaviour(player.rigidBody, {0,1}, {0.5,1}, edgeWall);
-		//プレイヤーが着地していたら
-		if (player.rigidBody.landing)
-		{
-			//しばらく前方に進めなければ反転
-			if ((player.direction
-				&& player.rigidBody.gameObject.beforePos.x >= player.rigidBody.gameObject.entity.x)
-				|| (!player.direction
-				&& player.rigidBody.gameObject.beforePos.x <= player.rigidBody.gameObject.entity.x))
+		if (sceneNo == gamemode) {
+			//プレイヤーの物理挙動
+			RigidBodyBehaviour(player.rigidBody, { 0,1 }, { 0.5,1 }, edgeWall);
+			//プレイヤーが着地していたら
+			if (player.rigidBody.landing)
 			{
-				player.stuckFrameCount++;
+				//しばらく前方に進めなければ反転
+				if ((player.direction
+					&& player.rigidBody.gameObject.beforePos.x >= player.rigidBody.gameObject.entity.x)
+					|| (!player.direction
+						&& player.rigidBody.gameObject.beforePos.x <= player.rigidBody.gameObject.entity.x))
+				{
+					player.stuckFrameCount++;
+				}
+				else
+				{
+					player.stuckFrameCount--;
+				}
+				player.stuckFrameCount = min(max(0, player.stuckFrameCount), 3);
+
+				if (player.stuckFrameCount >= 3)
+				{
+					player.direction = !player.direction;
+					player.stuckFrameCount = 0;
+				}
+
+				//前進
+				float playerMoveForce = 3;
+				if (!player.direction)
+				{
+					playerMoveForce *= -1;
+				}
+				player.rigidBody.movement.x += playerMoveForce;
 			}
 			else
 			{
-				player.stuckFrameCount--;
-			}
-			player.stuckFrameCount = min(max(0, player.stuckFrameCount), 3);
-
-			if (player.stuckFrameCount >= 3)
-			{
-				player.direction = !player.direction;
 				player.stuckFrameCount = 0;
 			}
-
-			//前進
-			float playerMoveForce = 3;
-			if (!player.direction)
-			{
-				playerMoveForce *= -1;
-			}
-			player.rigidBody.movement.x += playerMoveForce;
-		}
-		else
-		{
-			player.stuckFrameCount = 0;
 		}
 
 		// 描画処理
@@ -178,8 +179,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		DrawFormatString(0, 30, GetColor(122, 122, 122), "sceneTimer[gamemode] : %d", sceneTimer[gamemode]);
 		DrawFormatString(0, 60, GetColor(122, 122, 122), "sceneTimer[clear] : %d", sceneTimer[clear]);
 
-
-		RenderObject(player.rigidBody.gameObject, Vector2D{ -WIN_WIDTH / 2,WIN_HEIGHT / 2 });
+		if (sceneNo == gamemode) {
+			RenderObject(player.rigidBody.gameObject, Vector2D{ -WIN_WIDTH / 2,WIN_HEIGHT / 2 });
+		}
 
 		//---------  ここまでにプログラムを記述  ---------//
 		// (ダブルバッファ)裏面
