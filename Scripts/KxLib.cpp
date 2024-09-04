@@ -241,25 +241,25 @@ void collideWall(RigidBody& rgd, vector<GameObject> blocks) {
 	for (int i = 0; i < hittedBlocks.size(); i++) {
 		float dist = -1;
 		int target = 0;
-		for (int j = 0; j < hittedBlocks.size(); j++) {
+		/*for (int j = 0; j < hittedBlocks.size(); j++) {
 			if (VectorScale(Vector2D{ rgd.gameObject.entity.x ,rgd.gameObject.entity.y }, Vector2D{ hittedBlocks[j].entity.x ,hittedBlocks[j].entity.y }) < dist || dist < 0) {
 				dist = VectorScale(Vector2D{ rgd.gameObject.entity.x ,rgd.gameObject.entity.y }, Vector2D{ hittedBlocks[j].entity.x ,hittedBlocks[j].entity.y });
 				target = j;
 			}
-		}
-		CollisionRectAndRect(rgd.gameObject, hittedBlocks[target].entity);
-		if ((CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[target].entity).x == 1 && rgd.movement.x > 0)
-			|| (CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[target].entity).x == -1 && rgd.movement.x < 0)) {
+		}*/
+		CollisionRectAndRect(rgd.gameObject, hittedBlocks[i].entity);
+		if ((CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[i].entity).x == 1 && rgd.movement.x > 0)
+			|| (CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[i].entity).x == -1 && rgd.movement.x < 0)) {
 			rgd.movement.x *= 0.3;
 		}
-		if ((CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[target].entity).y == 1 && rgd.movement.y > 0)
-			|| (CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[target].entity).y == -1 && rgd.movement.y < 0)) {
+		if ((CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[i].entity).y == 1 && rgd.movement.y > 0)
+			|| (CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[i].entity).y == -1 && rgd.movement.y < 0)) {
 			rgd.movement.y *= 0.3;
 		}
-		if (CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[target].entity).y == 1) {
+		if (CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[i].entity).y == 1) {
 			rgd.beforeLanding = 3;
 		}
-		hittedBlocks.erase(hittedBlocks.begin() + target);
+		//hittedBlocks.erase(hittedBlocks.begin() + i);
 	}
 }
 
