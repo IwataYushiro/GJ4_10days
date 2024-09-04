@@ -4,7 +4,7 @@
 const char TITLE[] = "xx2x_xx_ナマエ: タイトル";
 
 // ウィンドウ横幅
-const int WIN_WIDTH = 600;
+const int WIN_WIDTH = 800;
 
 // ウィンドウ縦幅
 const int WIN_HEIGHT = 400;
