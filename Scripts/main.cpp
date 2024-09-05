@@ -6,6 +6,8 @@ const char TITLE[] = "GJ4_Gamejam";
 
 // ウィンドウ横幅
 const int WIN_WIDTH = 1280;
+//UIライン
+const int GAME_LINE = 960;
 
 // ウィンドウ縦幅
 const int WIN_HEIGHT = 720;
@@ -99,7 +101,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//タイトル画面(タイトル画面からシューティングゲーム)とBGM
 	const int titleGraph = LoadGraph("Resources/Textures/title.png");
 	//ゲームシーン画面とBGM
-	const int gameUiGraph = LoadGraph("Resources/Textures/gemeui.png");
+	//const int gameUiGraph = LoadGraph("Resources/Textures/gemeui.png");
 	//クリア画面(シューティングゲームからクリア画面)とBGM
 	const int clearGraph = LoadGraph("Resources/Textures/clear.png");
 	//自機
@@ -212,10 +214,21 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		case title:
 			//タイトル画面
 			DrawGraph(0, 0, titleGraph, true);
-			break;
-		case playpart:
-			//プレイパート
-			DrawGraph(0, 0, gameUiGraph, true);
+		}
+		else if (sceneNo == 1) {
+
+			//このラインからはUIゾーンなのでいっそここにボックスUIおいてもいいや
+			DrawBox(GAME_LINE, 0, WIN_WIDTH, WIN_HEIGHT, GetColor(0xff, 0xff, 0xff), TRUE);
+		}
+		else if (sceneNo == 2) {
+			DrawGraph(0, 0, clearGraph, true);
+		}
+
+		DrawFormatString(0, 0, GetColor(122, 122, 122), "sceneTimer[title] : %d", sceneTimer[title]);
+		DrawFormatString(0, 30, GetColor(122, 122, 122), "sceneTimer[gamemode] : %d", sceneTimer[gamemode]);
+		DrawFormatString(0, 60, GetColor(122, 122, 122), "sceneTimer[clear] : %d", sceneTimer[clear]);
+
+		if (sceneNo == gamemode) {
 			RenderObject(player.rigidBody.gameObject, Vector2D{ -WIN_WIDTH / 2,WIN_HEIGHT / 2 });
 			break;
 		case logo:
