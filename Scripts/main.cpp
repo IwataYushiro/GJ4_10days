@@ -214,22 +214,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		case title:
 			//タイトル画面
 			DrawGraph(0, 0, titleGraph, true);
-		}
-		else if (sceneNo == 1) {
+			break;
+		case playpart:
+			//プレイパート
 
+			//自機を描画
+			RenderObject(player.rigidBody.gameObject, Vector2D{ -WIN_WIDTH / 2,WIN_HEIGHT / 2 });
 			//このラインからはUIゾーンなのでいっそここにボックスUIおいてもいいや
 			DrawBox(GAME_LINE, 0, WIN_WIDTH, WIN_HEIGHT, GetColor(0xff, 0xff, 0xff), TRUE);
-		}
-		else if (sceneNo == 2) {
-			DrawGraph(0, 0, clearGraph, true);
-		}
-
-		DrawFormatString(0, 0, GetColor(122, 122, 122), "sceneTimer[title] : %d", sceneTimer[title]);
-		DrawFormatString(0, 30, GetColor(122, 122, 122), "sceneTimer[gamemode] : %d", sceneTimer[gamemode]);
-		DrawFormatString(0, 60, GetColor(122, 122, 122), "sceneTimer[clear] : %d", sceneTimer[clear]);
-
-		if (sceneNo == gamemode) {
-			RenderObject(player.rigidBody.gameObject, Vector2D{ -WIN_WIDTH / 2,WIN_HEIGHT / 2 });
 			break;
 		case logo:
 			//ロゴ画面
