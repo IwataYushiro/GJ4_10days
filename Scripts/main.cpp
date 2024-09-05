@@ -482,6 +482,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//ロゴ画面
 			DrawRotaGraph(WIN_WIDTH / 2, WIN_HEIGHT / 2, 2, 0, logoGraph, 0);
 			break;
+		case credit:
+			//クレジット画面
+			DrawString(
+				WIN_WIDTH / 2, FONT_SIZE * 2,
+				"プログラマー\n　鰯ユウ\n　神無月\n\nチーフプログラマー\n　てらぺた\n\nディレクター\n　てらぺた\n",
+				GetColor(0, 0, 0));
+			break;
+
 		}
 
 		//全てのボタンを描画
