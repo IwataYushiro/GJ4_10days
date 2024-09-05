@@ -160,15 +160,27 @@ void ConstructMap(vector<vector<int>> tileMap, const int tileScale, const int ti
 }
 
 ///<summary>
+///矩形と点が重なっているか否か
+///<para>...</para>
+///<para>r = 矩形</para>
+///<para>p = 点</para>
+/// </summary>
+bool HitRectAndPoint(rect r, Vector2D p)
+{
+	return r.x + r.w >= p.x && r.x - r.w <= p.x
+		&& r.y + r.h >= p.y && r.y - r.h <= p.y;
+}
+
+///<summary>
 ///矩形同士が重なっているか否か
 ///<para>...</para>
 ///<para>a,b = 判定を行う２つの矩形</para>
 /// </summary>
 bool HitRectAndRect(rect a, rect b) {
-	if (a.x - a.w * 0.5 <= b.x + b.w * 0.5 && a.x + a.w * 0.5 >= b.x - b.w * 0.5 && a.y - a.h * 0.5 <= b.y + b.h * 0.5 && a.y + a.h * 0.5 >= b.y - b.h * 0.5) {
-		return true;
-	}
-	return false;
+	return a.x - a.w * 0.5 <= b.x + b.w * 0.5
+		&& a.x + a.w * 0.5 >= b.x - b.w * 0.5
+		&& a.y - a.h * 0.5 <= b.y + b.h * 0.5
+		&& a.y + a.h * 0.5 >= b.y - b.h * 0.5;
 }
 
 ///<summary>
@@ -271,7 +283,7 @@ void collideWall(RigidBody& rgd, vector<GameObject> blocks) {
 ///<para>drag = x,y方向のスピード維持率（０～１の小数を入力してね）</para>
 ///<para>blocks = rgdを押し戻す地形ブロックの配列</para>
 /// </summary>
-void RigidBodyBehaviour(RigidBody& rgd, Vector2D gravity, Vector2D drag, vector<GameObject> blocks) {
+void RigidBodyUpdate(RigidBody& rgd, Vector2D gravity, Vector2D drag, vector<GameObject> blocks) {
 	GravityAndDrag(rgd, gravity, drag);
 	float physicsLoop = max(rgd.movement.x, rgd.movement.y) / min(rgd.gameObject.entity.w, rgd.gameObject.entity.h) * 4;
 	float physicsDiv = (max(rgd.movement.x, rgd.movement.y) - fmod(max(rgd.movement.x, rgd.movement.y), min(rgd.gameObject.entity.w, rgd.gameObject.entity.h))) / min(rgd.gameObject.entity.w, rgd.gameObject.entity.h) * 4;

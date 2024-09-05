@@ -177,6 +177,7 @@ void ConstructMap(vector<vector<int>> tileMap, const int tileScale, const int ti
 ///<para>a,b = 判定を行う２つの矩形</para>
 /// </summary>
 bool HitRectAndRect(rect a, rect b);
+bool HitRectAndPoint(rect r, Vector2D p);
 
 ///<summary>
 ///どの部分が対象の矩形に当たっているか
@@ -209,7 +210,7 @@ void collideWall(RigidBody& rgd, vector<GameObject> blocks = {});
 ///<para>drag = x,y方向のスピード維持率（０～１の小数を入力してね）</para>
 ///<para>blocks = rgdを押し戻す地形ブロックの配列</para>
 /// </summary>
-void RigidBodyBehaviour(RigidBody& rgd, Vector2D gravity, Vector2D drag, vector<GameObject> blocks = {});
+void RigidBodyUpdate(RigidBody& rgd, Vector2D gravity, Vector2D drag, vector<GameObject> blocks = {});
 
 ///<summary>
 /// <para>矩形と円の当たり判定</para>
