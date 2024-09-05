@@ -45,15 +45,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	SetDrawScreen(DX_SCREEN_BACK);
 
 	// 画像などのリソースデータの変数宣言と読み込み
+	
 	//タイトル画面(タイトル画面からシューティングゲーム)とBGM
-	int titleGraph;
-	titleGraph = LoadGraph("Resources/Textures/title.png");
+	const int titleGraph = LoadGraph("Resources/Textures/title.png");
 	//ゲームシーン画面とBGM
-	int gameUiGraph;
-	gameUiGraph = LoadGraph("Resources/Textures/gemeui.png");
+	const int gameUiGraph = LoadGraph("Resources/Textures/gemeui.png");
 	//クリア画面(シューティングゲームからクリア画面)とBGM
-	int clearGraph;
-	clearGraph = LoadGraph("Resources/Textures/clear.png");
+	const int clearGraph = LoadGraph("Resources/Textures/clear.png");
+	//自機
+	const int playerSprite = LoadGraph("Resources/Textures/napnose.png");
 
 	// ゲームループで使う変数の宣言
 
@@ -68,8 +68,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 
 	const Vector2D mapScale = {8,100};
-
-	const int playerSprite = LoadGraph("Resources/Textures/napnose.png");
 
 
 	Player player = Player{ RigidBody{ GameObject{ rect{0,0,64,64}, playerSprite} } };
