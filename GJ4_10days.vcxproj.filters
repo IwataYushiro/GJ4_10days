@@ -23,9 +23,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Scripts\GameObject.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Scripts\KxLib.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

@@ -4,11 +4,17 @@
 // ウィンドウのタイトルに表示する文字列
 const char TITLE[] = "GJ4_Gamejam";
 
+//ブロックの大きさ
+const int BLOCK_RADIUS = 128;
+//横列の数
+const int PLAYPART_WIDTH = 7;
+//1区画の縦の長さ
+const int PLAYPART_HEIGHT = 100;
+//UIライン
+const int GAME_LINE = BLOCK_RADIUS * PLAYPART_WIDTH;
+
 // ウィンドウ横幅
 const int WIN_WIDTH = 1280;
-//UIライン
-const int GAME_LINE = 960;
-
 // ウィンドウ縦幅
 const int WIN_HEIGHT = 720;
 
@@ -26,11 +32,19 @@ enum Scene
 	playpart,
 };
 
+Vector2D GetMousePositionToV2D()
+{
+	int mouseX;
+	int mouseY;
+	GetMousePoint(&mouseX, &mouseY);
+	return Vector2D{ (double)mouseX, (double)mouseY };
+}
+
 void PlayerBehaviour(Player* player, std::vector<GameObject> blocks)
 {
-	//プレイヤーの物理挙動
+	//物理挙動
 	RigidBodyBehaviour(player->rigidBody, { 0,1 }, { 0.5,1 }, blocks);
-	//プレイヤーが着地していたら
+	//着地していたら
 	if (player->rigidBody.landing)
 	{
 		//しばらく前方に進めなければ反転
@@ -54,7 +68,7 @@ void PlayerBehaviour(Player* player, std::vector<GameObject> blocks)
 		}
 
 		//前進
-		float playerMoveForce = 3;
+		float playerMoveForce = 5;
 		if (!player->direction)
 		{
 			playerMoveForce *= -1;
@@ -100,8 +114,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	const int logoGraph = LoadGraph("Resources/Textures/TERAPETAGAMES_logo.png");
 	//タイトル画面(タイトル画面からシューティングゲーム)とBGM
 	const int titleGraph = LoadGraph("Resources/Textures/title.png");
-	//ゲームシーン画面とBGM
-	//const int gameUiGraph = LoadGraph("Resources/Textures/gemeui.png");
 	//クリア画面(シューティングゲームからクリア画面)とBGM
 	const int clearGraph = LoadGraph("Resources/Textures/clear.png");
 	//自機
@@ -117,12 +129,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//シーン用のタイマー
 	float sceneTransitionProgress = 0;
 
-	const Vector2D mapScale = {8,100};
+	const Vector2D mapScale = {PLAYPART_WIDTH,PLAYPART_HEIGHT};
+
 
 	Player player = Player{ RigidBody{ GameObject{ rect{0,0,64,64}, playerSprite} } };
 	vector<GameObject> edgeWall = {
 		GameObject{rect{-WIN_WIDTH / 2,0,0,WIN_HEIGHT}},
-		GameObject{rect{WIN_WIDTH / 2,0,0,WIN_HEIGHT}},
+		GameObject{rect{-WIN_WIDTH / 2 + GAME_LINE,0,0,WIN_HEIGHT}},
 		GameObject{rect{0,-WIN_HEIGHT / 2,WIN_WIDTH,0}},
 		GameObject{rect{0,WIN_HEIGHT / 2,WIN_WIDTH,0}},
 	};
@@ -147,7 +160,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		// 更新処理
 		
 		//シーン遷移入力で対応するシーンへの遷移を準備
-		if (keys[KEY_INPUT_RETURN] == 1)
+		if ((GetMouseInput() & MOUSE_INPUT_LEFT))
 		{
 			switch (currentScene)
 			{
@@ -186,7 +199,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				break;
 			case playpart:
 				//プレイパート
-				player = Player{ RigidBody{ GameObject{ rect{0,0,64,64}, playerSprite} } };
+
+				//自機を初期座標へ
+				player = Player{ RigidBody{ GameObject{ rect{-WIN_WIDTH / 2 + GAME_LINE / 2,0,128,128}, playerSprite} } };
 				break;
 			default:
 				break;
