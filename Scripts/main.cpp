@@ -6,6 +6,8 @@ const char TITLE[] = "GJ4_Gamejam";
 
 // ウィンドウ横幅
 const int WIN_WIDTH = 1280;
+//UIライン
+const int GAME_LINE = 960;
 
 // ウィンドウ縦幅
 const int WIN_HEIGHT = 720;
@@ -49,7 +51,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//タイトル画面(タイトル画面からシューティングゲーム)とBGM
 	const int titleGraph = LoadGraph("Resources/Textures/title.png");
 	//ゲームシーン画面とBGM
-	const int gameUiGraph = LoadGraph("Resources/Textures/gemeui.png");
+	//const int gameUiGraph = LoadGraph("Resources/Textures/gemeui.png");
 	//クリア画面(シューティングゲームからクリア画面)とBGM
 	const int clearGraph = LoadGraph("Resources/Textures/clear.png");
 	//自機
@@ -167,7 +169,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			DrawGraph(0, 0, titleGraph, true);
 		}
 		else if (sceneNo == 1) {
-			DrawGraph(0, 0, gameUiGraph, true);
+
+			//このラインからはUIゾーンなのでいっそここにボックスUIおいてもいいや
+			DrawBox(GAME_LINE, 0, WIN_WIDTH, WIN_HEIGHT, GetColor(0xff, 0xff, 0xff), TRUE);
+			//DrawGraph(0, 0, gameUiGraph, true);
 		}
 		else if (sceneNo == 2) {
 			DrawGraph(0, 0, clearGraph, true);
