@@ -172,7 +172,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//このラインからはUIゾーンなのでいっそここにボックスUIおいてもいいや
 			DrawBox(GAME_LINE, 0, WIN_WIDTH, WIN_HEIGHT, GetColor(0xff, 0xff, 0xff), TRUE);
-			//DrawGraph(0, 0, gameUiGraph, true);
 		}
 		else if (sceneNo == 2) {
 			DrawGraph(0, 0, clearGraph, true);
