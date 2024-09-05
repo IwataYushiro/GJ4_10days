@@ -1,5 +1,6 @@
 #include "DxLib.h"
 #include "KxLib.h"
+#include <time.h>
 #include <string>
 
 // ウィンドウのタイトルに表示する文字列
@@ -18,6 +19,9 @@ const int GAME_LINE = BLOCK_RADIUS * PLAYPART_WIDTH;
 const int WIN_WIDTH = 1280;
 // ウィンドウ縦幅
 const int WIN_HEIGHT = 720;
+
+//フォントのサイズ
+const int FONT_SIZE = 24;
 
 struct MouseInputData {
 	Vector2D position = { 0, 0 };
@@ -47,6 +51,7 @@ enum Scene
 	logo,
 	title,
 	playpart,
+	credit,
 };
 
 Vector2D GetMousePositionToV2D()
@@ -236,6 +241,7 @@ void PlayerUpdate(Player* player, std::vector<GameObject> blocks)
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine,
 	_In_ int nCmdShow) {
+
 	// ウィンドウモードに設定
 	ChangeWindowMode(TRUE);
 
@@ -253,13 +259,16 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	SetWindowSizeExtendRate(1.0);
 
 	// 画面の背景色を設定する
-	SetBackgroundColor(0x00, 0x00, 0x00);
+	SetBackgroundColor(0xff, 0xee, 0xaa);
 
 	// DXlibの初期化
 	if (DxLib_Init() == -1) { return -1; }
 
 	// (ダブルバッファ)描画先グラフィック領域は裏面を指定
 	SetDrawScreen(DX_SCREEN_BACK);
+
+	// フォントのサイズを設定する
+	SetFontSize(FONT_SIZE);
 
 	// 画像などのリソースデータの変数宣言と読み込み
 
@@ -378,23 +387,33 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		case title:
 			//タイトル画面
 
-			//スタートボタン
+			//スタートボタンとクレジットボタン
 			buttons = {
-				Button{rect{WIN_WIDTH / 2, WIN_HEIGHT / 6 * 5,200,100},"スタート\n","START\n"},
+				Button{rect{WIN_WIDTH / 2, WIN_HEIGHT / 4 * 3,200,100},"スタート\n","START\n"},
+				Button{rect{140, 60,130,50},"クレジット\n","CREDITS\n"},
 			};
 			break;
 		case playpart:
 			//プレイパート
+
+			//ポーズボタン
 			buttons = {
 				Button{rect{70, 60,60,50},"ﾎﾟｰｽﾞ\n","PAUSE\n"},
 			};
 			break;
-		default:
+		case credit:
+			//クレジット画面
+
+			//タイトルに戻るボタン
+			buttons = {
+				Button{rect{140, 60,130,50},"もどる\n","RETURN\n"},
+			};
 			break;
 		}
 
-		//ボタンを更新
+		//ボタンを更新（ちょっとだけ縦に揺らす）
 		for (int i = 0; i < buttons.size(); i++) {
+			buttons[i].entity.y += sin(clock() / PI / 300 - i / 2.0) * 5;
 			ButtonUpdate(buttons[i], mouseInputData, buttonPushSound);
 		}
 
@@ -408,12 +427,25 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			{
 				nextScene = playpart;
 			}
+			if (IsButtonClicked(buttons, 1))
+			{
+				nextScene = credit;
+			}
 			break;
 		case playpart:
 			//プレイパート
 
 			//自機を更新
 			PlayerUpdate(&player, edgeWall);
+
+			//ボタンを押した時の処理
+			if (IsButtonClicked(buttons, 0))
+			{
+				nextScene = title;
+			}
+			break;
+		case credit:
+			//クレジット画面
 
 			//ボタンを押した時の処理
 			if (IsButtonClicked(buttons, 0))
@@ -430,7 +462,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		{
 		case title:
 			//タイトル画面
+
+			//タイトルロゴ
 			DrawGraph(0, 0, titleGraph, true);
+			//権利表示
+			DrawString(
+				WIN_WIDTH / 7 * 3, WIN_HEIGHT - (FONT_SIZE * 2 + 10), "2024 TERAPETA GAMES",
+				GetColor(0, 0, 0));
 			break;
 		case playpart:
 			//プレイパート
