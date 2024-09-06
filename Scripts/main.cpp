@@ -395,6 +395,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			case playpart:
 				//プレイパート
 
+				//ポーズ解除
+				isPause = false;
 				//自機を初期座標へ
 				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 32,50,64}, playerSprite} } };
 				//ブロックを初期化、生成
@@ -434,12 +436,21 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		case playpart:
 			//プレイパート
 
-			//ポーズボタン
-			buttons = {
-				Button{Rect{70, 60,60,50},"ﾎﾟｰｽﾞ","PAUSE"},
-				Button{Rect{370, 160,60,50},"つづける","RESUME"},
-				Button{Rect{370, 460,60,50},"やめる","QUIT"},
-			};
+			if (isPause)
+			{
+				//ポーズメニューボタン
+				buttons = {
+					Button{Rect{370, 160,60,50},"つづける","RESUME"},
+					Button{Rect{370, 460,60,50},"やめる","QUIT"},
+				};
+			}
+			else
+			{
+				//ポーズボタン
+				buttons = {
+					Button{Rect{70, 60,60,50},"ﾎﾟｰｽﾞ","PAUSE"},
+				};
+			}
 			break;
 		case credit:
 			//クレジット画面
@@ -495,42 +506,42 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			break;
 		case playpart:
 			//プレイパート
-		{
-			//全てのブロックを更新
-			for (int i = 0; i < blocks.size(); i++)
+			if (!isPause)
 			{
-				blocks[i].rigidBody.gameObject.graphNum = blocksSprite[blocks[i].blockType];
-				//クリックされたら消す準備（破壊可能なブロックのみ）
-				if (blocks[i].blockType != untappableblock && blocks[i].blockType !=lethalblock
-					&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.position + (camPosition + camPosOffset))
-					&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.pin + (camPosition + camPosOffset))
-					&& !mouseInputData.click && mouseInputData.preClick)
+				//全てのブロックを更新
+				for (int i = 0; i < blocks.size(); i++)
 				{
-					blocks[i].breaked = true;
+					blocks[i].rigidBody.gameObject.graphNum = blocksSprite[blocks[i].blockType];
+					//クリックされたら消す準備（破壊可能なブロックのみ）
+					if (blocks[i].blockType != untappableblock && blocks[i].blockType != lethalblock
+						&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.position + (camPosition + camPosOffset))
+						&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.pin + (camPosition + camPosOffset))
+						&& !mouseInputData.click && mouseInputData.preClick)
+					{
+						blocks[i].breaked = true;
+					}
 				}
-			}
-			//消す準備が出来たブロックを全部消す
-			for (int i = 0; i < blocks.size(); i++)
-			{
-				if (blocks[i].breaked)
+				//消す準備が出来たブロックを全部消す
+				for (int i = 0; i < blocks.size(); i++)
 				{
-					blocks.erase(blocks.begin() + i);
-					i--;
+					if (blocks[i].breaked)
+					{
+						blocks.erase(blocks.begin() + i);
+						i--;
+					}
 				}
-			}
 
-			//四隅の壁とブロック（フレームブロック以外）を壁とする
-			vector<GameObject> liveEntityWalls = edgeWall;
-			for (int i = 0; i < blocks.size(); i++)
-			{
-				if (blocks[i].blockType != frameblock)
+				//四隅の壁とブロック（フレームブロック以外）を壁とする
+				vector<GameObject> liveEntityWalls = edgeWall;
+				for (int i = 0; i < blocks.size(); i++)
 				{
-					liveEntityWalls.push_back(blocks[i].rigidBody.gameObject);
+					if (blocks[i].blockType != frameblock)
+					{
+						liveEntityWalls.push_back(blocks[i].rigidBody.gameObject);
+					}
 				}
-			}
-			//自機を更新
-			LiveEntityUpdate(&player, liveEntityWalls);
-		}
+				//自機を更新
+				LiveEntityUpdate(&player, liveEntityWalls);
 
 				//ボタンを押した時の処理
 				if (IsButtonClicked(buttons, 0))
@@ -543,17 +554,16 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			{
 				//ポーズ中
 
-				//続ける(1)
-				if (IsButtonClicked(buttons, 1))
+				//続ける
+				if (IsButtonClicked(buttons, 0))
 				{
-					//ポーズする
+					//ポーズ解除
 					isPause = false;
 				}
-				//終わる(2)
-				if (IsButtonClicked(buttons, 2))
+				//終わる
+				if (IsButtonClicked(buttons, 1))
 				{
-					//ポーズする
-					isPause = false;
+					//タイトルへ
 					nextScene = title;
 				}
 			}
