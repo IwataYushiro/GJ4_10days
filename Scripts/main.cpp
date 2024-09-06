@@ -33,11 +33,11 @@ enum Scene
 
 enum BlockType
 {
-	weak,
-	sand,
-	frame,
-	obstacle,
-	lethal,
+	weakblock,
+	sandblock,
+	frameblock,
+	untappableblock,
+	lethalblock,
 };
 
 struct MouseInputData {
@@ -97,7 +97,7 @@ void MouseInputDataUpdate(MouseInputData* mouseInputData)
 
 void ButtonUpdate(Button& button, MouseInputData mouseInputData, int pushSound)
 {
-	bool isHitMousePoint = HitRectAndPoint(button.entity, GetMousePositionToV2D());
+	bool isHitMousePoint = HitRectAndPoint(button.entity, mouseInputData.position);
 	if (!isHitMousePoint)
 	{
 		button.status = 0;
@@ -325,16 +325,21 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//ボタン
 	vector<Button> buttons;
 
-	const Vector2D mapScale = { PLAYPART_WIDTH,PLAYPART_HEIGHT };
+	//カメラ座標
+	Vector2D camPosition = Vector2D{ 0,0 };
+	const Vector2D camPosOffset = Vector2D{ -WIN_WIDTH / 2,-WIN_HEIGHT / 2 };
 
+
+	//自機
 	LiveEntity player = LiveEntity{ RigidBody{ GameObject{ Rect{0,0,64,64}, playerSprite} } };
+	//自機がフィールド外に出ないための壁
 	vector<GameObject> edgeWall = {
 		GameObject{Rect{-WIN_WIDTH / 2,0,0,WIN_HEIGHT}},
 		GameObject{Rect{-WIN_WIDTH / 2 + GAME_LINE,0,0,WIN_HEIGHT}},
 		GameObject{Rect{0,-WIN_HEIGHT / 2,WIN_WIDTH,0}},
 		GameObject{Rect{0,WIN_HEIGHT / 2,WIN_WIDTH,0}},
 	};
-	vector<vector<BlockType>> map = { {lethal,obstacle} };
+	//ブロック
 	vector<Block> blocks = {};
 
 
@@ -360,17 +365,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		//ボタン配列をリセット
 		buttons = {};
-
-		//シーン遷移入力で対応するシーンへの遷移を準備
-		if (!mouseInputData.click && mouseInputData.preClick)
-		{
-			switch (currentScene)
-			{
-			case logo:
-				nextScene = title;
-				break;
-			}
-		}
 
 		bool sceneInit = false;
 		if (nextScene == currentScene)
@@ -400,8 +394,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				//プレイパート
 
 				//自機を初期座標へ
-				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 64,64,64}, playerSprite} } };
-				//ブロックを生成
+				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 32,50,64}, playerSprite} } };
+				//ブロックを初期化、生成
+				blocks = {};
 				for (int i = 0; i < PLAYPART_HEIGHT; i++)
 				{
 					for (int j = 0; j < PLAYPART_WIDTH; j++)
@@ -409,7 +404,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						BlockType currentBlockType = (BlockType)(rand() % 5);
 						if (i == 0)
 						{
-							currentBlockType = weak;
+							currentBlockType = weakblock;
 						}
 
 						blocks.push_back(Block{ RigidBody{GameObject{
@@ -429,8 +424,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//スタートボタンとクレジットボタン
 			buttons = {
-				Button{Rect{WIN_WIDTH / 2, WIN_HEIGHT / 4 * 3,200,100},"スタート\n","START\n"},
-				Button{Rect{140, 60,130,50},"クレジット\n","CREDITS\n"},
+				Button{Rect{WIN_WIDTH / 2, WIN_HEIGHT / 4 * 3,200,100},"スタート","START"},
+				Button{Rect{140, 60,130,50},"クレジット","CREDITS"},
 			};
 			break;
 		case playpart:
@@ -438,7 +433,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//ポーズボタン
 			buttons = {
-				Button{Rect{70, 60,60,50},"ﾎﾟｰｽﾞ\n","PAUSE\n"},
+				Button{Rect{70, 60,60,50},"ﾎﾟｰｽﾞ","PAUSE"},
 			};
 			break;
 		case credit:
@@ -446,7 +441,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//タイトルに戻るボタン
 			buttons = {
-				Button{Rect{140, 60,130,50},"もどる\n","RETURN\n"},
+				Button{Rect{140, 60,130,50},"もどる","RETURN"},
 			};
 			break;
 		}
@@ -459,6 +454,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		switch (currentScene)
 		{
+		case logo:
+			//ロゴ画面
+
+			//左クリックでタイトルへ
+			if (!mouseInputData.click && mouseInputData.preClick)
+			{
+				nextScene = title;
+			}
+			break;
 		case title:
 			//タイトル画面
 
@@ -476,13 +480,36 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//プレイパート
 		{
 			//全てのブロックを更新
-			for (int i = 0; i < blocks.size(); i++) {
+			for (int i = 0; i < blocks.size(); i++)
+			{
 				blocks[i].rigidBody.gameObject.graphNum = blocksSprite[blocks[i].blockType];
+				//クリックされたら消す準備（破壊可能なブロックのみ）
+				if (blocks[i].blockType != untappableblock && blocks[i].blockType !=lethalblock
+					&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.position + (camPosition + camPosOffset))
+					&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.pin + (camPosition + camPosOffset))
+					&& !mouseInputData.click && mouseInputData.preClick)
+				{
+					blocks[i].breaked = true;
+				}
+			}
+			//消す準備が出来たブロックを全部消す
+			for (int i = 0; i < blocks.size(); i++)
+			{
+				if (blocks[i].breaked)
+				{
+					blocks.erase(blocks.begin() + i);
+					i--;
+				}
 			}
 
+			//四隅の壁とブロック（フレームブロック以外）を壁とする
 			vector<GameObject> liveEntityWalls = edgeWall;
-			for (int i = 0; i < blocks.size(); i++) {
-				liveEntityWalls.push_back(blocks[i].rigidBody.gameObject);
+			for (int i = 0; i < blocks.size(); i++)
+			{
+				if (blocks[i].blockType != frameblock)
+				{
+					liveEntityWalls.push_back(blocks[i].rigidBody.gameObject);
+				}
 			}
 			//自機を更新
 			LiveEntityUpdate(&player, liveEntityWalls);
@@ -508,6 +535,22 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		// 描画処理
 		switch (currentScene)
 		{
+		case logo:
+			//ロゴ画面
+			DrawString(
+				WIN_WIDTH / 7 * 3, WIN_HEIGHT / 4,
+				"Developed by",
+				GetColor(0, 0, 0));
+			DrawRotaGraph(WIN_WIDTH / 2, WIN_HEIGHT / 2, 2, 0, logoGraph, TRUE);
+			DrawString(
+				WIN_WIDTH / 7 * 3, WIN_HEIGHT / 5 * 3,
+				"TEAM GJ4",
+				GetColor(0, 0, 0));
+			DrawString(
+				WIN_WIDTH / 3, WIN_HEIGHT - FONT_SIZE * 4,
+				"画面を左クリックしてください",
+				GetColor(0, 0, 0));
+			break;
 		case title:
 			//タイトル画面
 
@@ -516,7 +559,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			DrawGraph(0, 0, operationGraph, true);
 			//権利表示
 			DrawString(
-				WIN_WIDTH / 7 * 3, WIN_HEIGHT - (FONT_SIZE * 2 + 10), "2024 TERAPETA GAMES",
+				WIN_WIDTH / 3, WIN_HEIGHT - (FONT_SIZE * 2 + 10), "2024 TERAPETA GAMES / TEAM GJ4",
 				GetColor(0, 0, 0));
 			break;
 		case playpart:
@@ -524,28 +567,29 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//全てのブロックを描画
 			for (int i = 0; i < blocks.size(); i++) {
-				RenderObject(blocks[i].rigidBody.gameObject, Vector2D{ -WIN_WIDTH / 2,WIN_HEIGHT / 2 });
+				RenderObject(blocks[i].rigidBody.gameObject, camPosition + camPosOffset);
 			}
 			//自機を描画
-			RenderObject(player.rigidBody.gameObject, Vector2D{ -WIN_WIDTH / 2,WIN_HEIGHT / 2 });
+			RenderObject(player.rigidBody.gameObject, camPosition + camPosOffset);
 			//このラインからはUIゾーンなのでいっそここにボックスUIおいてもいいや
 			DrawBox(GAME_LINE, 0, WIN_WIDTH, WIN_HEIGHT, GetColor(0xff, 0xff, 0xff), TRUE);
-			break;
-		case logo:
-			//ロゴ画面
-			DrawRotaGraph(WIN_WIDTH / 2, WIN_HEIGHT / 2, 2, 0, logoGraph, 0);
 			break;
 		case credit:
 			//クレジット画面
 			DrawString(
-				WIN_WIDTH / 2, FONT_SIZE * 2,
-				"プログラマー\n　鰯ユウ\n　神無月\n\nチーフプログラマー\n　てらぺた\n\nディレクター\n　てらぺた\n",
+				WIN_WIDTH / 4, 0,
+				"\n\nプログラマー\n　鰯ユウ\n　神無月\n\nチーフプログラマー\n　てらぺた\n\nアート\n　てらぺた\n\nエフェクト\n　てらぺた\n\nサウンドエフェクト\n　てらぺた\n\nコンポーサー\n　てらぺた",
+				GetColor(0, 0, 0));
+			DrawString(
+				WIN_WIDTH / 2, 0,
+				"\n\nビジュアルアドバイザー\n　てらぺた\n\nエグゼクティブプロデューサー\n　てらぺた\n\nディレクター\n　てらぺた\n\nかいはつ\n　てらぺたゲームズ\n　チームGJ4\n\n\nTERAPETA GAMES / TEAM GJ4\nAll Rights Reserved.",
 				GetColor(0, 0, 0));
 			break;
 		}
 
 		//全てのボタンを描画
-		for (int i = 0; i < buttons.size(); i++) {
+		for (int i = 0; i < buttons.size(); i++)
+		{
 			DrawButton(buttons[i]);
 		}
 

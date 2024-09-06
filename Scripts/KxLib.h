@@ -86,6 +86,17 @@ double VectorScale(Vector2D a, Vector2D b);
 Vector2D NormalizedVector(Vector2D a, Vector2D b);
 
 ///<summary>
+/// <para>ベクトル足し算</para>
+/// </summary>
+Vector2D operator +(const Vector2D& v0, const Vector2D& v1);
+
+///<summary>
+/// <para>ベクトル引き算</para>
+/// </summary>
+Vector2D operator -(const Vector2D& v0, const Vector2D& v1);
+
+
+///<summary>
 //度数法の角度をラジアン角に変換する
 ///<para>...</para>
 ///<para>degree = 度数法の角度</para>
