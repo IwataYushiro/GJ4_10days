@@ -307,6 +307,26 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		LoadGraph("Resources/Textures/lethalBlock.png"),
 	};
 
+	//ビットマップフォント用の数字画像とタイマー
+	const int zeroGraph = LoadGraph("Resources/Textures/timer0.png");
+	const int oneGraph = LoadGraph("Resources/Textures/timer1.png");
+	const int twoGraph = LoadGraph("Resources/Textures/timer2.png");
+	const int threeGraph = LoadGraph("Resources/Textures/timer3.png");
+	const int fourGraph = LoadGraph("Resources/Textures/timer4.png");
+	const int fiveGraph = LoadGraph("Resources/Textures/timer5.png");
+	const int sixGraph = LoadGraph("Resources/Textures/timer6.png");
+	const int sevenGraph = LoadGraph("Resources/Textures/timer7.png");
+	const int eightGraph = LoadGraph("Resources/Textures/timer8.png");
+	const int nineGraph = LoadGraph("Resources/Textures/timer9.png");
+	int timer = 0;
+	//1の位のタイマー
+	int timerT1 = 0;
+	//10の位のタイマー
+	int timer2 = 0;
+	//100の位のタイマー
+	int timer3 = 0;
+
+
 	//ボタンを押す音
 	const int buttonPushSound = LoadSoundMem("Resources/SE/buttonPush.wav");
 
@@ -508,6 +528,16 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//プレイパート
 			if (!isPause)
 			{
+				timer++;
+				if (timer >= 58) {
+					timerT1++;
+					timer = 0;
+				}
+				if (timerT1 >= 10) {
+					timerT1 = 0;
+				}
+
+
 				//全てのブロックを更新
 				for (int i = 0; i < blocks.size(); i++)
 				{
@@ -631,6 +661,21 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			RenderObject(player.rigidBody.gameObject, camPosition + camPosOffset);
 			//このラインからはUIゾーンなのでいっそここにボックスUIおいてもいいや
 			DrawBox(GAME_LINE, 0, WIN_WIDTH, WIN_HEIGHT, GetColor(0xff, 0xff, 0xff), TRUE);
+
+			//ビットマップフォントタイマー
+			if (timerT1 == 0) { DrawGraph(950, 60, zeroGraph, true); }
+			else if (timerT1 == 1) { DrawGraph(950, 60, oneGraph, true); }
+			else if (timerT1 == 2) { DrawGraph(950, 60, twoGraph, true); }
+			else if (timerT1 == 3) { DrawGraph(950, 60, threeGraph, true); }
+			else if (timerT1 == 4) { DrawGraph(950, 60, fourGraph, true); }
+			else if (timerT1 == 5) { DrawGraph(950, 60, fiveGraph, true); }
+			else if (timerT1 == 6) { DrawGraph(950, 60, sixGraph, true); }
+			else if (timerT1 == 7) { DrawGraph(950, 60, sevenGraph, true); }
+			else if (timerT1 == 8) { DrawGraph(950, 60, eightGraph, true); }
+			else if (timerT1 == 9) { DrawGraph(950, 60, nineGraph, true); }
+
+			DrawFormatString(800, 300, GetColor(122, 112, 122), "%d", timer);
+
 			break;
 		case credit:
 			//クレジット画面
