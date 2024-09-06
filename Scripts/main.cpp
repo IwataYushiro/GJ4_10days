@@ -3,24 +3,24 @@
 #include <time.h>
 #include <string>
 
-// ƒEƒBƒ“ƒhƒE‚Ìƒ^ƒCƒgƒ‹‚É•\¦‚·‚é•¶š—ñ
+// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®ã‚¿ã‚¤ãƒˆãƒ«ã«è¡¨ç¤ºã™ã‚‹æ–‡å­—åˆ—
 const char TITLE[] = "GJ4_Gamejam";
 
-//ƒuƒƒbƒN‚Ì‘å‚«‚³
+//ãƒ–ãƒ­ãƒƒã‚¯ã®å¤§ãã•
 const int BLOCK_RADIUS = 64;
-//‰¡—ñ‚Ì”
+//æ¨ªåˆ—ã®æ•°
 const int PLAYPART_WIDTH = 14;
-//1‹æ‰æ‚Ìc‚Ì’·‚³
+//1åŒºç”»ã®ç¸¦ã®é•·ã•
 const int PLAYPART_HEIGHT = 100;
-//UIƒ‰ƒCƒ“
+//UIãƒ©ã‚¤ãƒ³
 const int GAME_LINE = BLOCK_RADIUS * PLAYPART_WIDTH;
 
-// ƒEƒBƒ“ƒhƒE‰¡•
+// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦æ¨ªå¹…
 const int WIN_WIDTH = 1280;
-// ƒEƒBƒ“ƒhƒEc•
+// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ç¸¦å¹…
 const int WIN_HEIGHT = 720;
 
-//ƒtƒHƒ“ƒg‚ÌƒTƒCƒY
+//ãƒ•ã‚©ãƒ³ãƒˆã®ã‚µã‚¤ã‚º
 const int FONT_SIZE = 24;
 
 enum Scene
@@ -29,15 +29,16 @@ enum Scene
 	title,
 	playpart,
 	credit,
+	howtoplay,
 };
 
 enum BlockType
 {
-	weak,
-	sand,
-	frame,
-	obstacle,
-	lethal,
+	weakblock,
+	sandblock,
+	frameblock,
+	untappableblock,
+	lethalblock,
 };
 
 struct MouseInputData {
@@ -97,7 +98,7 @@ void MouseInputDataUpdate(MouseInputData* mouseInputData)
 
 void ButtonUpdate(Button& button, MouseInputData mouseInputData, int pushSound)
 {
-	bool isHitMousePoint = HitRectAndPoint(button.entity, GetMousePositionToV2D());
+	bool isHitMousePoint = HitRectAndPoint(button.entity, mouseInputData.position);
 	if (!isHitMousePoint)
 	{
 		button.status = 0;
@@ -216,12 +217,12 @@ bool IsButtonClicked(vector<Button>& buttons, int buttonIndex)
 
 void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 {
-	//•¨—‹““®
+	//ç‰©ç†æŒ™å‹•
 	RigidBodyUpdate(liveEntity->rigidBody, { 0,1 }, { 0.5,1 }, blocks);
-	//’…’n‚µ‚Ä‚¢‚½‚ç
+	//ç€åœ°ã—ã¦ã„ãŸã‚‰
 	if (liveEntity->rigidBody.landing)
 	{
-		//‚µ‚Î‚ç‚­‘O•û‚Éi‚ß‚È‚¯‚ê‚Î”½“]
+		//ã—ã°ã‚‰ãå‰æ–¹ã«é€²ã‚ãªã‘ã‚Œã°åè»¢
 		if ((liveEntity->direction
 			&& liveEntity->rigidBody.gameObject.beforePos.x >= liveEntity->rigidBody.gameObject.entity.x)
 			|| (!liveEntity->direction
@@ -241,7 +242,7 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 			liveEntity->stuckFrameCount = 0;
 		}
 
-		//‘Oi
+		//å‰é€²
 		float playerMoveForce = 5;
 		if (!liveEntity->direction)
 		{
@@ -255,7 +256,7 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 	}
 }
 
-//ƒXƒvƒ‰ƒCƒgî•ñ(ƒ^ƒCƒ}[‚Ìƒrƒbƒgƒ}ƒbƒvƒtƒHƒ“ƒg)
+//ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆæƒ…å ±(ã‚¿ã‚¤ãƒãƒ¼ã®ãƒ“ãƒƒãƒˆãƒãƒƒãƒ—ãƒ•ã‚©ãƒ³ãƒˆ)
 enum SpriteTimerkinds
 {
 	zero = 0,//0
@@ -268,52 +269,52 @@ enum SpriteTimerkinds
 	seven,//7
 	eight,//8
 	nine,//9
-	MaxSpriteTimer //Å‘å
+	MaxSpriteTimer //æœ€å¤§
 };
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine,
 	_In_ int nCmdShow) {
 
-	// ƒEƒBƒ“ƒhƒEƒ‚[ƒh‚Éİ’è
+	// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒ¢ãƒ¼ãƒ‰ã«è¨­å®š
 	ChangeWindowMode(TRUE);
 
-	// ƒEƒBƒ“ƒhƒEƒTƒCƒY‚ğè“®‚Å‚Í•ÏX‚³‚¹‚¸A
-	// ‚©‚ÂƒEƒBƒ“ƒhƒEƒTƒCƒY‚É‡‚í‚¹‚ÄŠg‘å‚Å‚«‚È‚¢‚æ‚¤‚É‚·‚é
+	// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºã‚’æ‰‹å‹•ã§ã¯å¤‰æ›´ã•ã›ãšã€
+	// ã‹ã¤ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºã«åˆã‚ã›ã¦æ‹¡å¤§ã§ããªã„ã‚ˆã†ã«ã™ã‚‹
 	SetWindowSizeChangeEnableFlag(FALSE, FALSE);
 
-	// ƒ^ƒCƒgƒ‹‚ğ•ÏX
+	// ã‚¿ã‚¤ãƒˆãƒ«ã‚’å¤‰æ›´
 	SetMainWindowText(TITLE);
 
-	// ‰æ–ÊƒTƒCƒY‚ÌÅ‘åƒTƒCƒYAƒJƒ‰[ƒrƒbƒg”‚ğİ’è(ƒ‚ƒjƒ^[‚Ì‰ğ‘œ“x‚É‡‚í‚¹‚é)
+	// ç”»é¢ã‚µã‚¤ã‚ºã®æœ€å¤§ã‚µã‚¤ã‚ºã€ã‚«ãƒ©ãƒ¼ãƒ“ãƒƒãƒˆæ•°ã‚’è¨­å®š(ãƒ¢ãƒ‹ã‚¿ãƒ¼ã®è§£åƒåº¦ã«åˆã‚ã›ã‚‹)
 	SetGraphMode(WIN_WIDTH, WIN_HEIGHT, 32);
 
-	// ‰æ–ÊƒTƒCƒY‚ğİ’è(‰ğ‘œ“x‚Æ‚Ì”ä—¦‚Åİ’è)
+	// ç”»é¢ã‚µã‚¤ã‚ºã‚’è¨­å®š(è§£åƒåº¦ã¨ã®æ¯”ç‡ã§è¨­å®š)
 	SetWindowSizeExtendRate(1.0);
 
-	// ‰æ–Ê‚Ì”wŒiF‚ğİ’è‚·‚é
+	// ç”»é¢ã®èƒŒæ™¯è‰²ã‚’è¨­å®šã™ã‚‹
 	SetBackgroundColor(0xff, 0xee, 0xaa);
 
-	// DXlib‚Ì‰Šú‰»
+	// DXlibã®åˆæœŸåŒ–
 	if (DxLib_Init() == -1) { return -1; }
 
-	// (ƒ_ƒuƒ‹ƒoƒbƒtƒ@)•`‰ææƒOƒ‰ƒtƒBƒbƒN—Ìˆæ‚Í— –Ê‚ğw’è
+	// (ãƒ€ãƒ–ãƒ«ãƒãƒƒãƒ•ã‚¡)æç”»å…ˆã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯é ˜åŸŸã¯è£é¢ã‚’æŒ‡å®š
 	SetDrawScreen(DX_SCREEN_BACK);
 
-	// ƒtƒHƒ“ƒg‚ÌƒTƒCƒY‚ğİ’è‚·‚é
+	// ãƒ•ã‚©ãƒ³ãƒˆã®ã‚µã‚¤ã‚ºã‚’è¨­å®šã™ã‚‹
 	SetFontSize(FONT_SIZE);
 
-	// ‰æ‘œ‚È‚Ç‚ÌƒŠƒ\[ƒXƒf[ƒ^‚Ì•Ï”éŒ¾‚Æ“Ç‚İ‚İ
+	// ç”»åƒãªã©ã®ãƒªã‚½ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿ã®å¤‰æ•°å®£è¨€ã¨èª­ã¿è¾¼ã¿
 
-	//ŠJ”­ÒƒƒS
+	//é–‹ç™ºè€…ãƒ­ã‚´
 	const int logoGraph = LoadGraph("Resources/Textures/TERAPETAGAMES_logo.png");
-	//ƒ^ƒCƒgƒ‹‰æ–Ê(ƒ^ƒCƒgƒ‹‰æ–Ê‚©‚çƒVƒ…[ƒeƒBƒ“ƒOƒQ[ƒ€)‚ÆBGM
+	//ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢(ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢ã‹ã‚‰ã‚·ãƒ¥ãƒ¼ãƒ†ã‚£ãƒ³ã‚°ã‚²ãƒ¼ãƒ )ã¨BGM
 	const int titleGraph = LoadGraph("Resources/Textures/title.png");
 	const int operationGraph = LoadGraph("Resources/Textures/sousa.png");
-	//ƒNƒŠƒA‰æ–Ê(ƒVƒ…[ƒeƒBƒ“ƒOƒQ[ƒ€‚©‚çƒNƒŠƒA‰æ–Ê)‚ÆBGM
+	//ã‚¯ãƒªã‚¢ç”»é¢(ã‚·ãƒ¥ãƒ¼ãƒ†ã‚£ãƒ³ã‚°ã‚²ãƒ¼ãƒ ã‹ã‚‰ã‚¯ãƒªã‚¢ç”»é¢)ã¨BGM
 	const int clearGraph = LoadGraph("Resources/Textures/clear.png");
-	//©‹@
+	//è‡ªæ©Ÿ
 	const int playerSprite = LoadGraph("Resources/Textures/frameBlock.png");
-	//ƒuƒƒbƒNŠeí
+	//ãƒ–ãƒ­ãƒƒã‚¯å„ç¨®
 	const int blocksSprite[] = {
 		LoadGraph("Resources/Textures/weakBlock.png"),
 		LoadGraph("Resources/Textures/sandBlock.png"),
@@ -322,7 +323,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		LoadGraph("Resources/Textures/lethalBlock.png"),
 	};
 
-	//ƒrƒbƒgƒ}ƒbƒvƒtƒHƒ“ƒg—p‚Ì”š‰æ‘œ‚Æƒ^ƒCƒ}[
+	//ãƒ“ãƒƒãƒˆãƒãƒƒãƒ—ãƒ•ã‚©ãƒ³ãƒˆç”¨ã®æ•°å­—ç”»åƒã¨ã‚¿ã‚¤ãƒãƒ¼
 	const int zeroGraph = LoadGraph("Resources/Textures/timer0.png");
 	const int oneGraph = LoadGraph("Resources/Textures/timer1.png");
 	const int twoGraph = LoadGraph("Resources/Textures/timer2.png");
@@ -334,79 +335,74 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	const int eightGraph = LoadGraph("Resources/Textures/timer8.png");
 	const int nineGraph = LoadGraph("Resources/Textures/timer9.png");
 	int timer = 0;
-	//1‚ÌˆÊ‚Ìƒ^ƒCƒ}[
+	//1ã®ä½ã®ã‚¿ã‚¤ãƒãƒ¼
 	int timerT1 = 0;
-	//10‚ÌˆÊ‚Ìƒ^ƒCƒ}[
+	//10ã®ä½ã®ã‚¿ã‚¤ãƒãƒ¼
 	int timer2 = 0;
-	//100‚ÌˆÊ‚Ìƒ^ƒCƒ}[
+	//100ã®ä½ã®ã‚¿ã‚¤ãƒãƒ¼
 	int timer3 = 0;
 
-	//ƒ{ƒ^ƒ“‚ğ‰Ÿ‚·‰¹
+	//ãƒœã‚¿ãƒ³ã‚’æŠ¼ã™éŸ³
 	const int buttonPushSound = LoadSoundMem("Resources/SE/buttonPush.wav");
 
-	// ƒQ[ƒ€ƒ‹[ƒv‚Åg‚¤•Ï”‚ÌéŒ¾
+	// ã‚²ãƒ¼ãƒ ãƒ«ãƒ¼ãƒ—ã§ä½¿ã†å¤‰æ•°ã®å®£è¨€
 
-	//ƒ}ƒEƒX“ü—Í‚ğˆµ‚¤ƒtƒB[ƒ‹ƒh
+	//ãƒã‚¦ã‚¹å…¥åŠ›ã‚’æ‰±ã†ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
 	MouseInputData mouseInputData;
 
-	//Œ»İ‚ÌƒV[ƒ“
+	//ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³
 	Scene currentScene = logo;
-	//‘JˆÚ‚µ‚æ‚¤‚Æ‚µ‚Ä‚¢‚éŸ‚ÌƒV[ƒ“
+	//é·ç§»ã—ã‚ˆã†ã¨ã—ã¦ã„ã‚‹æ¬¡ã®ã‚·ãƒ¼ãƒ³
 	Scene nextScene = logo;
 
 
-	//ƒV[ƒ“‘JˆÚ—p‚Ìƒ^ƒCƒ}[
+	//ã‚·ãƒ¼ãƒ³é·ç§»ç”¨ã®ã‚¿ã‚¤ãƒãƒ¼
 	float sceneTransitionProgress = 0;
-
-	//ƒ{ƒ^ƒ“
+	//Pauseä¸­ã®ãƒ•ãƒ©ã‚°
+	bool isPause = false;
+	//ãƒœã‚¿ãƒ³
 	vector<Button> buttons;
 
-	const Vector2D mapScale = { PLAYPART_WIDTH,PLAYPART_HEIGHT };
+	//ã‚«ãƒ¡ãƒ©åº§æ¨™
+	Vector2D camPosition = Vector2D{ 0,0 };
+	const Vector2D camPosOffset = Vector2D{ -WIN_WIDTH / 2,-WIN_HEIGHT / 2 };
 
+
+	//è‡ªæ©Ÿ
 	LiveEntity player = LiveEntity{ RigidBody{ GameObject{ Rect{0,0,64,64}, playerSprite} } };
+	//è‡ªæ©ŸãŒãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰å¤–ã«å‡ºãªã„ãŸã‚ã®å£
 	vector<GameObject> edgeWall = {
 		GameObject{Rect{-WIN_WIDTH / 2,0,0,WIN_HEIGHT}},
 		GameObject{Rect{-WIN_WIDTH / 2 + GAME_LINE,0,0,WIN_HEIGHT}},
 		GameObject{Rect{0,-WIN_HEIGHT / 2,WIN_WIDTH,0}},
 		GameObject{Rect{0,WIN_HEIGHT / 2,WIN_WIDTH,0}},
 	};
-	vector<vector<BlockType>> map = { {lethal,obstacle} };
+	//ãƒ–ãƒ­ãƒƒã‚¯
 	vector<Block> blocks = {};
 
 
-	// ÅV‚ÌƒL[ƒ{[ƒhî•ñ—p
+	// æœ€æ–°ã®ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰æƒ…å ±ç”¨
 	char keys[256] = { 0 };
 
-	// 1ƒ‹[ƒv(ƒtƒŒ[ƒ€)‘O‚ÌƒL[ƒ{[ƒhî•ñ
+	// 1ãƒ«ãƒ¼ãƒ—(ãƒ•ãƒ¬ãƒ¼ãƒ )å‰ã®ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰æƒ…å ±
 	char oldkeys[256] = { 0 };
 
-	// ƒQ[ƒ€ƒ‹[ƒv
+	// ã‚²ãƒ¼ãƒ ãƒ«ãƒ¼ãƒ—
 	while (true) {
-		// ÅV‚ÌƒL[ƒ{[ƒhî•ñ‚¾‚Á‚½‚à‚Ì‚Í1ƒtƒŒ[ƒ€‘O‚ÌƒL[ƒ{[ƒhî•ñ‚Æ‚µ‚Ä•Û‘¶
-		// ÅV‚ÌƒL[ƒ{[ƒhî•ñ‚ğæ“¾
+		// æœ€æ–°ã®ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰æƒ…å ±ã ã£ãŸã‚‚ã®ã¯1ãƒ•ãƒ¬ãƒ¼ãƒ å‰ã®ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰æƒ…å ±ã¨ã—ã¦ä¿å­˜
+		// æœ€æ–°ã®ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰æƒ…å ±ã‚’å–å¾—
 		GetHitKeyStateAll(keys);
-		// ‰æ–ÊƒNƒŠƒA
+		// ç”»é¢ã‚¯ãƒªã‚¢
 		ClearDrawScreen();
-		//---------  ‚±‚±‚©‚çƒvƒƒOƒ‰ƒ€‚ğ‹Lq  ----------//
+		//---------  ã“ã“ã‹ã‚‰ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚’è¨˜è¿°  ----------//
 
-		// XVˆ—
+		// æ›´æ–°å‡¦ç†
 
-		//ƒ}ƒEƒX‚ğXV
+		//ãƒã‚¦ã‚¹ã‚’æ›´æ–°
 		MouseInputDataUpdate(&mouseInputData);
 
-		//ƒ{ƒ^ƒ“”z—ñ‚ğƒŠƒZƒbƒg
+		//ãƒœã‚¿ãƒ³é…åˆ—ã‚’ãƒªã‚»ãƒƒãƒˆ
 		buttons = {};
-
-		//ƒV[ƒ“‘JˆÚ“ü—Í‚Å‘Î‰‚·‚éƒV[ƒ“‚Ö‚Ì‘JˆÚ‚ğ€”õ
-		if (!mouseInputData.click && mouseInputData.preClick)
-		{
-			switch (currentScene)
-			{
-			case logo:
-				nextScene = title;
-				break;
-			}
-		}
 
 		bool sceneInit = false;
 		if (nextScene == currentScene)
@@ -415,29 +411,32 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		}
 		else
 		{
-			//ƒV[ƒ“‚ğØ‚è‘Ö‚¦‚ÌƒJƒEƒ“ƒgƒ_ƒEƒ“
+			//ã‚·ãƒ¼ãƒ³ã‚’åˆ‡ã‚Šæ›¿ãˆã®ã‚«ã‚¦ãƒ³ãƒˆãƒ€ã‚¦ãƒ³
 			sceneTransitionProgress++;
 			if (sceneTransitionProgress >= 30) {
-				//ƒV[ƒ“‚ğØ‚è‘Ö‚¦A‰Šú‰»ƒtƒ‰ƒO‚ğ—§‚Ä‚é
+				//ã‚·ãƒ¼ãƒ³ã‚’åˆ‡ã‚Šæ›¿ãˆã€åˆæœŸåŒ–ãƒ•ãƒ©ã‚°ã‚’ç«‹ã¦ã‚‹
 				currentScene = nextScene;
 				sceneInit = true;
 			}
 		}
 
-		//ƒV[ƒ“‰Šú‰»ˆ—
+		//ã‚·ãƒ¼ãƒ³åˆæœŸåŒ–å‡¦ç†
 		if (sceneInit)
 		{
 			switch (currentScene)
 			{
 			case title:
-				//ƒ^ƒCƒgƒ‹‰æ–Ê
+				//ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢
 				break;
 			case playpart:
-				//ƒvƒŒƒCƒp[ƒg
+				//ãƒ—ãƒ¬ã‚¤ãƒ‘ãƒ¼ãƒˆ
 
-				//©‹@‚ğ‰ŠúÀ•W‚Ö
-				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 64,64,64}, playerSprite} } };
-				//ƒuƒƒbƒN‚ğ¶¬
+				//ãƒãƒ¼ã‚ºè§£é™¤
+				isPause = false;
+				//è‡ªæ©Ÿã‚’åˆæœŸåº§æ¨™ã¸
+				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 32,50,64}, playerSprite} } };
+				//ãƒ–ãƒ­ãƒƒã‚¯ã‚’åˆæœŸåŒ–ã€ç”Ÿæˆ
+				blocks = {};
 				for (int i = 0; i < PLAYPART_HEIGHT; i++)
 				{
 					for (int j = 0; j < PLAYPART_WIDTH; j++)
@@ -445,7 +444,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						BlockType currentBlockType = (BlockType)(rand() % 5);
 						if (i == 0)
 						{
-							currentBlockType = weak;
+							currentBlockType = weakblock;
 						}
 
 						blocks.push_back(Block{ RigidBody{GameObject{
@@ -457,37 +456,57 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			}
 		}
 
-		//ƒ{ƒ^ƒ“‚ğ¶¬
+		//ãƒœã‚¿ãƒ³ã‚’ç”Ÿæˆ
 		switch (currentScene)
 		{
 		case title:
-			//ƒ^ƒCƒgƒ‹‰æ–Ê
+			//ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢
 
-			//ƒXƒ^[ƒgƒ{ƒ^ƒ“‚ÆƒNƒŒƒWƒbƒgƒ{ƒ^ƒ“
+			//ã‚¹ã‚¿ãƒ¼ãƒˆãƒœã‚¿ãƒ³ã¨ã‚¯ãƒ¬ã‚¸ãƒƒãƒˆãƒœã‚¿ãƒ³
 			buttons = {
-				Button{Rect{WIN_WIDTH / 2, WIN_HEIGHT / 4 * 3,200,100},"ƒXƒ^[ƒg\n","START\n"},
-				Button{Rect{140, 60,130,50},"ƒNƒŒƒWƒbƒg\n","CREDITS\n"},
+				Button{Rect{WIN_WIDTH / 2, WIN_HEIGHT / 4 * 3,200,100},"ã‚¹ã‚¿ãƒ¼ãƒˆ","START"},
+				Button{Rect{140, 60,130,50},"ã‚¯ãƒ¬ã‚¸ãƒƒãƒˆ","CREDITS"},
+				Button{Rect{WIN_WIDTH - 140, 60,130,50},"éŠã³æ–¹","HOW TO PLAY"} ,
 			};
 			break;
 		case playpart:
-			//ƒvƒŒƒCƒp[ƒg
+			//ãƒ—ãƒ¬ã‚¤ãƒ‘ãƒ¼ãƒˆ
 
-			//ƒ|[ƒYƒ{ƒ^ƒ“
-			buttons = {
-				Button{Rect{70, 60,60,50},"Îß°½Ş\n","PAUSE\n"},
-			};
+			if (isPause)
+			{
+				//ãƒãƒ¼ã‚ºãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒœã‚¿ãƒ³
+				buttons = {
+					Button{Rect{370, 160,60,50},"ã¤ã¥ã‘ã‚‹","RESUME"},
+					Button{Rect{370, 460,60,50},"ã‚„ã‚ã‚‹","QUIT"},
+				};
+			}
+			else
+			{
+				//ãƒãƒ¼ã‚ºãƒœã‚¿ãƒ³
+				buttons = {
+					Button{Rect{70, 60,60,50},"ï¾ï¾Ÿï½°ï½½ï¾","PAUSE"},
+				};
+			}
 			break;
 		case credit:
-			//ƒNƒŒƒWƒbƒg‰æ–Ê
+			//ã‚¯ãƒ¬ã‚¸ãƒƒãƒˆç”»é¢
 
-			//ƒ^ƒCƒgƒ‹‚É–ß‚éƒ{ƒ^ƒ“
+			//ã‚¿ã‚¤ãƒˆãƒ«ã«æˆ»ã‚‹ãƒœã‚¿ãƒ³
 			buttons = {
-				Button{Rect{140, 60,130,50},"‚à‚Ç‚é\n","RETURN\n"},
+				Button{Rect{140, 60,130,50},"ã‚‚ã©ã‚‹","RETURN"},
+			};
+			break;
+		case howtoplay:
+			//éŠã³æ–¹èª¬æ˜ç”»é¢
+
+			//ã‚¿ã‚¤ãƒˆãƒ«ã«æˆ»ã‚‹ãƒœã‚¿ãƒ³
+			buttons = {
+				Button{Rect{140, 60,130,50},"ã‚‚ã©ã‚‹\n","RETURN\n"},
 			};
 			break;
 		}
 
-		//ƒ{ƒ^ƒ“‚ğXVi‚¿‚å‚Á‚Æ‚¾‚¯c‚É—h‚ç‚·j
+		//ãƒœã‚¿ãƒ³ã‚’æ›´æ–°ï¼ˆã¡ã‚‡ã£ã¨ã ã‘ç¸¦ã«æºã‚‰ã™ï¼‰
 		for (int i = 0; i < buttons.size(); i++) {
 			buttons[i].entity.y += sin(clock() / PI / 300 - i / 2.0) * 5;
 			ButtonUpdate(buttons[i], mouseInputData, buttonPushSound);
@@ -495,10 +514,19 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		switch (currentScene)
 		{
-		case title:
-			//ƒ^ƒCƒgƒ‹‰æ–Ê
+		case logo:
+			//ãƒ­ã‚´ç”»é¢
 
-			//ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚½‚Ìˆ—
+			//å·¦ã‚¯ãƒªãƒƒã‚¯ã§ã‚¿ã‚¤ãƒˆãƒ«ã¸
+			if (!mouseInputData.click && mouseInputData.preClick)
+			{
+				nextScene = title;
+			}
+			break;
+		case title:
+			//ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢
+
+			//ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ãŸæ™‚ã®å‡¦ç†
 			if (IsButtonClicked(buttons, 0))
 			{
 				nextScene = playpart;
@@ -507,21 +535,81 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			{
 				nextScene = credit;
 			}
+			if (IsButtonClicked(buttons, 2))
+			{
+				nextScene = howtoplay;
+			}
 			break;
 		case playpart:
-			//ƒvƒŒƒCƒp[ƒg
+			//ãƒ—ãƒ¬ã‚¤ãƒ‘ãƒ¼ãƒˆ
 		{
 			timer++;
-			//‘S‚Ä‚ÌƒuƒƒbƒN‚ğXV
+			//å…¨ã¦ã®ãƒ–ãƒ­ãƒƒã‚¯ã‚’æ›´æ–°
 			for (int i = 0; i < blocks.size(); i++) {
 				blocks[i].rigidBody.gameObject.graphNum = blocksSprite[blocks[i].blockType];
-			}
 
-			vector<GameObject> liveEntityWalls = edgeWall;
-			for (int i = 0; i < blocks.size(); i++) {
-				liveEntityWalls.push_back(blocks[i].rigidBody.gameObject);
+			if (!isPause)
+			{
+				//å…¨ã¦ã®ãƒ–ãƒ­ãƒƒã‚¯ã‚’æ›´æ–°
+				for (int i = 0; i < blocks.size(); i++)
+				{
+					blocks[i].rigidBody.gameObject.graphNum = blocksSprite[blocks[i].blockType];
+					//ã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸã‚‰æ¶ˆã™æº–å‚™ï¼ˆç ´å£Šå¯èƒ½ãªãƒ–ãƒ­ãƒƒã‚¯ã®ã¿ï¼‰
+					if (blocks[i].blockType != untappableblock && blocks[i].blockType != lethalblock
+						&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.position + (camPosition + camPosOffset))
+						&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.pin + (camPosition + camPosOffset))
+						&& !mouseInputData.click && mouseInputData.preClick)
+					{
+						blocks[i].breaked = true;
+					}
+				}
+				//æ¶ˆã™æº–å‚™ãŒå‡ºæ¥ãŸãƒ–ãƒ­ãƒƒã‚¯ã‚’å…¨éƒ¨æ¶ˆã™
+				for (int i = 0; i < blocks.size(); i++)
+				{
+					if (blocks[i].breaked)
+					{
+						blocks.erase(blocks.begin() + i);
+						i--;
+					}
+				}
+
+				//å››éš…ã®å£ã¨ãƒ–ãƒ­ãƒƒã‚¯ï¼ˆãƒ•ãƒ¬ãƒ¼ãƒ ãƒ–ãƒ­ãƒƒã‚¯ä»¥å¤–ï¼‰ã‚’å£ã¨ã™ã‚‹
+				vector<GameObject> liveEntityWalls = edgeWall;
+				for (int i = 0; i < blocks.size(); i++)
+				{
+					if (blocks[i].blockType != frameblock)
+					{
+						liveEntityWalls.push_back(blocks[i].rigidBody.gameObject);
+					}
+				}
+				//è‡ªæ©Ÿã‚’æ›´æ–°
+				LiveEntityUpdate(&player, liveEntityWalls);
+
+				//ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ãŸæ™‚ã®å‡¦ç†
+				if (IsButtonClicked(buttons, 0))
+				{
+					//ãƒãƒ¼ã‚ºã™ã‚‹
+					isPause = true;
+				}
 			}
-			//©‹@‚ğXV
+			else
+			{
+				//ãƒãƒ¼ã‚ºä¸­
+
+				//ç¶šã‘ã‚‹
+				if (IsButtonClicked(buttons, 0))
+				{
+					//ãƒãƒ¼ã‚ºè§£é™¤
+					isPause = false;
+				}
+				//çµ‚ã‚ã‚‹
+				if (IsButtonClicked(buttons, 1))
+				{
+					//ã‚¿ã‚¤ãƒˆãƒ«ã¸
+					nextScene = title;
+				}
+			}
+			//è‡ªæ©Ÿã‚’æ›´æ–°
 			LiveEntityUpdate(&player, liveEntityWalls);
 
 			if (timer >= 60) {
@@ -533,16 +621,21 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			}
 		}
 
-		//ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚½‚Ìˆ—
-		if (IsButtonClicked(buttons, 0))
-		{
-			nextScene = title;
-		}
-		break;
-		case credit:
-			//ƒNƒŒƒWƒbƒg‰æ–Ê
 
-			//ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚½‚Ìˆ—
+			break;
+		case credit:
+			//ã‚¯ãƒ¬ã‚¸ãƒƒãƒˆç”»é¢
+
+			//ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ãŸæ™‚ã®å‡¦ç†
+			if (IsButtonClicked(buttons, 0))
+			{
+				nextScene = title;
+			}
+			break;
+		case howtoplay:
+			//éŠã³æ–¹èª¬æ˜ç”»é¢
+
+			//ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ãŸæ™‚ã®å‡¦ç†
 			if (IsButtonClicked(buttons, 0))
 			{
 				nextScene = title;
@@ -550,33 +643,49 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			break;
 		}
 
-		// •`‰æˆ—
+		// æç”»å‡¦ç†
 		switch (currentScene)
 		{
+		case logo:
+			//ãƒ­ã‚´ç”»é¢
+			DrawString(
+				WIN_WIDTH / 7 * 3, WIN_HEIGHT / 4,
+				"Developed by",
+				GetColor(0, 0, 0));
+			DrawRotaGraph(WIN_WIDTH / 2, WIN_HEIGHT / 2, 2, 0, logoGraph, TRUE);
+			DrawString(
+				WIN_WIDTH / 7 * 3, WIN_HEIGHT / 5 * 3,
+				"TEAM GJ4",
+				GetColor(0, 0, 0));
+			DrawString(
+				WIN_WIDTH / 3, WIN_HEIGHT - FONT_SIZE * 4,
+				"ç”»é¢ã‚’å·¦ã‚¯ãƒªãƒƒã‚¯ã—ã¦ãã ã•ã„",
+				GetColor(0, 0, 0));
+			break;
 		case title:
-			//ƒ^ƒCƒgƒ‹‰æ–Ê
+			//ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢
 
-			//ƒ^ƒCƒgƒ‹ƒƒS
+			//ã‚¿ã‚¤ãƒˆãƒ«ãƒ­ã‚´
 			DrawGraph(0, 0, titleGraph, true);
 			DrawGraph(0, 0, operationGraph, true);
-			//Œ —˜•\¦
+			//æ¨©åˆ©è¡¨ç¤º
 			DrawString(
-				WIN_WIDTH / 7 * 3, WIN_HEIGHT - (FONT_SIZE * 2 + 10), "2024 TERAPETA GAMES",
+				WIN_WIDTH / 3, WIN_HEIGHT - (FONT_SIZE * 2 + 10), "2024 TERAPETA GAMES / TEAM GJ4",
 				GetColor(0, 0, 0));
 			break;
 		case playpart:
-			//ƒvƒŒƒCƒp[ƒg
+			//ãƒ—ãƒ¬ã‚¤ãƒ‘ãƒ¼ãƒˆ
 
-			//‘S‚Ä‚ÌƒuƒƒbƒN‚ğ•`‰æ
+			//å…¨ã¦ã®ãƒ–ãƒ­ãƒƒã‚¯ã‚’æç”»
 			for (int i = 0; i < blocks.size(); i++) {
-				RenderObject(blocks[i].rigidBody.gameObject, Vector2D{ -WIN_WIDTH / 2,WIN_HEIGHT / 2 });
+				RenderObject(blocks[i].rigidBody.gameObject, camPosition + camPosOffset);
 			}
-			//©‹@‚ğ•`‰æ
-			RenderObject(player.rigidBody.gameObject, Vector2D{ -WIN_WIDTH / 2,WIN_HEIGHT / 2 });
-			//‚±‚Ìƒ‰ƒCƒ“‚©‚ç‚ÍUIƒ][ƒ“‚È‚Ì‚Å‚¢‚Á‚»‚±‚±‚Éƒ{ƒbƒNƒXUI‚¨‚¢‚Ä‚à‚¢‚¢‚â
+			//è‡ªæ©Ÿã‚’æç”»
+			RenderObject(player.rigidBody.gameObject, camPosition + camPosOffset);
+			//ã“ã®ãƒ©ã‚¤ãƒ³ã‹ã‚‰ã¯UIã‚¾ãƒ¼ãƒ³ãªã®ã§ã„ã£ãã“ã“ã«ãƒœãƒƒã‚¯ã‚¹UIãŠã„ã¦ã‚‚ã„ã„ã‚„
 			DrawBox(GAME_LINE, 0, WIN_WIDTH, WIN_HEIGHT, GetColor(0xff, 0xff, 0xff), TRUE);
 
-			//ƒrƒbƒgƒ}ƒbƒvƒtƒHƒ“ƒgƒ^ƒCƒ}[
+			//ãƒ“ãƒƒãƒˆãƒãƒƒãƒ—ãƒ•ã‚©ãƒ³ãƒˆã‚¿ã‚¤ãƒãƒ¼
 			if (timerT1 == 0) { DrawGraph(950, 60, zeroGraph, true); }
 			else if (timerT1 == 1) { DrawGraph(950, 60, oneGraph, true); }
 			else if (timerT1 == 2) { DrawGraph(950, 60, twoGraph, true); }
@@ -591,44 +700,48 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			DrawFormatString(800, 300, GetColor(122, 112, 122), "%d", timer);
 
 			break;
-		case logo:
-			//ƒƒS‰æ–Ê
-			DrawRotaGraph(WIN_WIDTH / 2, WIN_HEIGHT / 2, 2, 0, logoGraph, 0);
-			break;
 		case credit:
-			//ƒNƒŒƒWƒbƒg‰æ–Ê
+			//ã‚¯ãƒ¬ã‚¸ãƒƒãƒˆç”»é¢
 			DrawString(
-				WIN_WIDTH / 2, FONT_SIZE * 2,
-				"ƒvƒƒOƒ‰ƒ}[\n@ˆñƒ†ƒE\n@_–³Œ\n\nƒ`[ƒtƒvƒƒOƒ‰ƒ}[\n@‚Ä‚ç‚Ø‚½\n\nƒfƒBƒŒƒNƒ^[\n@‚Ä‚ç‚Ø‚½\n",
+				WIN_WIDTH / 4, 0,
+				"\n\nãƒ—ãƒ­ã‚°ãƒ©ãƒãƒ¼\nã€€é°¯ãƒ¦ã‚¦\nã€€ç¥ç„¡æœˆ\n\nãƒãƒ¼ãƒ•ãƒ—ãƒ­ã‚°ãƒ©ãƒãƒ¼\nã€€ã¦ã‚‰ãºãŸ\n\nã‚¢ãƒ¼ãƒˆ\nã€€ã¦ã‚‰ãºãŸ\n\nã‚¨ãƒ•ã‚§ã‚¯ãƒˆ\nã€€ã¦ã‚‰ãºãŸ\n\nã‚µã‚¦ãƒ³ãƒ‰ã‚¨ãƒ•ã‚§ã‚¯ãƒˆ\nã€€ã¦ã‚‰ãºãŸ\n\nã‚³ãƒ³ãƒãƒ¼ã‚µãƒ¼\nã€€ã¦ã‚‰ãºãŸ",
 				GetColor(0, 0, 0));
+			DrawString(
+				WIN_WIDTH / 2, 0,
+				"\n\nãƒ“ã‚¸ãƒ¥ã‚¢ãƒ«ã‚¢ãƒ‰ãƒã‚¤ã‚¶ãƒ¼\nã€€ã¦ã‚‰ãºãŸ\n\nã‚¨ã‚°ã‚¼ã‚¯ãƒ†ã‚£ãƒ–ãƒ—ãƒ­ãƒ‡ãƒ¥ãƒ¼ã‚µãƒ¼\nã€€ã¦ã‚‰ãºãŸ\n\nãƒ‡ã‚£ãƒ¬ã‚¯ã‚¿ãƒ¼\nã€€ã¦ã‚‰ãºãŸ\n\nã‹ã„ã¯ã¤\nã€€ã¦ã‚‰ãºãŸã‚²ãƒ¼ãƒ ã‚º\nã€€ãƒãƒ¼ãƒ GJ4\n\n\nTERAPETA GAMES / TEAM GJ4\nAll Rights Reserved.",
+				GetColor(0, 0, 0));
+			break;
+		case howtoplay:
+			DrawGraph(0, 0, operationGraph, true);
 			break;
 		}
 
-		//‘S‚Ä‚Ìƒ{ƒ^ƒ“‚ğ•`‰æ
-		for (int i = 0; i < buttons.size(); i++) {
+		//å…¨ã¦ã®ãƒœã‚¿ãƒ³ã‚’æç”»
+		for (int i = 0; i < buttons.size(); i++)
+		{
 			DrawButton(buttons[i]);
 		}
 
-		//---------  ‚±‚±‚Ü‚Å‚ÉƒvƒƒOƒ‰ƒ€‚ğ‹Lq  ---------//
-		// (ƒ_ƒuƒ‹ƒoƒbƒtƒ@)— –Ê
+		//---------  ã“ã“ã¾ã§ã«ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚’è¨˜è¿°  ---------//
+		// (ãƒ€ãƒ–ãƒ«ãƒãƒƒãƒ•ã‚¡)è£é¢
 		ScreenFlip();
 
-		// 20ƒ~ƒŠ•b‘Ò‹@(‹^—60FPS)
+		// 20ãƒŸãƒªç§’å¾…æ©Ÿ(ç–‘ä¼¼60FPS)
 		WaitTimer(20);
 
-		// WindowsƒVƒXƒeƒ€‚©‚ç‚­‚éî•ñ‚ğˆ—‚·‚é
+		// Windowsã‚·ã‚¹ãƒ†ãƒ ã‹ã‚‰ãã‚‹æƒ…å ±ã‚’å‡¦ç†ã™ã‚‹
 		if (ProcessMessage() == -1) {
 			break;
 		}
 
-		// ESCƒL[‚ª‰Ÿ‚³‚ê‚½‚çƒ‹[ƒv‚©‚ç”²‚¯‚é
+		// ESCã‚­ãƒ¼ãŒæŠ¼ã•ã‚ŒãŸã‚‰ãƒ«ãƒ¼ãƒ—ã‹ã‚‰æŠœã‘ã‚‹
 		if (CheckHitKey(KEY_INPUT_ESCAPE) == 1) {
 			break;
 		}
 	}
-	// Dxƒ‰ƒCƒuƒ‰ƒŠI—¹ˆ—
+	// Dxãƒ©ã‚¤ãƒ–ãƒ©ãƒªçµ‚äº†å‡¦ç†
 	DxLib_End();
 
-	// ³íI—¹
+	// æ­£å¸¸çµ‚äº†
 	return 0;
 }

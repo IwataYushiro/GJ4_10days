@@ -12,20 +12,20 @@
 
 using namespace std;
 
-///<summary>
-///２点間の距離
-///<para>...</para>
-///<para>a,b = ２点の座標</para>
-/// </summary>
+Vector2D operator +(const Vector2D& v0, const Vector2D& v1)
+{
+	return Vector2D{v0.x + v1.x,v0.y + v1.y};
+}
+
+Vector2D operator -(const Vector2D& v0, const Vector2D& v1)
+{
+	return Vector2D{ v0.x - v1.x,v0.y - v1.y };
+}
+
 double VectorScale(Vector2D a, Vector2D b) {
 	return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
 }
 
-///<summary>
-///２点間のベクトルを正規化
-///<para>...</para>
-///<para>a,b = ２点の座標</para>
-/// </summary>
 Vector2D NormalizedVector(Vector2D a, Vector2D b) {
 	if (VectorScale(a, b) != 0) {
 		return Vector2D{ (b.x - a.x) / VectorScale(a, b),(b.y - a.y) / VectorScale(a, b) };
@@ -33,29 +33,14 @@ Vector2D NormalizedVector(Vector2D a, Vector2D b) {
 	return Vector2D{ 0,0 };
 }
 
-///<summary>
-//度数法の角度をラジアン角に変換する
-///<para>...</para>
-///<para>degree = 度数法の角度</para>
-/// </summary>
 float DegreeToRad(float degree) {
 	return degree * PI / 180;
 }
 
-///<summary>
-//ラジアン角を度数法の角度に変換する
-///<para>...</para>
-///<para>rad = ラジアン角</para>
-/// </summary>
 float RadToDegree(float rad) {
 	return rad / PI * 180;
 }
 
-///<summary>
-///<para>入力したラジアン角の方向を向いた長さ１のベクトルを出力する</para>
-///<para>...</para>
-///<para>rad = ラジアン角</para>
-/// </summary>
 Vector2D RadToPos(double rad) {
 	Vector2D ret;
 	ret.x = sin(rad);
@@ -63,26 +48,10 @@ Vector2D RadToPos(double rad) {
 	return ret;
 }
 
-///<summary>
-///<para>第一引数の座標から第二引数の座標を向いた時の角度</para>
-///<para>...</para>
-///<para>nowPos = 基準となる座標</para>
-///<para>targetPos = 向く対象の座標</para>
-/// </summary>
 double PosToRad(Vector2D nowPos, Vector2D targetPos) {
 	return atan2(targetPos.x - nowPos.x, nowPos.y - targetPos.y);
 }
 
-///<summary>
-///<para>シーンを切り替える準備（シーンを切り替える処理をする場所に置く）</para>
-///<para>これを使う前に現在のシーンを管理する変数と</para>
-///<para>次のシーンを格納する変数と</para>
-///<para>シーン変更までの残り時間を管理する変数を用意する</para>
-///<para>...</para>
-///<para>progress = シーン変更までの残り時間を管理する変数</para>
-///<para>nextScene = 次のシーンを格納する変数</para>
-///<para>setNextScene = 次のシーンを表す数値を直接入力</para>
-///</summary>
 void SetNextScene(float& progress, int& nextscene, int setNextScene) {
 	nextscene = setNextScene;
 	if (progress >= 1) {
@@ -90,49 +59,22 @@ void SetNextScene(float& progress, int& nextscene, int setNextScene) {
 	}
 }
 
-///<summary>
-///<para>シーンを切り替えるための更新処理（更新処理部分の下側に置く）</para>
-///<para>SetNextScene()と併用する</para>
-///<para>...</para>
-///<para>progress = シーン変更までの残り時間を管理する変数</para>
-///<para>scene = 現在のシーンを管理する変数</para>
-///<para>nextScene = 次のシーンを格納する変数</para>
-///</summary>
 void SceneUpdate(float& progress, int& scene, int nextScene) {
 	if (progress < 1) {
 		progress += 0.01;
 	}
 }
 
-///<summary>
-///GameObjectを描画する
-///<para>...</para>
-///<para>obj = 画像と矩形の情報の塊</para>
-///<para>scroll = カメラの位置</para>
-/// </summary>
 void RenderObject(GameObject obj, Vector2D scroll) {
-	DrawRotaGraph(obj.entity.x - scroll.x, obj.entity.y + scroll.y, obj.graphScale, obj.rot, obj.graphNum, true, obj.dir);
+	DrawRotaGraph(obj.entity.x - scroll.x, obj.entity.y - scroll.y, obj.graphScale, obj.rot, obj.graphNum, true, obj.dir);
 }
 
-///<summary>
-///配列内の全GameObjectを描画する
-///<para>...</para>
-///<para>obj = 描画するGameObjectの配列</para>
-///<para>scroll = カメラの位置</para>
-/// </summary>
 void RenderAllObject(vector<GameObject> obj, Vector2D scroll) {
 	for (int i = 0; i < obj.size(); i++) {
 		RenderObject(obj[i], scroll);
 	}
 }
 
-///<summary>
-///RigidBodyに重力と空気抵抗を加える
-///<para>...</para>
-///<para>rgd = 対象のRigidBody</para>
-///<para>gravity = 加える重力のx,y成分</para>
-///<para>drag = x,y方向のスピード維持率（０～１の小数を入力してね）</para>
-/// </summary>
 void GravityAndDrag(RigidBody& rgd, Vector2D gravity, Vector2D drag) {
 	rgd.movement.x += gravity.x;
 	rgd.movement.y += gravity.y;
@@ -140,14 +82,6 @@ void GravityAndDrag(RigidBody& rgd, Vector2D gravity, Vector2D drag) {
 	rgd.movement.y *= drag.y;
 }
 
-///<summary>
-///マップチップを基に地形ブロックを並べる
-///<para>...</para>
-///<para>tileMap = マップチップが記された配列</para>
-///<para>tileScale = 生成されるタイルの大きさ</para>
-///<para>tile = 地形ブロックに貼り付ける画像の番号</para>
-///<para>blocks = 出来上がった地形ブロックを格納する配列</para>
-/// </summary>
 void ConstructMap(vector<vector<int>> tileMap, const int tileScale, const int tile, vector<GameObject>& blocks, float graphScale) {
 	blocks = {};
 	for (int i = 0; i < tileMap.size(); i++) {
@@ -159,23 +93,12 @@ void ConstructMap(vector<vector<int>> tileMap, const int tileScale, const int ti
 	}
 }
 
-///<summary>
-///矩形と点が重なっているか否か
-///<para>...</para>
-///<para>r = 矩形</para>
-///<para>p = 点</para>
-/// </summary>
 bool HitRectAndPoint(Rect r, Vector2D p)
 {
 	return r.x + r.w >= p.x && r.x - r.w <= p.x
 		&& r.y + r.h >= p.y && r.y - r.h <= p.y;
 }
 
-///<summary>
-///矩形同士が重なっているか否か
-///<para>...</para>
-///<para>a,b = 判定を行う２つの矩形</para>
-/// </summary>
 bool HitRectAndRect(Rect a, Rect b) {
 	return a.x - a.w * 0.5 <= b.x + b.w * 0.5
 		&& a.x + a.w * 0.5 >= b.x - b.w * 0.5
@@ -183,12 +106,6 @@ bool HitRectAndRect(Rect a, Rect b) {
 		&& a.y + a.h * 0.5 >= b.y - b.h * 0.5;
 }
 
-///<summary>
-///どの部分が対象の矩形に当たっているか
-///<para>...</para>
-///<para>obj = 判定を取るオブジェクト</para>
-///<para>wall =触れている地形ブロック</para>
-/// </summary>
 Vector2D CollisionInfoRectAndRect(GameObject obj, Rect wall) {
 	Vector2D ret = Vector2D{ 0,0 };
 	obj.entity = Rect{ (float)obj.beforePos.x,(float)obj.beforePos.y,obj.entity.w,obj.entity.h };
@@ -211,12 +128,6 @@ Vector2D CollisionInfoRectAndRect(GameObject obj, Rect wall) {
 	return ret;
 }
 
-///<summary>
-///対象の矩形に対して押し戻す
-///<para>...</para>
-///<para>obj = 押し戻されるオブジェクト</para>
-///<para>wall = objを押し戻す地形ブロック</para>
-/// </summary>
 void CollisionRectAndRect(GameObject& obj, Rect wall) {
 	if (CollisionInfoRectAndRect(obj, wall).x != 0) {
 		if (obj.entity.x <= wall.x) {
@@ -236,12 +147,6 @@ void CollisionRectAndRect(GameObject& obj, Rect wall) {
 	}
 }
 
-///<summary>
-///RigidBodyを配列内の全ての地形ブロックに対して押し戻す
-///<para>...</para>
-///<para>rgd = 押し戻されるRigidBody</para>
-///<para>blocks = rgdを押し戻す地形ブロックの配列</para>
-/// </summary>
 void collideWall(RigidBody& rgd, vector<GameObject> blocks) {
 	vector<GameObject> hittedBlocks = {};
 	vector<GameObject> hittedEdgeBlocks = {};
@@ -279,14 +184,6 @@ void collideWall(RigidBody& rgd, vector<GameObject> blocks) {
 	}
 }
 
-///<summary>
-///<para>RigidBodyに対して重力、空気抵抗、地形ブロックの衝突処理を一括で行う</para>
-///<para>...</para>
-///<para>rgd = 押し戻されるRigidBody</para>
-///<para>gravity = 加える重力のx,y成分</para>
-///<para>drag = x,y方向のスピード維持率（０～１の小数を入力してね）</para>
-///<para>blocks = rgdを押し戻す地形ブロックの配列</para>
-/// </summary>
 void RigidBodyUpdate(RigidBody& rgd, Vector2D gravity, Vector2D drag, vector<GameObject> blocks) {
 	GravityAndDrag(rgd, gravity, drag);
 	float physicsLoop = max(rgd.movement.x, rgd.movement.y) / min(rgd.gameObject.entity.w, rgd.gameObject.entity.h) * 4;
@@ -311,18 +208,6 @@ void RigidBodyUpdate(RigidBody& rgd, Vector2D gravity, Vector2D drag, vector<Gam
 	rgd.gameObject.beforeSca = Vector2D{ rgd.gameObject.entity.w,rgd.gameObject.entity.h };
 }
 
-///<summary>
-/// <para>矩形と円の当たり判定</para>
-/// <para>当たってないとこの判定を全部取って、全部falseなら当たってる判定</para>
-///<para>...</para>
-/// <para>Left = 矩形の左辺</para>
-/// <para>Right = 矩形の右辺</para>
-/// <para>Top = 矩形の上辺</para>
-/// <para>Bottom = 矩形の底</para>
-/// <para>x = 円のX座標</para>
-/// <para>y = 円のY座標</para>
-/// <para>r = 円の半径</para>
-/// </summary>
 int CollisionBox2Circle(int Left, int Right, int Top, int Bottom, int x, int y, int r) {
 	if (Left - r > x || Right + r < x || Top - r > y || Bottom + r < y) {												//矩形に円の半径分を足した範囲
 		return false;
