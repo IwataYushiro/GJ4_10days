@@ -29,6 +29,7 @@ enum Scene
 	title,
 	playpart,
 	credit,
+	howtoplay,
 };
 
 enum BlockType
@@ -431,6 +432,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			buttons = {
 				Button{Rect{WIN_WIDTH / 2, WIN_HEIGHT / 4 * 3,200,100},"スタート\n","START\n"},
 				Button{Rect{140, 60,130,50},"クレジット\n","CREDITS\n"},
+				Button{Rect{WIN_WIDTH - 140, 60,130,50},"遊び方\n","HOW TO PLAY\n"} ,
 			};
 			break;
 		case playpart:
@@ -443,6 +445,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			break;
 		case credit:
 			//クレジット画面
+
+			//タイトルに戻るボタン
+			buttons = {
+				Button{Rect{140, 60,130,50},"もどる\n","RETURN\n"},
+			};
+			break;
+		case howtoplay:
+			//遊び方説明画面
 
 			//タイトルに戻るボタン
 			buttons = {
@@ -471,6 +481,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			{
 				nextScene = credit;
 			}
+			if (IsButtonClicked(buttons, 2))
+			{
+				nextScene = howtoplay;
+			}
 			break;
 		case playpart:
 			//プレイパート
@@ -496,6 +510,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		break;
 		case credit:
 			//クレジット画面
+
+			//ボタンを押した時の処理
+			if (IsButtonClicked(buttons, 0))
+			{
+				nextScene = title;
+			}
+			break;
+		case howtoplay:
+			//遊び方説明画面
 
 			//ボタンを押した時の処理
 			if (IsButtonClicked(buttons, 0))
@@ -541,6 +564,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				WIN_WIDTH / 2, FONT_SIZE * 2,
 				"プログラマー\n　鰯ユウ\n　神無月\n\nチーフプログラマー\n　てらぺた\n\nディレクター\n　てらぺた\n",
 				GetColor(0, 0, 0));
+			break;
+		case howtoplay:
+			DrawGraph(0, 0, operationGraph, true);
 			break;
 		}
 
