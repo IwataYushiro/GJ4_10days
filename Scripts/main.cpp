@@ -485,7 +485,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//タイトルに戻るボタン
 			buttons = {
-				Button{Rect{140, 60,130,50},"もどる\n","RETURN\n"},
+				Button{Rect{140, 60,130,50},"もどる","RETURN"},
 			};
 			break;
 		}
@@ -573,6 +573,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				//自機を更新
 				LiveEntityUpdate(&player, liveEntityWalls);
 
+				//カメラ追従
+				camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.y };
+
 				//ボタンを押した時の処理
 				if (IsButtonClicked(buttons, 0))
 				{
@@ -634,10 +637,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				WIN_WIDTH / 7 * 3, WIN_HEIGHT / 5 * 3,
 				"TEAM GJ4",
 				GetColor(0, 0, 0));
-			DrawString(
-				WIN_WIDTH / 3, WIN_HEIGHT - FONT_SIZE * 4,
-				"画面を左クリックしてください",
-				GetColor(0, 0, 0));
+			if (clock() % 1500 < 1000)
+			{
+				DrawString(
+					WIN_WIDTH / 3, WIN_HEIGHT - FONT_SIZE * 4,
+					"画面を左クリックしてください",
+					GetColor(0, 0, 0));
+			}
 			break;
 		case title:
 			//タイトル画面
