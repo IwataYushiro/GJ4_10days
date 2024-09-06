@@ -322,7 +322,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	//シーン遷移用のタイマー
 	float sceneTransitionProgress = 0;
-
+	//Pause中のフラグ
+	bool isPause = false;
 	//ボタン
 	vector<Button> buttons;
 
@@ -441,6 +442,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//ポーズボタン
 			buttons = {
 				Button{Rect{70, 60,60,50},"ﾎﾟｰｽﾞ\n","PAUSE\n"},
+				Button{Rect{370, 160,60,50},"ツヅケルﾞ\n","RESUME\n"},
+				Button{Rect{370, 460,60,50},"オワルﾞ\n","QUIT\n"},
 			};
 			break;
 		case credit:
@@ -488,26 +491,50 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			break;
 		case playpart:
 			//プレイパート
-		{
-			//全てのブロックを更新
-			for (int i = 0; i < blocks.size(); i++) {
-				blocks[i].rigidBody.gameObject.graphNum = blocksSprite[blocks[i].blockType];
+
+			if (!isPause)
+			{
+				//全てのブロックを更新
+				for (int i = 0; i < blocks.size(); i++) {
+					blocks[i].rigidBody.gameObject.graphNum = blocksSprite[blocks[i].blockType];
+				}
+
+				vector<GameObject> liveEntityWalls = edgeWall;
+				for (int i = 0; i < blocks.size(); i++) {
+					liveEntityWalls.push_back(blocks[i].rigidBody.gameObject);
+				}
+				//自機を更新
+				LiveEntityUpdate(&player, liveEntityWalls);
+
+
+				//ボタンを押した時の処理
+				if (IsButtonClicked(buttons, 0))
+				{
+					//ポーズする
+					isPause = true;
+				}
+			}
+			else
+			{
+				//ポーズ中
+
+				//続ける(1)
+				if (IsButtonClicked(buttons, 1))
+				{
+					//ポーズする
+					isPause = false;
+				}
+				//終わる(2)
+				if (IsButtonClicked(buttons, 2))
+				{
+					//ポーズする
+					isPause = false;
+					nextScene = title;
+				}
 			}
 
-			vector<GameObject> liveEntityWalls = edgeWall;
-			for (int i = 0; i < blocks.size(); i++) {
-				liveEntityWalls.push_back(blocks[i].rigidBody.gameObject);
-			}
-			//自機を更新
-			LiveEntityUpdate(&player, liveEntityWalls);
-		}
 
-		//ボタンを押した時の処理
-		if (IsButtonClicked(buttons, 0))
-		{
-			nextScene = title;
-		}
-		break;
+			break;
 		case credit:
 			//クレジット画面
 
