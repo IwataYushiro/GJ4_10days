@@ -354,6 +354,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//遷移しようとしている次のシーン
 	Scene nextScene = logo;
 
+
 	//シーン遷移用のタイマー
 	float sceneTransitionProgress = 0;
 
