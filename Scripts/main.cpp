@@ -29,6 +29,7 @@ enum Scene
 	title,
 	playpart,
 	credit,
+	howtoplay,
 };
 
 enum BlockType
@@ -321,7 +322,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	//シーン遷移用のタイマー
 	float sceneTransitionProgress = 0;
-
+	//Pause中のフラグ
+	bool isPause = false;
 	//ボタン
 	vector<Button> buttons;
 
@@ -426,6 +428,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			buttons = {
 				Button{Rect{WIN_WIDTH / 2, WIN_HEIGHT / 4 * 3,200,100},"スタート","START"},
 				Button{Rect{140, 60,130,50},"クレジット","CREDITS"},
+				Button{Rect{WIN_WIDTH - 140, 60,130,50},"遊び方","HOW TO PLAY"} ,
 			};
 			break;
 		case playpart:
@@ -434,6 +437,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//ポーズボタン
 			buttons = {
 				Button{Rect{70, 60,60,50},"ﾎﾟｰｽﾞ","PAUSE"},
+				Button{Rect{370, 160,60,50},"つづける","RESUME"},
+				Button{Rect{370, 460,60,50},"やめる","QUIT"},
 			};
 			break;
 		case credit:
@@ -442,6 +447,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//タイトルに戻るボタン
 			buttons = {
 				Button{Rect{140, 60,130,50},"もどる","RETURN"},
+			};
+			break;
+		case howtoplay:
+			//遊び方説明画面
+
+			//タイトルに戻るボタン
+			buttons = {
+				Button{Rect{140, 60,130,50},"もどる\n","RETURN\n"},
 			};
 			break;
 		}
@@ -474,6 +487,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			if (IsButtonClicked(buttons, 1))
 			{
 				nextScene = credit;
+			}
+			if (IsButtonClicked(buttons, 2))
+			{
+				nextScene = howtoplay;
 			}
 			break;
 		case playpart:
@@ -515,14 +532,45 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			LiveEntityUpdate(&player, liveEntityWalls);
 		}
 
-		//ボタンを押した時の処理
-		if (IsButtonClicked(buttons, 0))
-		{
-			nextScene = title;
-		}
-		break;
+				//ボタンを押した時の処理
+				if (IsButtonClicked(buttons, 0))
+				{
+					//ポーズする
+					isPause = true;
+				}
+			}
+			else
+			{
+				//ポーズ中
+
+				//続ける(1)
+				if (IsButtonClicked(buttons, 1))
+				{
+					//ポーズする
+					isPause = false;
+				}
+				//終わる(2)
+				if (IsButtonClicked(buttons, 2))
+				{
+					//ポーズする
+					isPause = false;
+					nextScene = title;
+				}
+			}
+
+
+			break;
 		case credit:
 			//クレジット画面
+
+			//ボタンを押した時の処理
+			if (IsButtonClicked(buttons, 0))
+			{
+				nextScene = title;
+			}
+			break;
+		case howtoplay:
+			//遊び方説明画面
 
 			//ボタンを押した時の処理
 			if (IsButtonClicked(buttons, 0))
@@ -584,6 +632,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				WIN_WIDTH / 2, 0,
 				"\n\nビジュアルアドバイザー\n　てらぺた\n\nエグゼクティブプロデューサー\n　てらぺた\n\nディレクター\n　てらぺた\n\nかいはつ\n　てらぺたゲームズ\n　チームGJ4\n\n\nTERAPETA GAMES / TEAM GJ4\nAll Rights Reserved.",
 				GetColor(0, 0, 0));
+			break;
+		case howtoplay:
+			DrawGraph(0, 0, operationGraph, true);
 			break;
 		}
 
