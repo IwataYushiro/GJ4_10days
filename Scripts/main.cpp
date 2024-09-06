@@ -276,6 +276,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	const int logoGraph = LoadGraph("Resources/Textures/TERAPETAGAMES_logo.png");
 	//タイトル画面(タイトル画面からシューティングゲーム)とBGM
 	const int titleGraph = LoadGraph("Resources/Textures/title.png");
+	const int operationGraph = LoadGraph("Resources/Textures/sousa.png");
 	//クリア画面(シューティングゲームからクリア画面)とBGM
 	const int clearGraph = LoadGraph("Resources/Textures/clear.png");
 	//自機
@@ -465,6 +466,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//タイトルロゴ
 			DrawGraph(0, 0, titleGraph, true);
+			DrawGraph(0, 0, operationGraph, true);
 			//権利表示
 			DrawString(
 				WIN_WIDTH / 7 * 3, WIN_HEIGHT - (FONT_SIZE * 2 + 10), "2024 TERAPETA GAMES",
