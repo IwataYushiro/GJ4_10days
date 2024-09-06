@@ -153,7 +153,7 @@ void ConstructMap(vector<vector<int>> tileMap, const int tileScale, const int ti
 	for (int i = 0; i < tileMap.size(); i++) {
 		for (int j = 0; j < tileMap[i].size(); j++) {
 			if (tileMap[i][j] != 0) {
-				blocks.push_back(GameObject{ rect{ j * (float)tileScale + (float)tileScale / 2, i * (float)tileScale + (float)tileScale / 2, (float)tileScale, (float)tileScale }, tile, graphScale });
+				blocks.push_back(GameObject{ Rect{ j * (float)tileScale + (float)tileScale / 2, i * (float)tileScale + (float)tileScale / 2, (float)tileScale, (float)tileScale }, tile, graphScale });
 			}
 		}
 	}
@@ -165,7 +165,7 @@ void ConstructMap(vector<vector<int>> tileMap, const int tileScale, const int ti
 ///<para>r = 矩形</para>
 ///<para>p = 点</para>
 /// </summary>
-bool HitRectAndPoint(rect r, Vector2D p)
+bool HitRectAndPoint(Rect r, Vector2D p)
 {
 	return r.x + r.w >= p.x && r.x - r.w <= p.x
 		&& r.y + r.h >= p.y && r.y - r.h <= p.y;
@@ -176,7 +176,7 @@ bool HitRectAndPoint(rect r, Vector2D p)
 ///<para>...</para>
 ///<para>a,b = 判定を行う２つの矩形</para>
 /// </summary>
-bool HitRectAndRect(rect a, rect b) {
+bool HitRectAndRect(Rect a, Rect b) {
 	return a.x - a.w * 0.5 <= b.x + b.w * 0.5
 		&& a.x + a.w * 0.5 >= b.x - b.w * 0.5
 		&& a.y - a.h * 0.5 <= b.y + b.h * 0.5
@@ -189,9 +189,9 @@ bool HitRectAndRect(rect a, rect b) {
 ///<para>obj = 判定を取るオブジェクト</para>
 ///<para>wall =触れている地形ブロック</para>
 /// </summary>
-Vector2D CollisionInfoRectAndRect(GameObject obj, rect wall) {
+Vector2D CollisionInfoRectAndRect(GameObject obj, Rect wall) {
 	Vector2D ret = Vector2D{ 0,0 };
-	obj.entity = rect{ (float)obj.beforePos.x,(float)obj.beforePos.y,obj.entity.w,obj.entity.h };
+	obj.entity = Rect{ (float)obj.beforePos.x,(float)obj.beforePos.y,obj.entity.w,obj.entity.h };
 	if (abs(wall.y - obj.entity.y) * (wall.w + obj.beforeSca.x) < abs(wall.x - obj.entity.x) * (wall.h + obj.beforeSca.y)) {
 		if (obj.entity.x <= wall.x) {
 			ret.x = 1;
@@ -217,7 +217,7 @@ Vector2D CollisionInfoRectAndRect(GameObject obj, rect wall) {
 ///<para>obj = 押し戻されるオブジェクト</para>
 ///<para>wall = objを押し戻す地形ブロック</para>
 /// </summary>
-void CollisionRectAndRect(GameObject& obj, rect wall) {
+void CollisionRectAndRect(GameObject& obj, Rect wall) {
 	if (CollisionInfoRectAndRect(obj, wall).x != 0) {
 		if (obj.entity.x <= wall.x) {
 			obj.entity.x -= (obj.entity.x + obj.entity.w / 2.0) - (wall.x - wall.w / 2.0);
@@ -250,28 +250,32 @@ void collideWall(RigidBody& rgd, vector<GameObject> blocks) {
 			hittedBlocks.push_back(blocks[i]);
 		}
 	}
-	for (int i = 0; i < hittedBlocks.size(); i++) {
-		float dist = -1;
+	while (hittedBlocks.size() > 0) {
+		float dist = 0;
 		int target = 0;
-		/*for (int j = 0; j < hittedBlocks.size(); j++) {
-			if (VectorScale(Vector2D{ rgd.gameObject.entity.x ,rgd.gameObject.entity.y }, Vector2D{ hittedBlocks[j].entity.x ,hittedBlocks[j].entity.y }) < dist || dist < 0) {
-				dist = VectorScale(Vector2D{ rgd.gameObject.entity.x ,rgd.gameObject.entity.y }, Vector2D{ hittedBlocks[j].entity.x ,hittedBlocks[j].entity.y });
+		for (int j = 0; j < hittedBlocks.size(); j++) {
+			int currentDist =
+				VectorScale(Vector2D{ rgd.gameObject.entity.x ,rgd.gameObject.entity.y }, Vector2D{ hittedBlocks[j].entity.x ,hittedBlocks[j].entity.y });
+			if (currentDist < dist || j == 0) {
+				dist = currentDist;
 				target = j;
 			}
-		}*/
-		CollisionRectAndRect(rgd.gameObject, hittedBlocks[i].entity);
-		if ((CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[i].entity).x == 1 && rgd.movement.x > 0)
-			|| (CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[i].entity).x == -1 && rgd.movement.x < 0)) {
-			rgd.movement.x *= 0.3;
 		}
-		if ((CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[i].entity).y == 1 && rgd.movement.y > 0)
-			|| (CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[i].entity).y == -1 && rgd.movement.y < 0)) {
-			rgd.movement.y *= 0.3;
+		if (HitRectAndRect(rgd.gameObject.entity, hittedBlocks[target].entity)) {
+			CollisionRectAndRect(rgd.gameObject, hittedBlocks[target].entity);
+			if ((CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[target].entity).x == 1 && rgd.movement.x > 0)
+				|| (CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[target].entity).x == -1 && rgd.movement.x < 0)) {
+				//rgd.movement.x *= 0.3;
+			}
+			if ((CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[target].entity).y == 1 && rgd.movement.y > 0)
+				|| (CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[target].entity).y == -1 && rgd.movement.y < 0)) {
+				rgd.movement.y *= 0.3;
+			}
+			if (CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[target].entity).y == 1) {
+				rgd.beforeLanding = 3;
+			}
 		}
-		if (CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[i].entity).y == 1) {
-			rgd.beforeLanding = 3;
-		}
-		//hittedBlocks.erase(hittedBlocks.begin() + i);
+		hittedBlocks.erase(hittedBlocks.begin() + target);
 	}
 }
 

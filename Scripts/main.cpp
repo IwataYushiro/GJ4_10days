@@ -7,9 +7,9 @@
 const char TITLE[] = "GJ4_Gamejam";
 
 //ブロックの大きさ
-const int BLOCK_RADIUS = 128;
+const int BLOCK_RADIUS = 64;
 //横列の数
-const int PLAYPART_WIDTH = 7;
+const int PLAYPART_WIDTH = 14;
 //1区画の縦の長さ
 const int PLAYPART_HEIGHT = 100;
 //UIライン
@@ -23,6 +23,23 @@ const int WIN_HEIGHT = 720;
 //フォントのサイズ
 const int FONT_SIZE = 24;
 
+enum Scene
+{
+	logo,
+	title,
+	playpart,
+	credit,
+};
+
+enum BlockType
+{
+	weak,
+	sand,
+	frame,
+	obstacle,
+	lethal,
+};
+
 struct MouseInputData {
 	Vector2D position = { 0, 0 };
 	Vector2D pin = { 0, 0 };
@@ -31,7 +48,7 @@ struct MouseInputData {
 };
 
 struct Button {
-	rect entity;
+	Rect entity;
 	string text;
 	string eText;
 	bool toggleEnabled;
@@ -39,19 +56,18 @@ struct Button {
 	int status;
 };
 
-struct Player
+struct Block
+{
+	RigidBody rigidBody;
+	BlockType blockType;
+	bool breaked = false;
+};
+
+struct LiveEntity
 {
 	RigidBody rigidBody;
 	bool direction;
 	int stuckFrameCount;
-};
-
-enum Scene
-{
-	logo,
-	title,
-	playpart,
-	credit,
 };
 
 Vector2D GetMousePositionToV2D()
@@ -198,44 +214,44 @@ bool IsButtonClicked(vector<Button>& buttons, int buttonIndex)
 	return buttons.size() > buttonIndex && buttons[buttonIndex].status == 3;
 }
 
-void PlayerUpdate(Player* player, std::vector<GameObject> blocks)
+void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 {
 	//物理挙動
-	RigidBodyUpdate(player->rigidBody, { 0,1 }, { 0.5,1 }, blocks);
+	RigidBodyUpdate(liveEntity->rigidBody, { 0,1 }, { 0.5,1 }, blocks);
 	//着地していたら
-	if (player->rigidBody.landing)
+	if (liveEntity->rigidBody.landing)
 	{
 		//しばらく前方に進めなければ反転
-		if ((player->direction
-			&& player->rigidBody.gameObject.beforePos.x >= player->rigidBody.gameObject.entity.x)
-			|| (!player->direction
-				&& player->rigidBody.gameObject.beforePos.x <= player->rigidBody.gameObject.entity.x))
+		if ((liveEntity->direction
+			&& liveEntity->rigidBody.gameObject.beforePos.x >= liveEntity->rigidBody.gameObject.entity.x)
+			|| (!liveEntity->direction
+				&& liveEntity->rigidBody.gameObject.beforePos.x <= liveEntity->rigidBody.gameObject.entity.x))
 		{
-			player->stuckFrameCount++;
+			liveEntity->stuckFrameCount++;
 		}
 		else
 		{
-			player->stuckFrameCount--;
+			liveEntity->stuckFrameCount--;
 		}
-		player->stuckFrameCount = min(max(0, player->stuckFrameCount), 3);
+		liveEntity->stuckFrameCount = min(max(0, liveEntity->stuckFrameCount), 3);
 
-		if (player->stuckFrameCount >= 3)
+		if (liveEntity->stuckFrameCount >= 3)
 		{
-			player->direction = !player->direction;
-			player->stuckFrameCount = 0;
+			liveEntity->direction = !liveEntity->direction;
+			liveEntity->stuckFrameCount = 0;
 		}
 
 		//前進
 		float playerMoveForce = 5;
-		if (!player->direction)
+		if (!liveEntity->direction)
 		{
 			playerMoveForce *= -1;
 		}
-		player->rigidBody.movement.x += playerMoveForce;
+		liveEntity->rigidBody.movement.x += playerMoveForce;
 	}
 	else
 	{
-		player->stuckFrameCount = 0;
+		liveEntity->stuckFrameCount = 0;
 	}
 }
 
@@ -279,7 +295,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//クリア画面(シューティングゲームからクリア画面)とBGM
 	const int clearGraph = LoadGraph("Resources/Textures/clear.png");
 	//自機
-	const int playerSprite = LoadGraph("Resources/Textures/napnose.png");
+	const int playerSprite = LoadGraph("Resources/Textures/frameBlock.png");
+	//ブロック各種
+	const int blocksSprite[] = {
+		LoadGraph("Resources/Textures/weakBlock.png"),
+		LoadGraph("Resources/Textures/sandBlock.png"),
+		LoadGraph("Resources/Textures/frameBlock.png"),
+		LoadGraph("Resources/Textures/unTappableBlock.png"),
+		LoadGraph("Resources/Textures/lethalBlock.png"),
+	};
 
 	//ボタンを押す音
 	const int buttonPushSound = LoadSoundMem("Resources/SE/buttonPush.wav");
@@ -302,14 +326,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	const Vector2D mapScale = { PLAYPART_WIDTH,PLAYPART_HEIGHT };
 
-	Player player = Player{ RigidBody{ GameObject{ rect{0,0,64,64}, playerSprite} } };
+	LiveEntity player = LiveEntity{ RigidBody{ GameObject{ Rect{0,0,64,64}, playerSprite} } };
 	vector<GameObject> edgeWall = {
-		GameObject{rect{-WIN_WIDTH / 2,0,0,WIN_HEIGHT}},
-		GameObject{rect{-WIN_WIDTH / 2 + GAME_LINE,0,0,WIN_HEIGHT}},
-		GameObject{rect{0,-WIN_HEIGHT / 2,WIN_WIDTH,0}},
-		GameObject{rect{0,WIN_HEIGHT / 2,WIN_WIDTH,0}},
+		GameObject{Rect{-WIN_WIDTH / 2,0,0,WIN_HEIGHT}},
+		GameObject{Rect{-WIN_WIDTH / 2 + GAME_LINE,0,0,WIN_HEIGHT}},
+		GameObject{Rect{0,-WIN_HEIGHT / 2,WIN_WIDTH,0}},
+		GameObject{Rect{0,WIN_HEIGHT / 2,WIN_WIDTH,0}},
 	};
-	vector<vector<int>> map = { {} };
+	vector<vector<BlockType>> map = { {lethal,obstacle} };
+	vector<Block> blocks = {};
 
 
 	// 最新のキーボード情報用
@@ -374,9 +399,23 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				//プレイパート
 
 				//自機を初期座標へ
-				player = Player{ RigidBody{ GameObject{ rect{-WIN_WIDTH / 2 + GAME_LINE / 2,0,128,128}, playerSprite} } };
-				break;
-			default:
+				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 64,64,64}, playerSprite} } };
+				//ブロックを生成
+				for (int i = 0; i < PLAYPART_HEIGHT; i++)
+				{
+					for (int j = 0; j < PLAYPART_WIDTH; j++)
+					{
+						BlockType currentBlockType = (BlockType)(rand() % 5);
+						if (i == 0)
+						{
+							currentBlockType = weak;
+						}
+
+						blocks.push_back(Block{ RigidBody{GameObject{
+							Rect{(float)-WIN_WIDTH / 2 + BLOCK_RADIUS / 2 + BLOCK_RADIUS * j,(float)BLOCK_RADIUS * i,BLOCK_RADIUS,BLOCK_RADIUS}
+						}},currentBlockType });
+					}
+				}
 				break;
 			}
 		}
@@ -389,8 +428,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//スタートボタンとクレジットボタン
 			buttons = {
-				Button{rect{WIN_WIDTH / 2, WIN_HEIGHT / 4 * 3,200,100},"スタート\n","START\n"},
-				Button{rect{140, 60,130,50},"クレジット\n","CREDITS\n"},
+				Button{Rect{WIN_WIDTH / 2, WIN_HEIGHT / 4 * 3,200,100},"スタート\n","START\n"},
+				Button{Rect{140, 60,130,50},"クレジット\n","CREDITS\n"},
 			};
 			break;
 		case playpart:
@@ -398,7 +437,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//ポーズボタン
 			buttons = {
-				Button{rect{70, 60,60,50},"ﾎﾟｰｽﾞ\n","PAUSE\n"},
+				Button{Rect{70, 60,60,50},"ﾎﾟｰｽﾞ\n","PAUSE\n"},
 			};
 			break;
 		case credit:
@@ -406,7 +445,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//タイトルに戻るボタン
 			buttons = {
-				Button{rect{140, 60,130,50},"もどる\n","RETURN\n"},
+				Button{Rect{140, 60,130,50},"もどる\n","RETURN\n"},
 			};
 			break;
 		}
@@ -434,16 +473,26 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			break;
 		case playpart:
 			//プレイパート
-
-			//自機を更新
-			PlayerUpdate(&player, edgeWall);
-
-			//ボタンを押した時の処理
-			if (IsButtonClicked(buttons, 0))
-			{
-				nextScene = title;
+		{
+			//全てのブロックを更新
+			for (int i = 0; i < blocks.size(); i++) {
+				blocks[i].rigidBody.gameObject.graphNum = blocksSprite[blocks[i].blockType];
 			}
-			break;
+
+			vector<GameObject> liveEntityWalls = edgeWall;
+			for (int i = 0; i < blocks.size(); i++) {
+				liveEntityWalls.push_back(blocks[i].rigidBody.gameObject);
+			}
+			//自機を更新
+			LiveEntityUpdate(&player, liveEntityWalls);
+		}
+
+		//ボタンを押した時の処理
+		if (IsButtonClicked(buttons, 0))
+		{
+			nextScene = title;
+		}
+		break;
 		case credit:
 			//クレジット画面
 
@@ -452,8 +501,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			{
 				nextScene = title;
 			}
-			break;
-		default:
 			break;
 		}
 
@@ -473,6 +520,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		case playpart:
 			//プレイパート
 
+			//全てのブロックを描画
+			for (int i = 0; i < blocks.size(); i++) {
+				RenderObject(blocks[i].rigidBody.gameObject, Vector2D{ -WIN_WIDTH / 2,WIN_HEIGHT / 2 });
+			}
 			//自機を描画
 			RenderObject(player.rigidBody.gameObject, Vector2D{ -WIN_WIDTH / 2,WIN_HEIGHT / 2 });
 			//このラインからはUIゾーンなのでいっそここにボックスUIおいてもいいや
@@ -489,7 +540,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				"プログラマー\n　鰯ユウ\n　神無月\n\nチーフプログラマー\n　てらぺた\n\nディレクター\n　てらぺた\n",
 				GetColor(0, 0, 0));
 			break;
-
 		}
 
 		//全てのボタンを描画

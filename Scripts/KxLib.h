@@ -28,7 +28,7 @@ struct Vector2D {
 ///<para>x,y = 矩形の中心座標</para>
 ///<para>w,h = 矩形の横幅,高さ</para>
 ///</summary>
-struct rect
+struct Rect
 {
 	float x;
 	float y;
@@ -47,7 +47,7 @@ struct rect
 ///<para>beforeSca = １フレーム前の大きさを記憶する場所、初期化する必要なし</para>
 /// </summary>
 struct GameObject {
-	rect entity;
+	Rect entity;
 	int graphNum;
 	float graphScale = 1;
 	float rot = 0;
@@ -176,8 +176,8 @@ void ConstructMap(vector<vector<int>> tileMap, const int tileScale, const int ti
 ///<para>...</para>
 ///<para>a,b = 判定を行う２つの矩形</para>
 /// </summary>
-bool HitRectAndRect(rect a, rect b);
-bool HitRectAndPoint(rect r, Vector2D p);
+bool HitRectAndRect(Rect a, Rect b);
+bool HitRectAndPoint(Rect r, Vector2D p);
 
 ///<summary>
 ///どの部分が対象の矩形に当たっているか
@@ -185,14 +185,14 @@ bool HitRectAndPoint(rect r, Vector2D p);
 ///<para>obj = 判定を取るオブジェクト</para>
 ///<para>wall =触れている地形ブロック</para>
 /// </summary>
-Vector2D CollisionInfoRectAndRect(GameObject obj, rect wall);
+Vector2D CollisionInfoRectAndRect(GameObject obj, Rect wall);
 ///<summary>
 ///対象の矩形に対して押し戻す
 ///<para>...</para>
 ///<para>obj = 押し戻されるオブジェクト</para>
 ///<para>wall = objを押し戻す地形ブロック</para>
 /// </summary>
-void CollisionRectAndRect(GameObject& obj, rect wall);
+void CollisionRectAndRect(GameObject& obj, Rect wall);
 
 ///<summary>
 ///RigidBodyを配列内の全ての地形ブロックに対して押し戻す
