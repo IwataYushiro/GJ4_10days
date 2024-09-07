@@ -306,6 +306,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		LoadGraph("Resources/Textures/unTappableBlock.png"),
 		LoadGraph("Resources/Textures/lethalBlock.png"),
 	};
+	//背景
+	const int backgroundSprite = LoadGraph("Resources/Textures/protobackground.png");
 
 	//ビットマップフォント用の数字画像とタイマー
 	const int zeroGraph = LoadGraph("Resources/Textures/timer0.png");
@@ -658,7 +660,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			break;
 		case playpart:
 			//プレイパート
-
+			//まずは背景を描画
+			DrawGraph(0, 0, backgroundSprite, true);
 			//全てのブロックを描画
 			for (int i = 0; i < blocks.size(); i++) {
 				RenderObject(blocks[i].rigidBody.gameObject, camPosition + camPosOffset);
