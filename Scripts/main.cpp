@@ -356,6 +356,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	//自機
 	LiveEntity player = LiveEntity{ RigidBody{ GameObject{ Rect{0,0,64,64}, playerSprite} } };
+	int scrool = player.rigidBody.gameObject.entity.y;
 	//自機がフィールド外に出ないための壁
 	vector<GameObject> edgeWall = {
 		GameObject{Rect{-WIN_WIDTH / 2,0,0,WIN_HEIGHT}},
@@ -577,6 +578,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 				//カメラ追従
 				camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.y };
+				//スクロール
+				scrool = int(player.rigidBody.gameObject.entity.y) % WIN_HEIGHT;
 
 				//ボタンを押した時の処理
 				if (IsButtonClicked(buttons, 0))
@@ -660,8 +663,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			break;
 		case playpart:
 			//プレイパート
+
 			//まずは背景を描画
-			DrawGraph(0, 0, backgroundSprite, true);
+			DrawGraph(0, scrool - WIN_HEIGHT, backgroundSprite, true);
 			//全てのブロックを描画
 			for (int i = 0; i < blocks.size(); i++) {
 				RenderObject(blocks[i].rigidBody.gameObject, camPosition + camPosOffset);
@@ -684,6 +688,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			else if (timerT1 == 9) { DrawGraph(950, 60, nineGraph, true); }
 
 			DrawFormatString(800, 300, GetColor(122, 112, 122), "%d", timer);
+			DrawFormatString(1200, 500, GetColor(122, 112, 122), "%d", scrool);
 
 			break;
 		case credit:
