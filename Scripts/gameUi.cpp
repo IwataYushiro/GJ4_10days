@@ -37,9 +37,12 @@ void gameUi::Update()
 		timerT2++;
 		timerT1 = 0;
 	}
-
-
-
+	
+	//Ç«Ç±Ç‹Ç≈å@Ç¡ÇΩÇ©
+	if (digTimerT1 >= 10) {
+		digTimerT2++;
+		digTimerT1 = 0;
+	}
 }
 
 void gameUi::Draw()
@@ -72,7 +75,7 @@ void gameUi::Draw()
 
 	//écÇËê[ëwâΩmÇ©ÇÃUI
 	//1ÇÃà 
-	if (digTimerT1 == 0) { DrawGraph(1050, 350, zeroGraph, true); }
+	if (digTimerT1 <= 0) { DrawGraph(1050, 350, zeroGraph, true); }
 	else if (digTimerT1 == 1) { DrawGraph(1050, 350, oneGraph, true); }
 	else if (digTimerT1 == 2) { DrawGraph(1050, 350, twoGraph, true); }
 	else if (digTimerT1 == 3) { DrawGraph(1050, 350, threeGraph, true); }

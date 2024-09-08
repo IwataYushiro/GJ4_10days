@@ -561,7 +561,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.y };
 				//スクロール(自機がWIN_HEIGHT超えたら元に戻すって感じでやった)
 				scrool = int(player.rigidBody.gameObject.entity.y) % WIN_HEIGHT;
-
+				gameui_->digTimerT1 = (player.rigidBody.gameObject.entity.y + player.rigidBody.gameObject.entity.h) / player.rigidBody.gameObject.entity.h;
 				//ボタンを押した時の処理
 				if (IsButtonClicked(buttons, 0))
 				{
