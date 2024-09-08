@@ -240,6 +240,7 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 		if (liveEntity->stuckFrameCount >= 3)
 		{
 			liveEntity->direction = !liveEntity->direction;
+			liveEntity->rigidBody.gameObject.dir = !liveEntity->rigidBody.gameObject.dir;
 			liveEntity->stuckFrameCount = 0;
 		}
 
@@ -303,7 +304,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//クリア画面(シューティングゲームからクリア画面)とBGM
 	const int clearGraph = LoadGraph("Resources/Textures/clear.png");
 	//自機
-	const int playerSprite = LoadGraph("Resources/Textures/frameBlock.png");
+	const int playerSprite = LoadGraph("Resources/Textures/protoplayer.png");
 	//ブロック各種
 	const int blocksSprite[] = {
 		LoadGraph("Resources/Textures/weakBlock.png"),
