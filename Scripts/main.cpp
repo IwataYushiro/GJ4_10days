@@ -657,8 +657,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			DrawBox(GAME_LINE, 0, WIN_WIDTH, WIN_HEIGHT, GetColor(0xff, 0xff, 0xff), TRUE);
 
 			gameui_->Draw();
-			DrawFormatString(800, 300, GetColor(122, 112, 122), "%d", gameui_->autotimer);
-
+			DrawFormatString(1150, 155, GetColor(0, 0, 0), "%d", gameui_->autotimer);
+			DrawString(1150,445,"m",GetColor(0, 0, 0));
 
 			//スクロールチェック用
 			DrawFormatString(1200, 500, GetColor(122, 112, 122), "%d", scrool);
