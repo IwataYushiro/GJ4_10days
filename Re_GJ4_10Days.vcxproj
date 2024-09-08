@@ -19,10 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Scripts\gameUi.cpp" />
     <ClCompile Include="Scripts\KxLib.cpp" />
     <ClCompile Include="Scripts\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Scripts\gameUi.h" />
     <ClInclude Include="Scripts\KxLib.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
