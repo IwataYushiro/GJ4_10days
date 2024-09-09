@@ -606,7 +606,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				//ƒJƒƒ‰’Ç]
 				camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.y };
 
-				gameui_->digTimerT1 = (player.rigidBody.gameObject.entity.y + player.rigidBody.gameObject.entity.h) / player.rigidBody.gameObject.entity.h;
+				gameui_->digTimerT1 = (player.rigidBody.gameObject.entity.y + player.rigidBody.gameObject.entity.h * 2.0f) / (player.rigidBody.gameObject.entity.h * 2.0f);
+				
 				//ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚½‚Ìˆ—
 				if (IsButtonClicked(buttons, 0))
 				{
