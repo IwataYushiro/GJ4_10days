@@ -18,8 +18,8 @@ using namespace std;
 ///<para>x,y = ベクトルのx成分,y成分</para>
 ///</summary>
 struct Vector2D {
-	double x;
-	double y;
+	float x;
+	float y;
 };
 
 ///<summary>
@@ -76,7 +76,7 @@ struct RigidBody {
 ///<para>...</para>
 ///<para>a,b = ２点の座標</para>
 /// </summary>
-double VectorScale(Vector2D a, Vector2D b);
+float VectorScale(Vector2D a, Vector2D b);
 
 ///<summary>
 ///２点間のベクトルを正規化
@@ -115,7 +115,7 @@ float RadToDegree(float rad);
 ///<para>...</para>
 ///<para>rad = ラジアン角</para>
 /// </summary>
-Vector2D RadToPos(double rad);
+Vector2D RadToPos(float rad);
 
 ///<summary>
 ///<para>第一引数の座標から第二引数の座標を向いた時の角度</para>
@@ -123,7 +123,7 @@ Vector2D RadToPos(double rad);
 ///<para>nowPos = 基準となる座標</para>
 ///<para>targetPos = 向く対象の座標</para>
 /// </summary>
-double PosToRad(Vector2D nowPos, Vector2D targetPos);
+float PosToRad(Vector2D nowPos, Vector2D targetPos);
 
 ///<summary>
 ///<para>シーンを切り替える準備（シーンを切り替える処理をする場所に置く）</para>
