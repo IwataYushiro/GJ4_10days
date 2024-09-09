@@ -8,7 +8,8 @@ void gameUi::Reset()
 	timerT3 = 0;
 
 	digTimerT1 = 0;
-	digTimerT2 = 0;
+	digTimerT10 = 0;
+	digTimerT100 = 0;
 
 	blockCountT1 = 0;
 	blockCountT2 = 0;
@@ -47,9 +48,9 @@ void gameUi::Update()
 
 	//‚Ç‚±‚Ü‚ÅŒ@‚Á‚½‚©
 	//10‚ÌŒ…
-	digTimerT2 = digTimerT1 / 10;
+	digTimerT10 = digTimerT1 / 10;
 	//100‚ÌŒ…
-	digTimerT100 = digTimerT2 / 10;
+	digTimerT100 = digTimerT10 / 10;
 }
 
 void gameUi::Draw()
@@ -94,7 +95,7 @@ void gameUi::Draw()
 	//1‚ÌˆÊ
 	DrawDigUI(digTimerT1, 1050);
 	//10‚ÌˆÊ
-	DrawDigUI(digTimerT2, 1000);
+	DrawDigUI(digTimerT10, 1000);
 	//100‚ÌˆÊ
 	DrawDigUI(digTimerT100, 950);
 

@@ -47,7 +47,7 @@ public:
 	//1‚ÌˆÊ
 	int digTimerT1 = 0;
 	//10‚ÌˆÊ
-	int digTimerT2 = 0;
+	int digTimerT10 = 0;
 	//100‚ÌˆÊ
 	int digTimerT100 = 0;
 	//‚±‚±‚Ü‚Å

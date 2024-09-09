@@ -208,7 +208,7 @@ void RigidBodyUpdate(RigidBody& rgd, Vector2D gravity, Vector2D drag, vector<Gam
 	rgd.gameObject.beforeSca = Vector2D{ rgd.gameObject.entity.scale.x,rgd.gameObject.entity.scale.y };
 }
 
-int HitRectAndCircle(Rect rect, int x, int y, int radius)
+bool HitRectAndCircle(Rect rect, int x, int y, int radius)
 {
 	int right = rect.position.x + rect.scale.x;
 	int left = rect.position.x - rect.scale.x;
