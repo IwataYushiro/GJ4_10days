@@ -64,6 +64,7 @@ struct Block
 	BlockType blockType;
 	bool breaked = false;
 	unsigned int landingBlockIndex = 0;
+	float latestLandingHeight = 0;
 	string status = "";
 };
 
@@ -441,6 +442,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 							Rect{(float)-WIN_WIDTH / 2 + BLOCK_DIAMETER / 2 + BLOCK_DIAMETER * j,(float)BLOCK_DIAMETER * i,
 							BLOCK_DIAMETER / 2,BLOCK_DIAMETER / 2}
 						}},currentBlockType });
+						blocks.back().latestLandingHeight = blocks.back().rigidBody.gameObject.entity.position.y;
 					}
 				}
 				break;
@@ -554,10 +556,21 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					{
 						//支えがある場合は軽量処理
 						blocks[i].rigidBody.gameObject.entity.position.y = targetPos.y - BLOCK_DIAMETER;
+						blocks[i].latestLandingHeight = blocks[i].rigidBody.gameObject.entity.position.y;
+						//壊れる準備が出来ている状態で壊せないブロックが着地していたら壊れる
+						if (blocks[i].blockType == untappableblock || blocks[i].blockType == lethalblock)
+						{
+							if (blocks[i].status == "prepareBreak")
+							{
+								blocks[i].breaked = true;
+							}
+						}
 					}
 					else
 					{
 						//支えを無くしたら精密処理
+
+						//下のブロックを探す
 						for (int j = 0; j < blocks.size(); j++)
 						{
 							pos = blocks[i].rigidBody.gameObject.entity.position;
@@ -567,6 +580,25 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 							{
 								blocks[i].rigidBody.gameObject.entity.position.y = targetPos.y - BLOCK_DIAMETER;
 								blocks[i].landingBlockIndex = j;
+
+								break;
+							}
+						}
+
+						//壊せないブロック同士が接触したら壊れる準備
+						if (blocks[i].blockType == untappableblock || blocks[i].blockType == lethalblock)
+						{
+							for (int j = 0; j < blocks.size(); j++)
+							{
+								pos = blocks[i].rigidBody.gameObject.entity.position;
+								targetPos = blocks[j].rigidBody.gameObject.entity.position;
+								if (i != j && blocks[i].rigidBody.gameObject.entity.position.y - blocks[i].latestLandingHeight > BLOCK_DIAMETER / 1.1f
+									&& (blocks[j].blockType == untappableblock || blocks[j].blockType == lethalblock)
+									&& VectorScale(pos, targetPos) <= BLOCK_DIAMETER * 1.2f)
+								{
+									blocks[i].status = "prepareBreak";
+									blocks[j].status = "prepareBreak";
+								}
 							}
 						}
 					}
@@ -574,7 +606,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					if (blocks[i].blockType == sandblock)
 					{
 						//砂ブロックが自機に触れたら崩れる準備
-						if (HitRectAndRect(blocks[i].rigidBody.gameObject.entity, player.rigidBody.gameObject.entity))
+						if (HitRectAndRect(blocks[i].rigidBody.gameObject.entity, player.rigidBody.gameObject.entity)
+							&& VectorScale(blocks[i].rigidBody.gameObject.entity.position, player.rigidBody.gameObject.entity.position) <= BLOCK_DIAMETER)
 						{
 							blocks[i].status = "touched";
 						}
@@ -599,6 +632,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 							}
 						}
 					}
+
 					//クリックされたら消す準備（破壊可能なブロックのみ）
 					if (blocks[i].blockType != untappableblock && blocks[i].blockType != lethalblock
 						&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.position + (camPosition + camPosOffset))
@@ -633,9 +667,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				//カメラ追従
 				camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.position.y };
 
+
 				vector<GameObject> edgeWall = {
-					GameObject{Rect{Vector2D{-WIN_WIDTH / 2,0} + camPosition,{0,WIN_HEIGHT} }},
-					GameObject{Rect{Vector2D{-WIN_WIDTH / 2 + GAME_LINE,0} + camPosition,{0,WIN_HEIGHT}}},
+					GameObject{Rect{Vector2D{-WIN_WIDTH / 2,0} + camPosition,{0,WIN_HEIGHT} },playerSprite},
+					GameObject{Rect{Vector2D{-WIN_WIDTH / 2 + GAME_LINE,0} + camPosition,{0,WIN_HEIGHT}},playerSprite},
 				};
 
 				gameui_->digTimerT1 = (player.rigidBody.gameObject.entity.position.y + player.rigidBody.gameObject.entity.scale.y * 2.0f) / (player.rigidBody.gameObject.entity.scale.y * 2.0f);
