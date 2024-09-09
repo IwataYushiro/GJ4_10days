@@ -778,7 +778,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//スクロールチェック用
 			DrawFormatString(1200, 500, GetColor(122, 112, 122), "%d", -((int)camPosition.y % WIN_HEIGHT));
-			DrawFormatString(1150, 180, GetColor(0, 0, 0), "%d", gameui_->digTimerT2);
+			DrawFormatString(1150, 180, GetColor(0, 0, 0), "%d", gameui_->digTimerT10);
 			DrawFormatString(1200, 180, GetColor(0, 0, 0), "%d", gameui_->digTimerT1);
 			break;
 		case credit:
