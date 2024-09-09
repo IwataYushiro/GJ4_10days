@@ -40,7 +40,11 @@ void gameUi::Update()
 		timerT2++;
 		timerT1 = 0;
 	}
-	
+	if (timerT2 >= 10) {
+		timerT3++;
+		timerT2 = 0;
+	}
+
 	//Ç«Ç±Ç‹Ç≈å@Ç¡ÇΩÇ©
 	//10ÇÃåÖ
 	digTimerT2 = digTimerT1 / 10;
@@ -74,7 +78,17 @@ void gameUi::Draw()
 	else if (timerT2 == 7) { DrawGraph(1000, 60, sevenGraph, true); }
 	else if (timerT2 == 8) { DrawGraph(1000, 60, eightGraph, true); }
 	else if (timerT2 == 9) { DrawGraph(1000, 60, nineGraph, true); }
-
+	//100ÇÃà 
+	if (timerT3 == 0) { DrawGraph(950, 60, zeroGraph, true); }
+	else if (timerT3 == 1) { DrawGraph(950, 60, oneGraph, true); }
+	else if (timerT3 == 2) { DrawGraph(950, 60, twoGraph, true); }
+	else if (timerT3 == 3) { DrawGraph(950, 60, threeGraph, true); }
+	else if (timerT3 == 4) { DrawGraph(950, 60, fourGraph, true); }
+	else if (timerT3 == 5) { DrawGraph(950, 60, fiveGraph, true); }
+	else if (timerT3 == 6) { DrawGraph(950, 60, sixGraph, true); }
+	else if (timerT3 == 7) { DrawGraph(950, 60, sevenGraph, true); }
+	else if (timerT3 == 8) { DrawGraph(950, 60, eightGraph, true); }
+	else if (timerT3 == 9) { DrawGraph(950, 60, nineGraph, true); }
 
 	//écÇËê[ëwâΩmÇ©ÇÃUI
 	//1ÇÃà 
