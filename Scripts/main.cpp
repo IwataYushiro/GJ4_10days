@@ -657,8 +657,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			DrawBox(GAME_LINE, 0, WIN_WIDTH, WIN_HEIGHT, GetColor(0xff, 0xff, 0xff), TRUE);
 
 			gameui_->Draw();
+			DrawString(950, 30, "TIME", GetColor(0, 0, 0));
 			DrawFormatString(1150, 155, GetColor(0, 0, 0), "%d", gameui_->autotimer);
-			DrawString(1150,445,"m",GetColor(0, 0, 0));
+			DrawString(950, 260, "DEPTH", GetColor(0, 0, 0));
+			DrawString(1150,385,"m",GetColor(0, 0, 0));
+			DrawString(950, 500, "壊したブロック数", GetColor(0, 0, 0));
 
 			//スクロールチェック用
 			DrawFormatString(1200, 500, GetColor(122, 112, 122), "%d", scrool);
