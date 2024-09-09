@@ -48,6 +48,8 @@ public:
 	int digTimerT1 = 0;
 	//10の位
 	int digTimerT2 = 0;
+	//100の位
+	int digTimerT100 = 0;
 	//ここまで
 	////////////////////////////////////////////////////
 
@@ -62,4 +64,7 @@ public:
 	//ここまで
 	////////////////////////////////////////////////////
 
+private:
+	//深層何メートルまで進んでるかのUI描画(桁数、X軸)
+	void DrawDigUI(int digTimerRank, int uiPosX);
 };
