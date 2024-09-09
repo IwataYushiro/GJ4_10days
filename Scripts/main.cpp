@@ -63,6 +63,7 @@ struct Block
 	RigidBody rigidBody;
 	BlockType blockType;
 	bool breaked = false;
+	string status = "";
 };
 
 struct LiveEntity
@@ -438,7 +439,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						}
 
 						blocks.push_back(Block{ RigidBody{GameObject{
-							Rect{(float)-WIN_WIDTH / 2 + BLOCK_DIAMETER / 2 + BLOCK_DIAMETER * j,(float)BLOCK_DIAMETER * i,BLOCK_DIAMETER / 2,BLOCK_DIAMETER / 2}
+							Rect{(float)-WIN_WIDTH / 2 + BLOCK_DIAMETER / 2 + BLOCK_DIAMETER * j,(float)BLOCK_DIAMETER * i,
+							BLOCK_DIAMETER / 2,BLOCK_DIAMETER / 2}
 						}},currentBlockType });
 					}
 				}
@@ -542,7 +544,34 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				{
 					blocks[i].rigidBody.gameObject.graphNum = blocksSprite[blocks[i].blockType];
 
-					
+					if (blocks[i].blockType == sandblock)
+					{
+						//砂ブロックが自機に触れたら崩れる準備
+						if (HitRectAndRect(blocks[i].rigidBody.gameObject.entity, player.rigidBody.gameObject.entity))
+						{
+							blocks[i].status = "touched";
+						}
+						else
+						{
+							//崩れる準備が出来ている状態で砂ブロックが自機に触れていない状態が4フレーム（バッファのため）続いたら崩れる
+							if (blocks[i].status == "touched")
+							{
+								blocks[i].status = "prepareBreak3";
+							}
+							else if (blocks[i].status == "prepareBreak3")
+							{
+								blocks[i].status = "prepareBreak2";
+							}
+							else if (blocks[i].status == "prepareBreak2")
+							{
+								blocks[i].status = "prepareBreak";
+							}
+							else if (blocks[i].status == "prepareBreak")
+							{
+								blocks[i].breaked = true;
+							}
+						}
+					}
 					//クリックされたら消す準備（破壊可能なブロックのみ）
 					if (blocks[i].blockType != untappableblock && blocks[i].blockType != lethalblock
 						&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.position + (camPosition + camPosOffset))
