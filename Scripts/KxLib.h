@@ -234,4 +234,4 @@ void RigidBodyUpdate(RigidBody& rgd, Vector2D gravity, Vector2D drag, vector<Gam
 /// <para>y = â~ÇÃYç¿ïW</para>
 /// <para>r = â~ÇÃîºåa</para>
 /// </summary>
-int CollisionBox2Circle(int Left, int Right, int Top, int Bottom, int x, int y, int r);
+bool HitRectAndCircle(Rect rect, int x, int y, int radius);
