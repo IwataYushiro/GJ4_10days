@@ -62,4 +62,7 @@ public:
 	//ここまで
 	////////////////////////////////////////////////////
 
+private:
+	//深層何メートルまで進んでるかのUI描画(桁数、X軸)
+	void DrawDigUI(int digTimerRank, int uiPosX);
 };

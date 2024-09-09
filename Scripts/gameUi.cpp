@@ -42,10 +42,8 @@ void gameUi::Update()
 	}
 	
 	//どこまで掘ったか
-	if (digTimerT1 >= 10) {
-		digTimerT2++;
-		digTimerT1 = 0;
-	}
+	//10の桁
+	digTimerT2 = digTimerT1 / 10;
 }
 
 void gameUi::Draw()
@@ -78,27 +76,9 @@ void gameUi::Draw()
 
 	//残り深層何mかのUI
 	//1の位
-	if (digTimerT1 <= 0) { DrawGraph(1050, 290, zeroGraph, true); }
-	else if (digTimerT1 == 1) { DrawGraph(1050, 290, oneGraph, true); }
-	else if (digTimerT1 == 2) { DrawGraph(1050, 290, twoGraph, true); }
-	else if (digTimerT1 == 3) { DrawGraph(1050, 290, threeGraph, true); }
-	else if (digTimerT1 == 4) { DrawGraph(1050, 290, fourGraph, true); }
-	else if (digTimerT1 == 5) { DrawGraph(1050, 290, fiveGraph, true); }
-	else if (digTimerT1 == 6) { DrawGraph(1050, 290, sixGraph, true); }
-	else if (digTimerT1 == 7) { DrawGraph(1050, 290, sevenGraph, true); }
-	else if (digTimerT1 == 8) { DrawGraph(1050, 290, eightGraph, true); }
-	else if (digTimerT1 == 9) { DrawGraph(1050, 290, nineGraph, true); }
+	DrawDigUI(digTimerT1, 1050);
 	//10の位
-	if (digTimerT2 == 0) { DrawGraph(1000, 290, zeroGraph, true); }
-	else if (digTimerT2 == 1) { DrawGraph(1000, 290, oneGraph, true); }
-	else if (digTimerT2 == 2) { DrawGraph(1000, 290, twoGraph, true); }
-	else if (digTimerT2 == 3) { DrawGraph(1000, 290, threeGraph, true); }
-	else if (digTimerT2 == 4) { DrawGraph(1000, 290, fourGraph, true); }
-	else if (digTimerT2 == 5) { DrawGraph(1000, 290, fiveGraph, true); }
-	else if (digTimerT2 == 6) { DrawGraph(1000, 290, sixGraph, true); }
-	else if (digTimerT2 == 7) { DrawGraph(1000, 290, sevenGraph, true); }
-	else if (digTimerT2 == 8) { DrawGraph(1000, 290, eightGraph, true); }
-	else if (digTimerT2 == 9) { DrawGraph(1000, 290, nineGraph, true); }
+	DrawDigUI(digTimerT2, 1000);
 
 	//ブロックをいくつ壊したかのかのUI
 	//1の位
@@ -124,4 +104,18 @@ void gameUi::Draw()
 	else if (blockCountT2 == 8) { DrawGraph(1000, 550, eightGraph, true); }
 	else if (blockCountT2 == 9) { DrawGraph(1000, 550, nineGraph, true); }
 
+}
+
+void gameUi::DrawDigUI(int digTimerRank, int uiPosX)
+{
+	if (digTimerRank % 10 <= 0) { DrawGraph(uiPosX, 290, zeroGraph, true); }
+	else if (digTimerRank % 10 == 1) { DrawGraph(uiPosX, 290, oneGraph, true); }
+	else if (digTimerRank % 10 == 2) { DrawGraph(uiPosX, 290, twoGraph, true); }
+	else if (digTimerRank % 10 == 3) { DrawGraph(uiPosX, 290, threeGraph, true); }
+	else if (digTimerRank % 10 == 4) { DrawGraph(uiPosX, 290, fourGraph, true); }
+	else if (digTimerRank % 10 == 5) { DrawGraph(uiPosX, 290, fiveGraph, true); }
+	else if (digTimerRank % 10 == 6) { DrawGraph(uiPosX, 290, sixGraph, true); }
+	else if (digTimerRank % 10 == 7) { DrawGraph(uiPosX, 290, sevenGraph, true); }
+	else if (digTimerRank % 10 == 8) { DrawGraph(uiPosX, 290, eightGraph, true); }
+	else if (digTimerRank % 10 == 9) { DrawGraph(uiPosX, 290, nineGraph, true); }
 }

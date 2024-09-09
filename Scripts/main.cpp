@@ -618,7 +618,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				//カメラ追従
 				camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.position.y };
 
-				gameui_->digTimerT1 = (player.rigidBody.gameObject.entity.position.y + player.rigidBody.gameObject.entity.scale.y * 2.0f) / (player.rigidBody.gameObject.entity.scale.y * 2.0f);
+				gameui_->digTimerT1 = player.rigidBody.gameObject.entity.position.y / (player.rigidBody.gameObject.entity.scale.y * 2.0f);
 				
 				//ボタンを押した時の処理
 				if (IsButtonClicked(buttons, 0))
@@ -723,7 +723,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//スクロールチェック用
 			DrawFormatString(1200, 500, GetColor(122, 112, 122), "%d", -((int)camPosition.y % WIN_HEIGHT));
-
+			DrawFormatString(1150, 180, GetColor(0, 0, 0), "%d", gameui_->digTimerT2);
+			DrawFormatString(1200, 180, GetColor(0, 0, 0), "%d", gameui_->digTimerT1);
 			break;
 		case credit:
 			//クレジット画面
