@@ -22,7 +22,7 @@ Vector2D operator -(const Vector2D& v0, const Vector2D& v1)
 	return Vector2D{ v0.x - v1.x,v0.y - v1.y };
 }
 
-double VectorScale(Vector2D a, Vector2D b) {
+float VectorScale(Vector2D a, Vector2D b) {
 	return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
 }
 
@@ -41,14 +41,14 @@ float RadToDegree(float rad) {
 	return rad / PI * 180;
 }
 
-Vector2D RadToPos(double rad) {
+Vector2D RadToPos(float rad) {
 	Vector2D ret;
 	ret.x = sin(rad);
 	ret.y = -cos(rad);
 	return ret;
 }
 
-double PosToRad(Vector2D nowPos, Vector2D targetPos) {
+float PosToRad(Vector2D nowPos, Vector2D targetPos) {
 	return atan2(targetPos.x - nowPos.x, nowPos.y - targetPos.y);
 }
 

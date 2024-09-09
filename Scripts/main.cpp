@@ -78,7 +78,7 @@ Vector2D GetMousePositionToV2D()
 	int mouseX;
 	int mouseY;
 	GetMousePoint(&mouseX, &mouseY);
-	return Vector2D{ (double)mouseX, (double)mouseY };
+	return Vector2D{ (float)mouseX, (float)mouseY };
 }
 
 bool GetLeftClick()
