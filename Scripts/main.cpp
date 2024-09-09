@@ -8,13 +8,13 @@
 const char TITLE[] = "GJ4_Gamejam";
 
 //ブロックの大きさ
-const int BLOCK_RADIUS = 64;
+const int BLOCK_DIAMETER = 64;
 //横列の数
 const int PLAYPART_WIDTH = 14;
 //1区画の縦の長さ
 const int PLAYPART_HEIGHT = 100;
 //UIライン
-const int GAME_LINE = BLOCK_RADIUS * PLAYPART_WIDTH;
+const int GAME_LINE = BLOCK_DIAMETER * PLAYPART_WIDTH;
 
 // ウィンドウ横幅
 const int WIN_WIDTH = 1280;
@@ -68,8 +68,9 @@ struct Block
 struct LiveEntity
 {
 	RigidBody rigidBody;
-	bool direction;
-	int stuckFrameCount;
+	bool isLive = true;
+	bool direction = true;
+	int stuckFrameCount = 0;
 };
 
 Vector2D GetMousePositionToV2D()
@@ -220,41 +221,57 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 {
 	//物理挙動
 	RigidBodyUpdate(liveEntity->rigidBody, { 0,1 }, { 0.5,1 }, blocks);
-	//着地していたら
-	if (liveEntity->rigidBody.landing)
+
+	//生きていたら
+	if (liveEntity->isLive)
 	{
-		//しばらく前方に進めなければ反転
-		if ((liveEntity->direction
-			&& liveEntity->rigidBody.gameObject.beforePos.x >= liveEntity->rigidBody.gameObject.entity.x)
-			|| (!liveEntity->direction
-				&& liveEntity->rigidBody.gameObject.beforePos.x <= liveEntity->rigidBody.gameObject.entity.x))
+		//もしブロックの中に押し込まれたら死ぬ
+		for (int i = 0; i < blocks.size(); i++)
 		{
-			liveEntity->stuckFrameCount++;
+			if (HitRectAndPoint(blocks[i].entity,
+				Vector2D{ liveEntity->rigidBody.gameObject.entity.x,
+				liveEntity->rigidBody.gameObject.entity.y }))
+			{
+				liveEntity->isLive = false;
+			}
+		}
+
+		//着地していたら
+		if (liveEntity->rigidBody.landing)
+		{
+			//しばらく前方に進めなければ反転
+			if ((liveEntity->direction
+				&& liveEntity->rigidBody.gameObject.beforePos.x >= liveEntity->rigidBody.gameObject.entity.x)
+				|| (!liveEntity->direction
+					&& liveEntity->rigidBody.gameObject.beforePos.x <= liveEntity->rigidBody.gameObject.entity.x))
+			{
+				liveEntity->stuckFrameCount++;
+			}
+			else
+			{
+				liveEntity->stuckFrameCount--;
+			}
+			liveEntity->stuckFrameCount = min(max(0, liveEntity->stuckFrameCount), 3);
+
+			if (liveEntity->stuckFrameCount >= 3)
+			{
+				liveEntity->direction = !liveEntity->direction;
+				liveEntity->rigidBody.gameObject.dir = !liveEntity->rigidBody.gameObject.dir;
+				liveEntity->stuckFrameCount = 0;
+			}
+
+			//前進
+			float playerMoveForce = 5;
+			if (!liveEntity->direction)
+			{
+				playerMoveForce *= -1;
+			}
+			liveEntity->rigidBody.movement.x += playerMoveForce;
 		}
 		else
 		{
-			liveEntity->stuckFrameCount--;
-		}
-		liveEntity->stuckFrameCount = min(max(0, liveEntity->stuckFrameCount), 3);
-
-		if (liveEntity->stuckFrameCount >= 3)
-		{
-			liveEntity->direction = !liveEntity->direction;
-			liveEntity->rigidBody.gameObject.dir = !liveEntity->rigidBody.gameObject.dir;
 			liveEntity->stuckFrameCount = 0;
 		}
-
-		//前進
-		float playerMoveForce = 5;
-		if (!liveEntity->direction)
-		{
-			playerMoveForce *= -1;
-		}
-		liveEntity->rigidBody.movement.x += playerMoveForce;
-	}
-	else
-	{
-		liveEntity->stuckFrameCount = 0;
 	}
 }
 
@@ -343,8 +360,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	//自機
 	LiveEntity player = LiveEntity{ RigidBody{ GameObject{ Rect{0,0,64,64}, playerSprite} } };
-	//スクロール変数
-	int scrool = player.rigidBody.gameObject.entity.y;
 	//自機がフィールド外に出ないための壁
 	vector<GameObject> edgeWall = {
 		GameObject{Rect{-WIN_WIDTH / 2,0,0,WIN_HEIGHT}},
@@ -409,7 +424,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				//ポーズ解除
 				isPause = false;
 				//自機を初期座標へ
-				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 32,50,64}, playerSprite} } };
+				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 32,25,32}, playerSprite} } };
 				//ブロックを初期化、生成
 				blocks = {};
 				for (int i = 0; i < PLAYPART_HEIGHT; i++)
@@ -423,7 +438,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						}
 
 						blocks.push_back(Block{ RigidBody{GameObject{
-							Rect{(float)-WIN_WIDTH / 2 + BLOCK_RADIUS / 2 + BLOCK_RADIUS * j,(float)BLOCK_RADIUS * i,BLOCK_RADIUS,BLOCK_RADIUS}
+							Rect{(float)-WIN_WIDTH / 2 + BLOCK_DIAMETER / 2 + BLOCK_DIAMETER * j,(float)BLOCK_DIAMETER * i,BLOCK_DIAMETER / 2,BLOCK_DIAMETER / 2}
 						}},currentBlockType });
 					}
 				}
@@ -526,6 +541,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				for (int i = 0; i < blocks.size(); i++)
 				{
 					blocks[i].rigidBody.gameObject.graphNum = blocksSprite[blocks[i].blockType];
+
+					
 					//クリックされたら消す準備（破壊可能なブロックのみ）
 					if (blocks[i].blockType != untappableblock && blocks[i].blockType != lethalblock
 						&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.position + (camPosition + camPosOffset))
@@ -559,8 +576,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 				//カメラ追従
 				camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.y };
-				//スクロール(自機がWIN_HEIGHT超えたら元に戻すって感じでやった)
-				scrool = int(player.rigidBody.gameObject.entity.y) % WIN_HEIGHT;
+
 				gameui_->digTimerT1 = (player.rigidBody.gameObject.entity.y + player.rigidBody.gameObject.entity.h) / player.rigidBody.gameObject.entity.h;
 				//ボタンを押した時の処理
 				if (IsButtonClicked(buttons, 0))
@@ -646,7 +662,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//プレイパート
 
 			//まずは背景を描画(スクロール付き　画像の縦軸はWIN_HEIGHTの三倍に長くなったよ)
-			DrawGraph(0, scrool - WIN_HEIGHT, backgroundSprite, true);
+			DrawGraph(0, -((int)camPosition.y % WIN_HEIGHT) - WIN_HEIGHT, backgroundSprite, true);
 			//全てのブロックを描画
 			for (int i = 0; i < blocks.size(); i++) {
 				RenderObject(blocks[i].rigidBody.gameObject, camPosition + camPosOffset);
@@ -661,7 +677,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			DrawString(1150,445,"m",GetColor(0, 0, 0));
 
 			//スクロールチェック用
-			DrawFormatString(1200, 500, GetColor(122, 112, 122), "%d", scrool);
+			DrawFormatString(1200, 500, GetColor(122, 112, 122), "%d", -((int)camPosition.y % WIN_HEIGHT));
 
 			break;
 		case credit:
@@ -672,7 +688,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				GetColor(0, 0, 0));
 			DrawString(
 				WIN_WIDTH / 2, 0,
-				"\n\nビジュアルアドバイザー\n　てらぺた\n\nエグゼクティブプロデューサー\n　てらぺた\n\nディレクター\n　てらぺた\n\nかいはつ\n　てらぺたゲームズ\n　チームGJ4\n\n\nTERAPETA GAMES / TEAM GJ4\nAll Rights Reserved.",
+				"\n\nテクニカルサポート\n　鰯ユウ\n　神無月\n\nビジュアルアドバイザー\n　てらぺた\n\nエグゼクティブプロデューサー\n　てらぺた\n\nディレクター\n　てらぺた\n\nかいはつ\n　てらぺたゲームズ\n　チームGJ4\n\n\nTERAPETA GAMES / TEAM GJ4\nAll Rights Reserved.",
 				GetColor(0, 0, 0));
 			break;
 		case howtoplay:

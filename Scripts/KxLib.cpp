@@ -100,10 +100,10 @@ bool HitRectAndPoint(Rect r, Vector2D p)
 }
 
 bool HitRectAndRect(Rect a, Rect b) {
-	return a.x - a.w * 0.5 <= b.x + b.w * 0.5
-		&& a.x + a.w * 0.5 >= b.x - b.w * 0.5
-		&& a.y - a.h * 0.5 <= b.y + b.h * 0.5
-		&& a.y + a.h * 0.5 >= b.y - b.h * 0.5;
+	return a.x - a.w <= b.x + b.w
+		&& a.x + a.w >= b.x - b.w
+		&& a.y - a.h <= b.y + b.h
+		&& a.y + a.h >= b.y - b.h;
 }
 
 Vector2D CollisionInfoRectAndRect(GameObject obj, Rect wall) {
@@ -131,18 +131,18 @@ Vector2D CollisionInfoRectAndRect(GameObject obj, Rect wall) {
 void CollisionRectAndRect(GameObject& obj, Rect wall) {
 	if (CollisionInfoRectAndRect(obj, wall).x != 0) {
 		if (obj.entity.x <= wall.x) {
-			obj.entity.x -= (obj.entity.x + obj.entity.w / 2.0) - (wall.x - wall.w / 2.0);
+			obj.entity.x -= (obj.entity.x + obj.entity.w) - (wall.x - wall.w);
 		}
 		else {
-			obj.entity.x -= (obj.entity.x - obj.entity.w / 2.0) - (wall.x + wall.w / 2.0);
+			obj.entity.x -= (obj.entity.x - obj.entity.w) - (wall.x + wall.w);
 		}
 	}
 	else {
 		if (obj.entity.y <= wall.y) {
-			obj.entity.y -= (obj.entity.y + obj.entity.h / 2.0) - (wall.y - wall.h / 2.0);
+			obj.entity.y -= (obj.entity.y + obj.entity.h) - (wall.y - wall.h);
 		}
 		else {
-			obj.entity.y -= (obj.entity.y - obj.entity.h / 2.0) - (wall.y + wall.h / 2.0);
+			obj.entity.y -= (obj.entity.y - obj.entity.h) - (wall.y + wall.h);
 		}
 	}
 }
@@ -177,7 +177,7 @@ void collideWall(RigidBody& rgd, vector<GameObject> blocks) {
 				rgd.movement.y *= 0.3;
 			}
 			if (CollisionInfoRectAndRect(rgd.gameObject, hittedBlocks[target].entity).y == 1) {
-				rgd.beforeLanding = 3;
+				rgd.beforeLanding = 1;
 			}
 		}
 		hittedBlocks.erase(hittedBlocks.begin() + target);
