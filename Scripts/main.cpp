@@ -12,7 +12,7 @@ const int BLOCK_DIAMETER = 64;
 //横列の数
 const int PLAYPART_WIDTH = 14;
 //1区画の縦の長さ
-const int PLAYPART_HEIGHT = 100;
+const int PLAYPART_HEIGHT = 20;
 //UIライン
 const int GAME_LINE = BLOCK_DIAMETER * PLAYPART_WIDTH;
 
@@ -63,6 +63,7 @@ struct Block
 	RigidBody rigidBody;
 	BlockType blockType;
 	bool breaked = false;
+	unsigned int landingBlockIndex = 0;
 	string status = "";
 };
 
@@ -158,58 +159,58 @@ void DrawButton(Button button)
 		break;
 	}
 	DrawBox(
-		(int)(button.entity.x + button.entity.w),
-		(int)(button.entity.y + button.entity.h),
-		(int)(button.entity.x - button.entity.w),
-		(int)(button.entity.y - button.entity.h),
+		(int)(button.entity.position.x + button.entity.scale.x),
+		(int)(button.entity.position.y + button.entity.scale.y),
+		(int)(button.entity.position.x - button.entity.scale.x),
+		(int)(button.entity.position.y - button.entity.scale.y),
 		GetColor(color[0], color[1], color[2]), TRUE);
 	DrawLine(
-		(int)(button.entity.x + button.entity.w - 1),
-		(int)(button.entity.y - button.entity.h),
-		(int)(button.entity.x - button.entity.w),
-		(int)(button.entity.y - button.entity.h),
+		(int)(button.entity.position.x + button.entity.scale.x - 1),
+		(int)(button.entity.position.y - button.entity.scale.y),
+		(int)(button.entity.position.x - button.entity.scale.x),
+		(int)(button.entity.position.y - button.entity.scale.y),
 		GetColor((color[0] + 127) / 2, (color[1] + 127) / 2, (color[2] + 127) / 2));
 	DrawLine(
-		(int)(button.entity.x - button.entity.w),
-		(int)(button.entity.y + button.entity.h - 1),
-		(int)(button.entity.x - button.entity.w),
-		(int)(button.entity.y - button.entity.h - 1),
+		(int)(button.entity.position.x - button.entity.scale.x),
+		(int)(button.entity.position.y + button.entity.scale.y - 1),
+		(int)(button.entity.position.x - button.entity.scale.x),
+		(int)(button.entity.position.y - button.entity.scale.y - 1),
 		GetColor((color[0] + 127) / 2, (color[1] + 127) / 2, (color[2] + 127) / 2));
 	DrawTriangle(
-		(int)(button.entity.x - button.entity.w),
-		(int)(button.entity.y + button.entity.h),
-		(int)(button.entity.x + button.entity.w),
-		(int)(button.entity.y - button.entity.h),
-		(int)(button.entity.x + button.entity.w),
-		(int)(button.entity.y + button.entity.h),
+		(int)(button.entity.position.x - button.entity.scale.x),
+		(int)(button.entity.position.y + button.entity.scale.y),
+		(int)(button.entity.position.x + button.entity.scale.x),
+		(int)(button.entity.position.y - button.entity.scale.y),
+		(int)(button.entity.position.x + button.entity.scale.x),
+		(int)(button.entity.position.y + button.entity.scale.y),
 		GetColor((color[0] + 127) / 2, (color[1] + 127) / 2, (color[2] + 127) / 2), TRUE);
 	if (button.toggleEnabled) {
 		DrawBox(
-			(int)(button.entity.x + button.entity.w),
-			(int)(button.entity.y - button.entity.h / 2),
-			(int)(button.entity.x + button.entity.w / 2),
-			(int)(button.entity.y - button.entity.h), GetColor(100, 100, 100), TRUE);
+			(int)(button.entity.position.x + button.entity.scale.x),
+			(int)(button.entity.position.y - button.entity.scale.y / 2),
+			(int)(button.entity.position.x + button.entity.scale.x / 2),
+			(int)(button.entity.position.y - button.entity.scale.y), GetColor(100, 100, 100), TRUE);
 		if (button.toggleStatus) {
 			DrawBox(
-				(int)(button.entity.x + button.entity.w / 4 * 3),
-				(int)(button.entity.y - button.entity.h / 2),
-				(int)(button.entity.x + button.entity.w / 2),
-				(int)(button.entity.y - button.entity.h), GetColor(100, 255, 100), TRUE);
+				(int)(button.entity.position.x + button.entity.scale.x / 4 * 3),
+				(int)(button.entity.position.y - button.entity.scale.y / 2),
+				(int)(button.entity.position.x + button.entity.scale.x / 2),
+				(int)(button.entity.position.y - button.entity.scale.y), GetColor(100, 255, 100), TRUE);
 		}
 		else {
 			DrawBox(
-				(int)(button.entity.x + button.entity.w / 4 * 3),
-				(int)(button.entity.y - button.entity.h / 2),
-				(int)(button.entity.x + button.entity.w),
-				(int)(button.entity.y - button.entity.h), GetColor(150, 0, 0), TRUE);
+				(int)(button.entity.position.x + button.entity.scale.x / 4 * 3),
+				(int)(button.entity.position.y - button.entity.scale.y / 2),
+				(int)(button.entity.position.x + button.entity.scale.x),
+				(int)(button.entity.position.y - button.entity.scale.y), GetColor(150, 0, 0), TRUE);
 		}
 	}
 	DrawString(
-		button.entity.x - button.entity.w, button.entity.y - button.entity.h,
+		button.entity.position.x - button.entity.scale.x, button.entity.position.y - button.entity.scale.y,
 		button.eText.c_str(),
 		GetColor((color[0] + 127) / 2, (color[1] + 127) / 2, (color[2] + 127) / 2));
 	DrawString(
-		button.entity.x, button.entity.y, button.text.c_str(),
+		button.entity.position.x, button.entity.position.y, button.text.c_str(),
 		GetColor(0, 0, 0));
 }
 
@@ -230,8 +231,8 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 		for (int i = 0; i < blocks.size(); i++)
 		{
 			if (HitRectAndPoint(blocks[i].entity,
-				Vector2D{ liveEntity->rigidBody.gameObject.entity.x,
-				liveEntity->rigidBody.gameObject.entity.y }))
+				Vector2D{ liveEntity->rigidBody.gameObject.entity.position.x,
+				liveEntity->rigidBody.gameObject.entity.position.y }))
 			{
 				liveEntity->isLive = false;
 			}
@@ -242,9 +243,9 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 		{
 			//しばらく前方に進めなければ反転
 			if ((liveEntity->direction
-				&& liveEntity->rigidBody.gameObject.beforePos.x >= liveEntity->rigidBody.gameObject.entity.x)
+				&& liveEntity->rigidBody.gameObject.beforePos.x >= liveEntity->rigidBody.gameObject.entity.position.x)
 				|| (!liveEntity->direction
-					&& liveEntity->rigidBody.gameObject.beforePos.x <= liveEntity->rigidBody.gameObject.entity.x))
+					&& liveEntity->rigidBody.gameObject.beforePos.x <= liveEntity->rigidBody.gameObject.entity.position.x))
 			{
 				liveEntity->stuckFrameCount++;
 			}
@@ -365,8 +366,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	vector<GameObject> edgeWall = {
 		GameObject{Rect{-WIN_WIDTH / 2,0,0,WIN_HEIGHT}},
 		GameObject{Rect{-WIN_WIDTH / 2 + GAME_LINE,0,0,WIN_HEIGHT}},
-		GameObject{Rect{0,-WIN_HEIGHT / 2,WIN_WIDTH,0}},
-		GameObject{Rect{0,WIN_HEIGHT / 2,WIN_WIDTH,0}},
 	};
 	//ブロック
 	vector<Block> blocks = {};
@@ -500,7 +499,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		//ボタンを更新（ちょっとだけ縦に揺らす）
 		for (int i = 0; i < buttons.size(); i++) {
-			buttons[i].entity.y += sin(clock() / PI / 300 - i / 2.0) * 5;
+			buttons[i].entity.position.y += sin(clock() / PI / 300 - i / 2.0) * 5;
 			ButtonUpdate(buttons[i], mouseInputData, buttonPushSound);
 		}
 
@@ -538,11 +537,24 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			{
 				gameui_->Update();
 
-
 				//全てのブロックを更新
 				for (int i = 0; i < blocks.size(); i++)
 				{
 					blocks[i].rigidBody.gameObject.graphNum = blocksSprite[blocks[i].blockType];
+
+					blocks[i].rigidBody.gameObject.entity.position.y =
+						min(blocks[i].rigidBody.gameObject.entity.position.y + BLOCK_DIAMETER / 10, BLOCK_DIAMETER * PLAYPART_HEIGHT);
+
+					for (int j = 0; j < blocks.size(); j++)
+					{
+						Vector2D pos = blocks[i].rigidBody.gameObject.entity.position;
+						Vector2D targetPos = blocks[j].rigidBody.gameObject.entity.position;
+						if (pos.x == targetPos.x
+							&& pos.y < targetPos.y && pos.y > targetPos.y - BLOCK_DIAMETER)
+						{
+							blocks[i].rigidBody.gameObject.entity.position.y = targetPos.y - BLOCK_DIAMETER;
+						}
+					}
 
 					if (blocks[i].blockType == sandblock)
 					{
@@ -604,9 +616,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				LiveEntityUpdate(&player, liveEntityWalls);
 
 				//カメラ追従
-				camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.y };
+				camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.position.y };
 
-				gameui_->digTimerT1 = (player.rigidBody.gameObject.entity.y + player.rigidBody.gameObject.entity.h) / player.rigidBody.gameObject.entity.h;
+				gameui_->digTimerT1 = (player.rigidBody.gameObject.entity.position.y + player.rigidBody.gameObject.entity.scale.y) / player.rigidBody.gameObject.entity.scale.y;
 				//ボタンを押した時の処理
 				if (IsButtonClicked(buttons, 0))
 				{

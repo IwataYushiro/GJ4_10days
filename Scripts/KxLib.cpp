@@ -2,7 +2,7 @@
 // 
 // 		KXライブラリ		cppファイル
 // 
-// 				Ver 20211115.0
+// 				Ver 20240909.0
 // 
 // -------------------------------------------------------------------------------
 
@@ -66,7 +66,7 @@ void SceneUpdate(float& progress, int& scene, int nextScene) {
 }
 
 void RenderObject(GameObject obj, Vector2D scroll) {
-	DrawRotaGraph(obj.entity.x - scroll.x, obj.entity.y - scroll.y, obj.graphScale, obj.rot, obj.graphNum, true, obj.dir);
+	DrawRotaGraph(obj.entity.position.x - scroll.x, obj.entity.position.y - scroll.y, obj.graphScale, obj.rot, obj.graphNum, true, obj.dir);
 }
 
 void RenderAllObject(vector<GameObject> obj, Vector2D scroll) {
@@ -95,22 +95,22 @@ void ConstructMap(vector<vector<int>> tileMap, const int tileScale, const int ti
 
 bool HitRectAndPoint(Rect r, Vector2D p)
 {
-	return r.x + r.w >= p.x && r.x - r.w <= p.x
-		&& r.y + r.h >= p.y && r.y - r.h <= p.y;
+	return r.position.x + r.scale.x >= p.x && r.position.x - r.scale.x <= p.x
+		&& r.position.y + r.scale.y >= p.y && r.position.y - r.scale.y <= p.y;
 }
 
 bool HitRectAndRect(Rect a, Rect b) {
-	return a.x - a.w <= b.x + b.w
-		&& a.x + a.w >= b.x - b.w
-		&& a.y - a.h <= b.y + b.h
-		&& a.y + a.h >= b.y - b.h;
+	return a.position.x - a.scale.x <= b.position.x + b.scale.x
+		&& a.position.x + a.scale.x >= b.position.x - b.scale.x
+		&& a.position.y - a.scale.y <= b.position.y + b.scale.y
+		&& a.position.y + a.scale.y >= b.position.y - b.scale.y;
 }
 
 Vector2D CollisionInfoRectAndRect(GameObject obj, Rect wall) {
 	Vector2D ret = Vector2D{ 0,0 };
-	obj.entity = Rect{ (float)obj.beforePos.x,(float)obj.beforePos.y,obj.entity.w,obj.entity.h };
-	if (abs(wall.y - obj.entity.y) * (wall.w + obj.beforeSca.x) < abs(wall.x - obj.entity.x) * (wall.h + obj.beforeSca.y)) {
-		if (obj.entity.x <= wall.x) {
+	obj.entity = Rect{ (float)obj.beforePos.x,(float)obj.beforePos.y,obj.entity.scale.x,obj.entity.scale.y };
+	if (abs(wall.position.y - obj.entity.position.y) * (wall.scale.x + obj.beforeSca.x) < abs(wall.position.x - obj.entity.position.x) * (wall.scale.y + obj.beforeSca.y)) {
+		if (obj.entity.position.x <= wall.position.x) {
 			ret.x = 1;
 		}
 		else {
@@ -118,7 +118,7 @@ Vector2D CollisionInfoRectAndRect(GameObject obj, Rect wall) {
 		}
 	}
 	else {
-		if (obj.entity.y <= wall.y) {
+		if (obj.entity.position.y <= wall.position.y) {
 			ret.y = 1;
 		}
 		else {
@@ -130,19 +130,19 @@ Vector2D CollisionInfoRectAndRect(GameObject obj, Rect wall) {
 
 void CollisionRectAndRect(GameObject& obj, Rect wall) {
 	if (CollisionInfoRectAndRect(obj, wall).x != 0) {
-		if (obj.entity.x <= wall.x) {
-			obj.entity.x -= (obj.entity.x + obj.entity.w) - (wall.x - wall.w);
+		if (obj.entity.position.x <= wall.position.x) {
+			obj.entity.position.x -= (obj.entity.position.x + obj.entity.scale.x) - (wall.position.x - wall.scale.x);
 		}
 		else {
-			obj.entity.x -= (obj.entity.x - obj.entity.w) - (wall.x + wall.w);
+			obj.entity.position.x -= (obj.entity.position.x - obj.entity.scale.x) - (wall.position.x + wall.scale.x);
 		}
 	}
 	else {
-		if (obj.entity.y <= wall.y) {
-			obj.entity.y -= (obj.entity.y + obj.entity.h) - (wall.y - wall.h);
+		if (obj.entity.position.y <= wall.position.y) {
+			obj.entity.position.y -= (obj.entity.position.y + obj.entity.scale.y) - (wall.position.y - wall.scale.y);
 		}
 		else {
-			obj.entity.y -= (obj.entity.y - obj.entity.h) - (wall.y + wall.h);
+			obj.entity.position.y -= (obj.entity.position.y - obj.entity.scale.y) - (wall.position.y + wall.scale.y);
 		}
 	}
 }
@@ -160,7 +160,7 @@ void collideWall(RigidBody& rgd, vector<GameObject> blocks) {
 		int target = 0;
 		for (int j = 0; j < hittedBlocks.size(); j++) {
 			int currentDist =
-				VectorScale(Vector2D{ rgd.gameObject.entity.x ,rgd.gameObject.entity.y }, Vector2D{ hittedBlocks[j].entity.x ,hittedBlocks[j].entity.y });
+				VectorScale(Vector2D{ rgd.gameObject.entity.position.x ,rgd.gameObject.entity.position.y }, Vector2D{ hittedBlocks[j].entity.position.x ,hittedBlocks[j].entity.position.y });
 			if (currentDist < dist || j == 0) {
 				dist = currentDist;
 				target = j;
@@ -186,14 +186,14 @@ void collideWall(RigidBody& rgd, vector<GameObject> blocks) {
 
 void RigidBodyUpdate(RigidBody& rgd, Vector2D gravity, Vector2D drag, vector<GameObject> blocks) {
 	GravityAndDrag(rgd, gravity, drag);
-	float physicsLoop = max(rgd.movement.x, rgd.movement.y) / min(rgd.gameObject.entity.w, rgd.gameObject.entity.h) * 4;
-	float physicsDiv = (max(rgd.movement.x, rgd.movement.y) - fmod(max(rgd.movement.x, rgd.movement.y), min(rgd.gameObject.entity.w, rgd.gameObject.entity.h))) / min(rgd.gameObject.entity.w, rgd.gameObject.entity.h) * 4;
+	float physicsLoop = max(rgd.movement.x, rgd.movement.y) / min(rgd.gameObject.entity.scale.x, rgd.gameObject.entity.scale.y) * 4;
+	float physicsDiv = (max(rgd.movement.x, rgd.movement.y) - fmod(max(rgd.movement.x, rgd.movement.y), min(rgd.gameObject.entity.scale.x, rgd.gameObject.entity.scale.y))) / min(rgd.gameObject.entity.scale.x, rgd.gameObject.entity.scale.y) * 4;
 	physicsDiv = max(1, physicsDiv);
 	collideWall(rgd, blocks);
 	for (int i = 0; i < physicsDiv; i++) {
-		rgd.gameObject.beforePos = Vector2D{ rgd.gameObject.entity.x,rgd.gameObject.entity.y };
-		rgd.gameObject.entity.x += rgd.movement.x / physicsDiv;
-		rgd.gameObject.entity.y += rgd.movement.y / physicsDiv;
+		rgd.gameObject.beforePos = Vector2D{ rgd.gameObject.entity.position.x,rgd.gameObject.entity.position.y };
+		rgd.gameObject.entity.position.x += rgd.movement.x / physicsDiv;
+		rgd.gameObject.entity.position.y += rgd.movement.y / physicsDiv;
 		collideWall(rgd, blocks);
 	}
 	if (rgd.beforeLanding > 0)
@@ -205,23 +205,29 @@ void RigidBodyUpdate(RigidBody& rgd, Vector2D gravity, Vector2D drag, vector<Gam
 	{
 		rgd.landing = false;
 	}
-	rgd.gameObject.beforeSca = Vector2D{ rgd.gameObject.entity.w,rgd.gameObject.entity.h };
+	rgd.gameObject.beforeSca = Vector2D{ rgd.gameObject.entity.scale.x,rgd.gameObject.entity.scale.y };
 }
 
-int CollisionBox2Circle(int Left, int Right, int Top, int Bottom, int x, int y, int r) {
-	if (Left - r > x || Right + r < x || Top - r > y || Bottom + r < y) {												//矩形に円の半径分を足した範囲
+int HitRectAndCircle(Rect rect, int x, int y, int radius)
+{
+	int right = rect.position.x + rect.scale.x;
+	int left = rect.position.x - rect.scale.x;
+	int top = rect.position.y + rect.scale.y;
+	int bottom = rect.position.y - rect.scale.y;
+
+	if (left - radius > x || right + radius < x || top - radius > y || bottom + radius < y) {						//矩形に円の半径分を足した範囲
 		return false;
 	}
-	if (Left > x && Top > y && !((Left - x) * (Left - x) + (Top - y) * (Top - y) < r * r)) {				//左上の当たり判定
+	if (left > x && top > y && !((left - x) * (left - x) + (top - y) * (top - y) < radius * radius)) {				//左上の当たり判定
 		return false;
 	}
-	if (Right < x && Top > y && !((Right - x) * (Right - x) + (Top - y) * (Top - y) < r * r)) {				//右上の当たり判定
+	if (right < x && top > y && !((right - x) * (right - x) + (top - y) * (top - y) < radius * radius)) {			//右上の当たり判定
 		return false;
 	}
-	if (Left > x && Bottom < y && !((Left - x) * (Left - x) + (Bottom - y) * (Bottom - y) < r * r)) {		//左下の当たり判定
+	if (left > x && bottom < y && !((left - x) * (left - x) + (bottom - y) * (bottom - y) < radius * radius)) {		//左下の当たり判定
 		return false;
 	}
-	if (Right < x && Bottom < y && !((Right - x) * (Right - x) + (Bottom - y) * (Bottom - y) < r * r)) {	//右下の当たり判定
+	if (right < x && bottom < y && !((right - x) * (right - x) + (bottom - y) * (bottom - y) < radius * radius)) {	//右下の当たり判定
 		return false;
 	}
 	return true;//すべての条件が外れたときに当たっている

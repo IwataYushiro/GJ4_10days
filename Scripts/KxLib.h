@@ -2,7 +2,7 @@
 // 
 // 		KXライブラリ		ヘッダファイル
 // 
-// 				Ver 20211115.0
+// 				Ver 20240909.0
 // 
 // -------------------------------------------------------------------------------
 
@@ -18,8 +18,8 @@ using namespace std;
 ///<para>x,y = ベクトルのx成分,y成分</para>
 ///</summary>
 struct Vector2D {
-	float x;
-	float y;
+	float x = 0;
+	float y = 0;
 };
 
 ///<summary>
@@ -30,10 +30,8 @@ struct Vector2D {
 ///</summary>
 struct Rect
 {
-	float x;
-	float y;
-	float w;
-	float h;
+	Vector2D position = Vector2D{};
+	Vector2D scale = Vector2D{};
 };
 
 ///<summary>
@@ -50,10 +48,11 @@ struct GameObject {
 	Rect entity;
 	int graphNum;
 	float graphScale = 1;
+	Vector2D graphLocalPos = Vector2D{};
 	float rot = 0;
 	bool dir = false;
-	Vector2D beforePos = Vector2D{ entity.x,entity.y };
-	Vector2D beforeSca = Vector2D{ entity.w,entity.h };
+	Vector2D beforePos = entity.position;
+	Vector2D beforeSca = entity.scale;
 };
 
 ///<summary>
@@ -66,7 +65,7 @@ struct GameObject {
 /// </summary>
 struct RigidBody {
 	GameObject gameObject;
-	Vector2D movement = Vector2D{ 0,0 };
+	Vector2D movement = Vector2D{};
 	bool landing = false;
 	int beforeLanding = 0;
 };
