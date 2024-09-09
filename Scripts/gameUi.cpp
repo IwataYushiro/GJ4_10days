@@ -44,6 +44,8 @@ void gameUi::Update()
 	//‚Ç‚±‚Ü‚ÅŒ@‚Á‚½‚©
 	//10‚ÌŒ…
 	digTimerT2 = digTimerT1 / 10;
+	//100‚ÌŒ…
+	digTimerT100 = digTimerT2 / 10;
 }
 
 void gameUi::Draw()
@@ -79,6 +81,8 @@ void gameUi::Draw()
 	DrawDigUI(digTimerT1, 1050);
 	//10‚ÌˆÊ
 	DrawDigUI(digTimerT2, 1000);
+	//100‚ÌˆÊ
+	DrawDigUI(digTimerT100, 950);
 
 	//ƒuƒƒbƒN‚ğ‚¢‚­‚Â‰ó‚µ‚½‚©‚Ì‚©‚ÌUI
 	//1‚ÌˆÊ
