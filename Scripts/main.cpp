@@ -633,6 +633,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				//ƒJƒƒ‰’Ç]
 				camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.position.y };
 
+				vector<GameObject> edgeWall = {
+					GameObject{Rect{Vector2D{-WIN_WIDTH / 2,0} + camPosition,{0,WIN_HEIGHT} }},
+					GameObject{Rect{Vector2D{-WIN_WIDTH / 2 + GAME_LINE,0} + camPosition,{0,WIN_HEIGHT}}},
+				};
+
 				gameui_->digTimerT1 = (player.rigidBody.gameObject.entity.position.y + player.rigidBody.gameObject.entity.scale.y * 2.0f) / (player.rigidBody.gameObject.entity.scale.y * 2.0f);
 				
 				//ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚½‚Ìˆ—
