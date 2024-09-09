@@ -12,7 +12,7 @@ const int BLOCK_DIAMETER = 64;
 //横列の数
 const int PLAYPART_WIDTH = 14;
 //1区画の縦の長さ
-const int PLAYPART_HEIGHT = 20;
+const int PLAYPART_HEIGHT = 100;
 //UIライン
 const int GAME_LINE = BLOCK_DIAMETER * PLAYPART_WIDTH;
 
@@ -361,7 +361,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 
 	//自機
-	LiveEntity player = LiveEntity{ RigidBody{ GameObject{ Rect{0,0,64,64}, playerSprite} } };
+	LiveEntity player = {};
 	//自機がフィールド外に出ないための壁
 	vector<GameObject> edgeWall = {
 		GameObject{Rect{-WIN_WIDTH / 2,0,0,WIN_HEIGHT}},
@@ -424,7 +424,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				//ポーズ解除
 				isPause = false;
 				//自機を初期座標へ
-				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 32,25,32}, playerSprite} } };
+				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 32,25,25}, playerSprite} } };
 				//ブロックを初期化、生成
 				blocks = {};
 				for (int i = 0; i < PLAYPART_HEIGHT; i++)
@@ -542,17 +542,32 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				{
 					blocks[i].rigidBody.gameObject.graphNum = blocksSprite[blocks[i].blockType];
 
+					//落下
 					blocks[i].rigidBody.gameObject.entity.position.y =
-						min(blocks[i].rigidBody.gameObject.entity.position.y + BLOCK_DIAMETER / 10, BLOCK_DIAMETER * PLAYPART_HEIGHT);
+						min(blocks[i].rigidBody.gameObject.entity.position.y + BLOCK_DIAMETER / 10, BLOCK_DIAMETER * (PLAYPART_HEIGHT - 1));
 
-					for (int j = 0; j < blocks.size(); j++)
+					unsigned int landingBlockIndex = min(blocks[i].landingBlockIndex, blocks.size() - 1);
+					Vector2D pos = blocks[i].rigidBody.gameObject.entity.position;
+					Vector2D targetPos = blocks[landingBlockIndex].rigidBody.gameObject.entity.position;
+					if (pos.x == targetPos.x
+						&& pos.y < targetPos.y && pos.y > targetPos.y - BLOCK_DIAMETER)
 					{
-						Vector2D pos = blocks[i].rigidBody.gameObject.entity.position;
-						Vector2D targetPos = blocks[j].rigidBody.gameObject.entity.position;
-						if (pos.x == targetPos.x
-							&& pos.y < targetPos.y && pos.y > targetPos.y - BLOCK_DIAMETER)
+						//支えがある場合は軽量処理
+						blocks[i].rigidBody.gameObject.entity.position.y = targetPos.y - BLOCK_DIAMETER;
+					}
+					else
+					{
+						//支えを無くしたら精密処理
+						for (int j = 0; j < blocks.size(); j++)
 						{
-							blocks[i].rigidBody.gameObject.entity.position.y = targetPos.y - BLOCK_DIAMETER;
+							pos = blocks[i].rigidBody.gameObject.entity.position;
+							targetPos = blocks[j].rigidBody.gameObject.entity.position;
+							if (pos.x == targetPos.x
+								&& pos.y < targetPos.y && pos.y > targetPos.y - BLOCK_DIAMETER)
+							{
+								blocks[i].rigidBody.gameObject.entity.position.y = targetPos.y - BLOCK_DIAMETER;
+								blocks[i].landingBlockIndex = j;
+							}
 						}
 					}
 
