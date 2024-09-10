@@ -31,7 +31,6 @@ enum Scene
 	playpart,
 	credit,
 	howtoplay,
-	gameover,
 };
 
 enum BlockType
@@ -324,6 +323,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	const int operationGraph = LoadGraph("Resources/Textures/sousa.png");
 	//クリア画面(シューティングゲームからクリア画面)とBGM
 	const int clearGraph = LoadGraph("Resources/Textures/clear.png");
+	//ゲームオーバー画面(シューティングゲームからゲームオーバー画面)とBGM
+	const int gameoverGraph = LoadGraph("Resources/Textures/gameover.png");
 	//自機
 	const int playerSprite = LoadGraph("Resources/Textures/protoplayer.png");
 	//ブロック各種
@@ -427,7 +428,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				//ポーズ解除
 				isPause = false;
 				//自機を初期座標へ
-				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 32,25,25}, playerSprite} } };
+				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 32,25,25}, playerSprite} },true,true,0 };
 				//ブロックを初期化、生成
 				blocks = {};
 				for (int i = 0; i < PLAYPART_HEIGHT; i++)
@@ -475,6 +476,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					Button{Rect{370, 460,60,50},"やめる","QUIT"},
 				};
 			}
+			else if (!player.isLive&& !isPause)
+			{
+				buttons = {
+					Button{Rect{370, 260,100,50},"もう一回","TRY AGAIN"},
+					Button{Rect{370, 560,100,50},"もうやめる","QUIT"},
+				};
+			}
 			else
 			{
 				//ポーズボタン
@@ -499,12 +507,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				Button{Rect{140, 60,130,50},"もどる","RETURN"},
 			};
 			break;
-		case gameover:
-			//ゲームオーバーボタン
-			buttons = {
-				Button{Rect{400, 600,100,50},"もう一回","TRY AGAIN"},
-				Button{Rect{860, 600,100,50},"もうやめる","QUIT"},
-			};
 		}
 
 		//ボタンを更新（ちょっとだけ縦に揺らす）
@@ -699,11 +701,22 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					//ポーズする
 					isPause = true;
 				}
-				//自機が死んだら
-				if (!player.isLive)
+			}
+			else if(!player.isLive)
+			{
+				//自機死亡時
+				//続ける
+				if (IsButtonClicked(buttons, 0))
 				{
-					nextScene = gameover;
-					
+					gameui_->Reset();
+					//リセット
+					sceneInit = true;
+				}
+				//終わる
+				if (IsButtonClicked(buttons, 1))
+				{
+					//タイトルへ
+					nextScene = title;
 				}
 			}
 			else
@@ -744,21 +757,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				nextScene = title;
 			}
 			break;
-		case gameover:
-			//ゲームオーバー
-			gameui_->Reset();
-			//続ける
-			if (IsButtonClicked(buttons, 0))
-			{
-				//もう一回
-				nextScene = playpart;
-			}
-			//終わる
-			if (IsButtonClicked(buttons, 1))
-			{
-				//タイトルへ
-				nextScene = title;
-			}
+			
+			
 		}
 
 		// 描画処理
@@ -805,20 +805,17 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			}
 			//自機を描画
 			RenderObject(player.rigidBody.gameObject, camPosition + camPosOffset);
+
+			if (!player.isLive)
+			{
+				
+				DrawGraph(300, 80, gameoverGraph, true);
+			}
 			//このラインからはUIゾーンなのでいっそここにボックスUIおいてもいいや
 			DrawBox(GAME_LINE, 0, WIN_WIDTH, WIN_HEIGHT, GetColor(0xff, 0xff, 0xff), TRUE);
-
 			gameui_->Draw();
-			DrawString(950, 30, "TIME", GetColor(0, 0, 0));
-			DrawFormatString(1150, 155, GetColor(0, 0, 0), "%d", gameui_->autotimer);
-			DrawString(950, 260, "DEPTH", GetColor(0, 0, 0));
-			DrawString(1150,385,"m",GetColor(0, 0, 0));
-			DrawString(950, 500, "壊したブロック数", GetColor(0, 0, 0));
+			
 
-			//スクロールチェック用
-			DrawFormatString(1200, 500, GetColor(122, 112, 122), "%d", -((int)camPosition.y % WIN_HEIGHT));
-			DrawFormatString(1150, 180, GetColor(0, 0, 0), "%d", gameui_->digTimerT10);
-			DrawFormatString(1200, 180, GetColor(0, 0, 0), "%d", gameui_->digTimerT1);
 			break;
 		case credit:
 			//クレジット画面
@@ -832,9 +829,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				GetColor(0, 0, 0));
 			break;
 		case howtoplay:
-			DrawGraph(0, 0, operationGraph, true);
-			break;
-		case gameover:
 			DrawGraph(0, 0, operationGraph, true);
 			break;
 		}
