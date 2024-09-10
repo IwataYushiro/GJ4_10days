@@ -641,6 +641,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					{
 						blocks[i].breaked = true;
 					}
+
+					//リーサルブロックに自機が触れたら死ぬ
+					if (blocks[i].blockType == lethalblock
+						&& HitRectAndRect(blocks[i].rigidBody.gameObject.entity, player.rigidBody.gameObject.entity)
+						&& VectorScale(blocks[i].rigidBody.gameObject.entity.position, player.rigidBody.gameObject.entity.position) <= BLOCK_DIAMETER)
+					{
+						player.isLive = false;
+					}
 				}
 				//消す準備が出来たブロックを全部消す
 				for (int i = 0; i < blocks.size(); i++)
@@ -667,8 +675,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				//カメラ追従
 				camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.position.y };
 
-
-				vector<GameObject> edgeWall = {
+				//両端の壁を追従させる
+				edgeWall = {
 					GameObject{Rect{Vector2D{-WIN_WIDTH / 2,0} + camPosition,{0,WIN_HEIGHT} },playerSprite},
 					GameObject{Rect{Vector2D{-WIN_WIDTH / 2 + GAME_LINE,0} + camPosition,{0,WIN_HEIGHT}},playerSprite},
 				};
