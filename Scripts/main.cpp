@@ -391,8 +391,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	};
 	//ブロック
 	vector<Block> blocks = {};
-	//シーン初期化
-	bool sceneInit = false;
 	
 	// 最新のキーボード情報用
 	char keys[256] = { 0 };
@@ -472,7 +470,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			}
 			sceneInit = false;
 		}
-		sceneInit = false;
 
 		//ボタンを生成
 		switch (currentScene)
