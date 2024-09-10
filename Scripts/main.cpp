@@ -525,10 +525,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		{
 		case title:
 			//タイトル画面
-			StopSoundMem(gameoverSceneBgm);
-			StopSoundMem(gameSceneBgm);
-			PlaySoundMem(titleSceneBgm, DX_PLAYTYPE_LOOP, false);
-
 			//スタートボタンとクレジットボタン
 			buttons = {
 				Button{Rect{WIN_WIDTH / 2, WIN_HEIGHT / 4 * 3,200,100},"スタート","START"},
@@ -538,13 +534,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			break;
 		case playpart:
 			//プレイパート
-			StopSoundMem(titleSceneBgm);
-			StopSoundMem(gameoverSceneBgm);
-			PlaySoundMem(gameSceneBgm, DX_PLAYTYPE_LOOP, false);
-			ChangeVolumeSoundMem(170, gameSceneBgm);
 			if (isPause)
 			{
-				ChangeVolumeSoundMem(70, gameSceneBgm);
 				//ポーズメニューボタン
 				buttons = {
 					Button{Rect{370, 160,60,50},"つづける","RESUME"},
@@ -553,9 +544,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			}
 			else if (!player.isLive)
 			{
-				StopSoundMem(gameSceneBgm);
-				PlaySoundMem(gameoverSceneBgm, DX_PLAYTYPE_LOOP, false);
-				ChangeVolumeSoundMem(120, gameoverSceneBgm);
 				buttons = {
 					Button{Rect{370, 260,100,50},"もう一回","TRY AGAIN"},
 					Button{Rect{370, 560,100,50},"もうやめる","QUIT"},
