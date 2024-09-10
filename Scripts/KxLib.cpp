@@ -22,13 +22,23 @@ Vector2D operator -(const Vector2D& v0, const Vector2D& v1)
 	return Vector2D{ v0.x - v1.x,v0.y - v1.y };
 }
 
-float VectorScale(Vector2D a, Vector2D b) {
-	return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+Vector2D operator *(const Vector2D& v, const float& f)
+{
+	return Vector2D{ v.x * f,v.y * f };
 }
 
-Vector2D NormalizedVector(Vector2D a, Vector2D b) {
-	if (VectorScale(a, b) != 0) {
-		return Vector2D{ (b.x - a.x) / VectorScale(a, b),(b.y - a.y) / VectorScale(a, b) };
+Vector2D operator/(const Vector2D& v, const float& f)
+{
+	return Vector2D{ v.x / f,v.y / f };
+}
+
+float VectorScale(Vector2D a) {
+	return sqrt(a.x * a.x + a.y * a.y);
+}
+
+Vector2D NormalizedVector(Vector2D a) {
+	if (VectorScale(a) != 0) {
+		return a / VectorScale(a);
 	}
 	return Vector2D{ 0,0 };
 }
@@ -163,7 +173,7 @@ void collideWall(RigidBody& rgd, vector<GameObject> blocks) {
 		int target = 0;
 		for (int j = 0; j < hittedBlocks.size(); j++) {
 			int currentDist =
-				VectorScale(Vector2D{ rgd.gameObject.entity.position.x ,rgd.gameObject.entity.position.y }, Vector2D{ hittedBlocks[j].entity.position.x ,hittedBlocks[j].entity.position.y });
+				VectorScale(rgd.gameObject.entity.position - hittedBlocks[j].entity.position);
 			if (currentDist < dist || j == 0) {
 				dist = currentDist;
 				target = j;

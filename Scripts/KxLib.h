@@ -76,14 +76,14 @@ struct RigidBody {
 ///<para>...</para>
 ///<para>a,b = ２点の座標</para>
 /// </summary>
-float VectorScale(Vector2D a, Vector2D b);
+float VectorScale(Vector2D a);
 
 ///<summary>
 ///２点間のベクトルを正規化
 ///<para>...</para>
 ///<para>a,b = ２点の座標</para>
 /// </summary>
-Vector2D NormalizedVector(Vector2D a, Vector2D b);
+Vector2D NormalizedVector(Vector2D a);
 
 ///<summary>
 /// <para>ベクトル足し算</para>
@@ -95,6 +95,15 @@ Vector2D operator +(const Vector2D& v0, const Vector2D& v1);
 /// </summary>
 Vector2D operator -(const Vector2D& v0, const Vector2D& v1);
 
+///<summary>
+/// <para>ベクトル掛け算</para>
+/// </summary>
+Vector2D operator *(const Vector2D& v, const float& f);
+
+///<summary>
+/// <para>ベクトル割り算</para>
+/// </summary>
+Vector2D operator /(const Vector2D& v, const float& f);
 
 ///<summary>
 //度数法の角度をラジアン角に変換する
