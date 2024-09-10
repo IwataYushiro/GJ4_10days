@@ -71,6 +71,7 @@ struct Block
 struct LiveEntity
 {
 	RigidBody rigidBody;
+	int insideBlockCount;
 	bool isLive = true;
 	bool direction = true;
 	int stuckFrameCount = 0;
@@ -228,15 +229,30 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 	//生きていたら
 	if (liveEntity->isLive)
 	{
-		//もしブロックの中に押し込まれたら死ぬ
+		//ブロックの中に押し込まれているか判定
+		bool isInsideBlock = false;
 		for (int i = 0; i < blocks.size(); i++)
 		{
 			if (HitRectAndPoint(blocks[i].entity,
 				Vector2D{ liveEntity->rigidBody.gameObject.entity.position.x,
 				liveEntity->rigidBody.gameObject.entity.position.y }))
 			{
+				isInsideBlock = true;
+				break;
+			}
+		}
+		//もしブロックの中に押し込まれた状態が6フレーム続いたら死ぬ
+		if (isInsideBlock)
+		{
+			liveEntity->insideBlockCount++;
+			if (liveEntity->insideBlockCount >= 6)
+			{
 				liveEntity->isLive = false;
 			}
+		}
+		else
+		{
+			liveEntity->insideBlockCount = 0;
 		}
 
 		//着地していたら
@@ -358,6 +374,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	Scene currentScene = logo;
 	//遷移しようとしている次のシーン
 	Scene nextScene = logo;
+	//シーンの初期化が必要ならこれをtrueに
+	bool sceneInit = false;
 
 	//シーン遷移用のタイマー
 	float sceneTransitionProgress = 0;
@@ -381,8 +399,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	};
 	//ブロック
 	vector<Block> blocks = {};
-
-
+	
 	// 最新のキーボード情報用
 	char keys[256] = { 0 };
 
@@ -406,7 +423,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		//ボタン配列をリセット
 		buttons = {};
 
-		bool sceneInit = false;
+
 		if (nextScene == currentScene)
 		{
 			sceneTransitionProgress = 0;
@@ -433,6 +450,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			case playpart:
 				//プレイパート
 
+				gameui_->Reset();
 				//ポーズ解除
 				isPause = false;
 				//自機を初期座標へ
@@ -458,6 +476,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				}
 				break;
 			}
+			sceneInit = false;
 		}
 
 		//音(BGM)の生成
@@ -573,7 +592,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			break;
 		case title:
 			//タイトル画面
-			gameui_->Reset();
+
 			//ボタンを押した時の処理
 			if (IsButtonClicked(buttons, 0))
 			{
@@ -592,168 +611,173 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//プレイパート
 			if (!isPause)
 			{
-				gameui_->Update();
-
-				//全てのブロックを更新
-				for (int i = 0; i < blocks.size(); i++)
+				if (player.isLive)
 				{
-					blocks[i].rigidBody.gameObject.graphNum = blocksSprite[blocks[i].blockType];
+					gameui_->Update();
 
-					//落下
-					blocks[i].rigidBody.gameObject.entity.position.y =
-						min(blocks[i].rigidBody.gameObject.entity.position.y + BLOCK_DIAMETER / 10, BLOCK_DIAMETER * (PLAYPART_HEIGHT - 1));
-
-					unsigned int landingBlockIndex = min(blocks[i].landingBlockIndex, blocks.size() - 1);
-					Vector2D pos = blocks[i].rigidBody.gameObject.entity.position;
-					Vector2D targetPos = blocks[landingBlockIndex].rigidBody.gameObject.entity.position;
-					if (pos.x == targetPos.x
-						&& pos.y < targetPos.y && pos.y > targetPos.y - BLOCK_DIAMETER)
+					//全てのブロックを更新
+					for (int i = 0; i < blocks.size(); i++)
 					{
-						//支えがある場合は軽量処理
-						blocks[i].rigidBody.gameObject.entity.position.y = targetPos.y - BLOCK_DIAMETER;
-						blocks[i].latestLandingHeight = blocks[i].rigidBody.gameObject.entity.position.y;
-						//壊れる準備が出来ている状態で壊せないブロックが着地していたら壊れる
-						if (blocks[i].blockType == untappableblock || blocks[i].blockType == lethalblock)
-						{
-							if (blocks[i].status == "prepareBreak")
-							{
-								blocks[i].breaked = true;
-							}
-						}
-					}
-					else
-					{
-						//支えを無くしたら精密処理
+						blocks[i].rigidBody.gameObject.graphNum = blocksSprite[blocks[i].blockType];
 
-						//下のブロックを探す
-						for (int j = 0; j < blocks.size(); j++)
+						//落下
+						blocks[i].rigidBody.gameObject.entity.position.y =
+							min(blocks[i].rigidBody.gameObject.entity.position.y + BLOCK_DIAMETER / 10, BLOCK_DIAMETER * (PLAYPART_HEIGHT - 1));
+
+						unsigned int landingBlockIndex = min(blocks[i].landingBlockIndex, blocks.size() - 1);
+						Vector2D pos = blocks[i].rigidBody.gameObject.entity.position;
+						Vector2D targetPos = blocks[landingBlockIndex].rigidBody.gameObject.entity.position;
+						if (pos.y >= BLOCK_DIAMETER * (PLAYPART_HEIGHT - 1)
+							|| (pos.x == targetPos.x
+								&& pos.y < targetPos.y && pos.y > targetPos.y - BLOCK_DIAMETER))
 						{
-							pos = blocks[i].rigidBody.gameObject.entity.position;
-							targetPos = blocks[j].rigidBody.gameObject.entity.position;
-							if (pos.x == targetPos.x
-								&& pos.y < targetPos.y && pos.y > targetPos.y - BLOCK_DIAMETER)
+							//支えがある場合は軽量処理
+							if (pos.y < BLOCK_DIAMETER * (PLAYPART_HEIGHT - 1))
 							{
 								blocks[i].rigidBody.gameObject.entity.position.y = targetPos.y - BLOCK_DIAMETER;
-								blocks[i].landingBlockIndex = j;
-
-								break;
+							}
+							blocks[i].latestLandingHeight = blocks[i].rigidBody.gameObject.entity.position.y;
+							//壊れる準備が出来ている状態で壊せないブロックが着地していたら壊れる
+							if (blocks[i].blockType == untappableblock || blocks[i].blockType == lethalblock)
+							{
+								if (blocks[i].status == "prepareBreak")
+								{
+									blocks[i].breaked = true;
+								}
 							}
 						}
-
-						//壊せないブロック同士が接触したら壊れる準備
-						if (blocks[i].blockType == untappableblock || blocks[i].blockType == lethalblock)
+						else
 						{
+							//支えを無くしたら精密処理
+
+							//下のブロックを探す
 							for (int j = 0; j < blocks.size(); j++)
 							{
 								pos = blocks[i].rigidBody.gameObject.entity.position;
 								targetPos = blocks[j].rigidBody.gameObject.entity.position;
-								if (i != j && blocks[i].rigidBody.gameObject.entity.position.y - blocks[i].latestLandingHeight > BLOCK_DIAMETER / 1.1f
-									&& (blocks[j].blockType == untappableblock || blocks[j].blockType == lethalblock)
-									&& VectorScale(pos, targetPos) <= BLOCK_DIAMETER * 1.2f)
+								if (pos.x == targetPos.x
+									&& pos.y < targetPos.y && pos.y > targetPos.y - BLOCK_DIAMETER)
 								{
-									blocks[i].status = "prepareBreak";
-									blocks[j].status = "prepareBreak";
+									blocks[i].rigidBody.gameObject.entity.position.y = targetPos.y - BLOCK_DIAMETER;
+									blocks[i].landingBlockIndex = j;
+
+									break;
+								}
+							}
+
+							//壊せないブロック同士が接触したら壊れる準備
+							if (blocks[i].blockType == untappableblock || blocks[i].blockType == lethalblock)
+							{
+								for (int j = 0; j < blocks.size(); j++)
+								{
+									pos = blocks[i].rigidBody.gameObject.entity.position;
+									targetPos = blocks[j].rigidBody.gameObject.entity.position;
+									if (i != j && blocks[i].rigidBody.gameObject.entity.position.y - blocks[i].latestLandingHeight > BLOCK_DIAMETER / 1.1f
+										&& (blocks[j].blockType == untappableblock || blocks[j].blockType == lethalblock)
+										&& VectorScale(pos, targetPos) <= BLOCK_DIAMETER * 1.2f)
+									{
+										blocks[i].status = "prepareBreak";
+										blocks[j].status = "prepareBreak";
+									}
 								}
 							}
 						}
-					}
 
-					if (blocks[i].blockType == sandblock)
-					{
-						//砂ブロックが自機に触れたら崩れる準備
-						if (HitRectAndRect(blocks[i].rigidBody.gameObject.entity, player.rigidBody.gameObject.entity)
+						if (blocks[i].blockType == sandblock)
+						{
+							//砂ブロックが自機に触れたら崩れる準備
+							if (HitRectAndRect(blocks[i].rigidBody.gameObject.entity, player.rigidBody.gameObject.entity)
+								&& VectorScale(blocks[i].rigidBody.gameObject.entity.position, player.rigidBody.gameObject.entity.position) <= BLOCK_DIAMETER)
+							{
+								blocks[i].status = "touched";
+							}
+							else
+							{
+								//崩れる準備が出来ている状態で砂ブロックが自機に触れていない状態が4フレーム（バッファのため）続いたら崩れる
+								if (blocks[i].status == "touched")
+								{
+									blocks[i].status = "prepareBreak3";
+								}
+								else if (blocks[i].status == "prepareBreak3")
+								{
+									blocks[i].status = "prepareBreak2";
+								}
+								else if (blocks[i].status == "prepareBreak2")
+								{
+									blocks[i].status = "prepareBreak";
+								}
+								else if (blocks[i].status == "prepareBreak")
+								{
+									blocks[i].breaked = true;
+								}
+							}
+						}
+
+						//クリックされたら消す準備（破壊可能なブロックのみ）
+						if (blocks[i].blockType != untappableblock && blocks[i].blockType != lethalblock
+							&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.position + (camPosition + camPosOffset))
+							&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.pin + (camPosition + camPosOffset))
+							&& !mouseInputData.click && mouseInputData.preClick)
+						{
+							blocks[i].breaked = true;
+						}
+
+						//リーサルブロックに自機が触れたら死ぬ
+						if (blocks[i].blockType == lethalblock
+							&& HitRectAndRect(blocks[i].rigidBody.gameObject.entity, player.rigidBody.gameObject.entity)
 							&& VectorScale(blocks[i].rigidBody.gameObject.entity.position, player.rigidBody.gameObject.entity.position) <= BLOCK_DIAMETER)
 						{
-							blocks[i].status = "touched";
+							player.isLive = false;
 						}
-						else
+					}
+					//消す準備が出来たブロックを全部消す
+					for (int i = 0; i < blocks.size(); i++)
+					{
+						if (blocks[i].breaked)
 						{
-							//崩れる準備が出来ている状態で砂ブロックが自機に触れていない状態が4フレーム（バッファのため）続いたら崩れる
-							if (blocks[i].status == "touched")
-							{
-								blocks[i].status = "prepareBreak3";
-							}
-							else if (blocks[i].status == "prepareBreak3")
-							{
-								blocks[i].status = "prepareBreak2";
-							}
-							else if (blocks[i].status == "prepareBreak2")
-							{
-								blocks[i].status = "prepareBreak";
-							}
-							else if (blocks[i].status == "prepareBreak")
-							{
-								blocks[i].breaked = true;
-							}
+							gameui_->blockCountT1++;
+							blocks.erase(blocks.begin() + i);
+							i--;
 						}
 					}
 
-					//クリックされたら消す準備（破壊可能なブロックのみ）
-					if (blocks[i].blockType != untappableblock && blocks[i].blockType != lethalblock
-						&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.position + (camPosition + camPosOffset))
-						&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.pin + (camPosition + camPosOffset))
-						&& !mouseInputData.click && mouseInputData.preClick)
+					//四隅の壁とブロック（フレームブロック以外）を壁とする
+					vector<GameObject> liveEntityWalls = edgeWall;
+					for (int i = 0; i < blocks.size(); i++)
 					{
-						blocks[i].breaked = true;
+						if (blocks[i].blockType != frameblock)
+						{
+							liveEntityWalls.push_back(blocks[i].rigidBody.gameObject);
+						}
 					}
+					//自機を更新
+					LiveEntityUpdate(&player, liveEntityWalls);
 
-					//リーサルブロックに自機が触れたら死ぬ
-					if (blocks[i].blockType == lethalblock
-						&& HitRectAndRect(blocks[i].rigidBody.gameObject.entity, player.rigidBody.gameObject.entity)
-						&& VectorScale(blocks[i].rigidBody.gameObject.entity.position, player.rigidBody.gameObject.entity.position) <= BLOCK_DIAMETER)
-					{
-						player.isLive = false;
-					}
-				}
-				//消す準備が出来たブロックを全部消す
-				for (int i = 0; i < blocks.size(); i++)
-				{
-					if (blocks[i].breaked)
-					{
-						gameui_->blockCountT1++;
-						blocks.erase(blocks.begin() + i);
-						i--;
-					}
-				}
+					//カメラ追従
+					camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.position.y };
 
-				//四隅の壁とブロック（フレームブロック以外）を壁とする
-				vector<GameObject> liveEntityWalls = edgeWall;
-				for (int i = 0; i < blocks.size(); i++)
-				{
-					if (blocks[i].blockType != frameblock)
+					//両端の壁を追従させる
+					edgeWall = {
+						GameObject{Rect{Vector2D{-WIN_WIDTH / 2,0} + camPosition,{0,WIN_HEIGHT} },playerSprite},
+						GameObject{Rect{Vector2D{-WIN_WIDTH / 2 + GAME_LINE,0} + camPosition,{0,WIN_HEIGHT}},playerSprite},
+					};
+
+					gameui_->depthT1 =
+						(player.rigidBody.gameObject.entity.position.y) / BLOCK_DIAMETER + 1;
+
+					//ボタンを押した時の処理
+					if (IsButtonClicked(buttons, 0))
 					{
-						liveEntityWalls.push_back(blocks[i].rigidBody.gameObject);
+						//ポーズする
+						isPause = true;
 					}
 				}
-				//自機を更新
-				LiveEntityUpdate(&player, liveEntityWalls);
-
-				//カメラ追従
-				camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.position.y };
-
-				//両端の壁を追従させる
-				edgeWall = {
-					GameObject{Rect{Vector2D{-WIN_WIDTH / 2,0} + camPosition,{0,WIN_HEIGHT} },playerSprite},
-					GameObject{Rect{Vector2D{-WIN_WIDTH / 2 + GAME_LINE,0} + camPosition,{0,WIN_HEIGHT}},playerSprite},
-				};
-
-				gameui_->depthT1 =
-					(player.rigidBody.gameObject.entity.position.y) / BLOCK_DIAMETER + 1;
-
-				//ボタンを押した時の処理
-				if (IsButtonClicked(buttons, 0))
-				{
-					//ポーズする
-					isPause = true;
-				}
-
-				if (!player.isLive)
+				else
 				{
 					//自機死亡時
 					//続ける
 					if (IsButtonClicked(buttons, 0))
 					{
-						gameui_->Reset();
 						//リセット
 						sceneInit = true;
 					}
