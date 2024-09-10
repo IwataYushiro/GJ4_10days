@@ -366,6 +366,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	Scene currentScene = logo;
 	//遷移しようとしている次のシーン
 	Scene nextScene = logo;
+	//シーンの初期化が必要ならこれをtrueに
+	bool sceneInit = false;
 
 	//シーン遷移用のタイマー
 	float sceneTransitionProgress = 0;
@@ -442,6 +444,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			case playpart:
 				//プレイパート
 
+				gameui_->Reset();
 				//ポーズ解除
 				isPause = false;
 				//自機を初期座標へ
@@ -469,6 +472,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			}
 			sceneInit = false;
 		}
+		sceneInit = false;
 
 		//ボタンを生成
 		switch (currentScene)
@@ -546,7 +550,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			break;
 		case title:
 			//タイトル画面
-			gameui_->Reset();
+
 			//ボタンを押した時の処理
 			if (IsButtonClicked(buttons, 0))
 			{
@@ -732,7 +736,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					//続ける
 					if (IsButtonClicked(buttons, 0))
 					{
-						gameui_->Reset();
 						//リセット
 						sceneInit = true;
 					}
