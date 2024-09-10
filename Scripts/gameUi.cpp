@@ -7,9 +7,9 @@ void gameUi::Reset()
 	timerT2 = 0;
 	timerT3 = 0;
 
-	digTimerT1 = 0;
-	digTimerT10 = 0;
-	digTimerT100 = 0;
+	depthT1 = 0;
+	depthT10 = 0;
+	depthT100 = 0;
 
 	blockCountT1 = 0;
 	blockCountT10 = 0;
@@ -49,9 +49,9 @@ void gameUi::Update()
 
 	//どこまで掘ったか
 	//10の桁
-	digTimerT10 = digTimerT1 / 10;
+	depthT10 = depthT1 / 10;
 	//100の桁
-	digTimerT100 = digTimerT10 / 10;
+	depthT100 = depthT10 / 10;
 	//どこまでブロックを壊したか
 	//10の桁
 	blockCountT10 = blockCountT1 / 10;
@@ -99,11 +99,11 @@ void gameUi::Draw()
 
 	//残り深層何mかのUI
 	//1の位
-	DrawUI(digTimerT1, 1050, 290);
+	DrawUI(depthT1, 1050, 290);
 	//10の位
-	DrawUI(digTimerT10, 1000, 290);
+	DrawUI(depthT10, 1000, 290);
 	//100の位
-	DrawUI(digTimerT100, 950, 290);
+	DrawUI(depthT100, 950, 290);
 
 	//ブロックをいくつ壊したかのかのUI
 	//1の位
