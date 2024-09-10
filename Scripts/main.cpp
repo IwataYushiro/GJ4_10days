@@ -526,6 +526,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		case playpart:
 			//プレイパート
 			StopSoundMem(titleSceneBgm);
+			StopSoundMem(gameoverSceneBgm);
 			PlaySoundMem(gameSceneBgm, DX_PLAYTYPE_LOOP, false);
 			ChangeVolumeSoundMem(170, gameSceneBgm);
 			if (isPause)
