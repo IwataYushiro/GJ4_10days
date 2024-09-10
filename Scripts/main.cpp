@@ -285,7 +285,7 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 			}
 
 			//‘Oi
-			float playerMoveForce = 2;
+			float playerMoveForce = 1;
 			if (!liveEntity->direction)
 			{
 				playerMoveForce *= -1;
