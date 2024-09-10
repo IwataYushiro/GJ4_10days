@@ -367,6 +367,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	//ボタンを押す音
 	const int buttonPushSound = LoadSoundMem("Resources/SE/buttonPush.wav");
+	//壊せないブロックを押す音
+	const int reflectSound = LoadSoundMem("Resources/SE/reflect.wav");
 
 	//BGM
 	int titleSceneBgm;
@@ -631,6 +633,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					for (int i = 0; i < blocks.size(); i++)
 					{
 						blocks[i].rigidBody.gameObject.graphNum = blocksSprite[blocks[i].blockType];
+						blocks[i].rigidBody.gameObject.graphLocalPos = blocks[i].rigidBody.gameObject.graphLocalPos * 0.3f;
 
 						//落下
 						blocks[i].rigidBody.gameObject.entity.position.y =
@@ -686,7 +689,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 									targetPos = blocks[j].rigidBody.gameObject.entity.position;
 									if (i != j && blocks[i].rigidBody.gameObject.entity.position.y - blocks[i].latestLandingHeight > BLOCK_DIAMETER / 1.1f
 										&& (blocks[j].blockType == untappableblock || blocks[j].blockType == lethalblock)
-										&& VectorScale(pos, targetPos) <= BLOCK_DIAMETER * 1.2f)
+										&& VectorScale(pos - targetPos) <= BLOCK_DIAMETER * 1.2f)
 									{
 										blocks[i].status = "prepareBreak";
 										blocks[j].status = "prepareBreak";
@@ -699,7 +702,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						{
 							//砂ブロックが自機に触れたら崩れる準備
 							if (HitRectAndRect(blocks[i].rigidBody.gameObject.entity, player.rigidBody.gameObject.entity)
-								&& VectorScale(blocks[i].rigidBody.gameObject.entity.position, player.rigidBody.gameObject.entity.position) <= BLOCK_DIAMETER)
+								&& VectorScale(blocks[i].rigidBody.gameObject.entity.position - player.rigidBody.gameObject.entity.position) <= BLOCK_DIAMETER)
 							{
 								blocks[i].status = "touched";
 							}
@@ -725,19 +728,27 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 							}
 						}
 
-						//クリックされたら消す準備（破壊可能なブロックのみ）
-						if (blocks[i].blockType != untappableblock && blocks[i].blockType != lethalblock
-							&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.position + (camPosition + camPosOffset))
+						//クリックされたら消す準備、壊せないブロックは少し演出を起こすだけ
+						if (HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.position + (camPosition + camPosOffset))
 							&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.pin + (camPosition + camPosOffset))
 							&& !mouseInputData.click && mouseInputData.preClick)
 						{
-							blocks[i].breaked = true;
+							if (blocks[i].blockType == untappableblock || blocks[i].blockType == lethalblock)
+							{
+								PlaySoundMem(reflectSound, DX_PLAYTYPE_BACK, true);
+								blocks[i].rigidBody.gameObject.graphLocalPos =
+									NormalizedVector(Vector2D{ (float)(rand() % 4) - 1.5f,(float)(rand() % 4) - 1.5f }) * 10;
+							}
+							else
+							{
+								blocks[i].breaked = true;
+							}
 						}
 
 						//リーサルブロックに自機が触れたら死ぬ
 						if (blocks[i].blockType == lethalblock
 							&& HitRectAndRect(blocks[i].rigidBody.gameObject.entity, player.rigidBody.gameObject.entity)
-							&& VectorScale(blocks[i].rigidBody.gameObject.entity.position, player.rigidBody.gameObject.entity.position) <= BLOCK_DIAMETER)
+							&& VectorScale(blocks[i].rigidBody.gameObject.entity.position - player.rigidBody.gameObject.entity.position) <= BLOCK_DIAMETER)
 						{
 							player.isLive = false;
 						}
