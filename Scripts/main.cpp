@@ -788,7 +788,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//タイトルロゴ
 			DrawGraph(0, 0, titleGraph, true);
-			DrawGraph(0, 0, operationGraph, true);
 			//権利表示
 			DrawString(
 				WIN_WIDTH / 3, WIN_HEIGHT - (FONT_SIZE * 2 + 10), "2024 TERAPETA GAMES / TEAM GJ4",
@@ -817,8 +816,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//スクロールチェック用
 			DrawFormatString(1200, 500, GetColor(122, 112, 122), "%d", -((int)camPosition.y % WIN_HEIGHT));
-			DrawFormatString(1150, 180, GetColor(0, 0, 0), "%d", gameui_->digTimerT10);
-			DrawFormatString(1200, 180, GetColor(0, 0, 0), "%d", gameui_->digTimerT1);
+			DrawFormatString(1150, 180, GetColor(0, 0, 0), "%d", gameui_->depthT1);
+			DrawFormatString(1200, 180, GetColor(0, 0, 0), "%d", gameui_->depthT1);
 			break;
 		case credit:
 			//クレジット画面
