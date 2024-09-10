@@ -341,6 +341,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//ボタンを押す音
 	const int buttonPushSound = LoadSoundMem("Resources/SE/buttonPush.wav");
 
+	//BGM
+	int titleSceneBgm;
+	titleSceneBgm = LoadSoundMem("Resources/BGM/title.mp3");
+	int gameSceneBgm;
+	gameSceneBgm = LoadSoundMem("Resources/BGM/game.mp3");
+	int gameoverSceneBgm;
+	gameoverSceneBgm = LoadSoundMem("Resources/BGM/gameover.mp3");
+
 	// ゲームループで使う変数の宣言
 
 	//マウス入力を扱うフィールド
@@ -452,11 +460,42 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			}
 		}
 
+		//音(BGM)の生成
+		switch (currentScene)
+		{
+		case title:
+			//タイトル画面
+			StopSoundMem(gameoverSceneBgm);
+			StopSoundMem(gameSceneBgm);
+			PlaySoundMem(titleSceneBgm, DX_PLAYTYPE_LOOP, false);
+			break;
+		case playpart:
+			//プレイパート
+			StopSoundMem(titleSceneBgm);
+			PlaySoundMem(gameSceneBgm, DX_PLAYTYPE_LOOP, false);
+			ChangeVolumeSoundMem(170, gameSceneBgm);
+			if (isPause)
+			{
+				ChangeVolumeSoundMem(70, gameSceneBgm);
+			}
+			else if (!player.isLive)
+			{
+				StopSoundMem(gameSceneBgm);
+				PlaySoundMem(gameoverSceneBgm, DX_PLAYTYPE_LOOP, false);
+				ChangeVolumeSoundMem(120, gameoverSceneBgm);
+			}
+			break;
+		}
+
+
 		//ボタンを生成
 		switch (currentScene)
 		{
 		case title:
 			//タイトル画面
+			StopSoundMem(gameoverSceneBgm);
+			StopSoundMem(gameSceneBgm);
+			PlaySoundMem(titleSceneBgm, DX_PLAYTYPE_LOOP, false);
 
 			//スタートボタンとクレジットボタン
 			buttons = {
@@ -467,9 +506,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			break;
 		case playpart:
 			//プレイパート
-
+			StopSoundMem(titleSceneBgm);
+			PlaySoundMem(gameSceneBgm, DX_PLAYTYPE_LOOP, false);
+			ChangeVolumeSoundMem(170, gameSceneBgm);
 			if (isPause)
 			{
+				ChangeVolumeSoundMem(70, gameSceneBgm);
 				//ポーズメニューボタン
 				buttons = {
 					Button{Rect{370, 160,60,50},"つづける","RESUME"},
@@ -478,6 +520,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			}
 			else if (!player.isLive)
 			{
+				StopSoundMem(gameSceneBgm);
+				PlaySoundMem(gameoverSceneBgm, DX_PLAYTYPE_LOOP, false);
+				ChangeVolumeSoundMem(120, gameoverSceneBgm);
 				buttons = {
 					Button{Rect{370, 260,100,50},"もう一回","TRY AGAIN"},
 					Button{Rect{370, 560,100,50},"もうやめる","QUIT"},
