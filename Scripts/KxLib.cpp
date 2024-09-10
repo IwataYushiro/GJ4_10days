@@ -198,7 +198,6 @@ void collideWall(RigidBody& rgd, vector<GameObject> blocks) {
 }
 
 void RigidBodyUpdate(RigidBody& rgd, Vector2D gravity, Vector2D drag, vector<GameObject> blocks) {
-	GravityAndDrag(rgd, gravity, drag);
 	float physicsLoop = max(rgd.movement.x, rgd.movement.y) / min(rgd.gameObject.entity.scale.x, rgd.gameObject.entity.scale.y) * 4;
 	float physicsDiv = (max(rgd.movement.x, rgd.movement.y) - fmod(max(rgd.movement.x, rgd.movement.y), min(rgd.gameObject.entity.scale.x, rgd.gameObject.entity.scale.y))) / min(rgd.gameObject.entity.scale.x, rgd.gameObject.entity.scale.y) * 4;
 	physicsDiv = max(1, physicsDiv);
@@ -219,6 +218,8 @@ void RigidBodyUpdate(RigidBody& rgd, Vector2D gravity, Vector2D drag, vector<Gam
 		rgd.landing = false;
 	}
 	rgd.gameObject.beforeSca = Vector2D{ rgd.gameObject.entity.scale.x,rgd.gameObject.entity.scale.y };
+
+	GravityAndDrag(rgd, gravity, drag);
 }
 
 bool HitRectAndCircle(Rect rect, int x, int y, int radius)

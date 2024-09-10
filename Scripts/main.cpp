@@ -228,6 +228,9 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 	//物理挙動
 	RigidBodyUpdate(liveEntity->rigidBody, { 0,1 }, { 0.5,1 }, blocks);
 
+	//落下速度制限（ブロックと同じにする）
+	liveEntity->rigidBody.movement.y = min(liveEntity->rigidBody.movement.y, BLOCK_DIAMETER / 10);
+
 	//生きていたら
 	if (liveEntity->isLive)
 	{
@@ -272,9 +275,9 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 			{
 				liveEntity->stuckFrameCount--;
 			}
-			liveEntity->stuckFrameCount = min(max(0, liveEntity->stuckFrameCount), 3);
+			liveEntity->stuckFrameCount = min(max(0, liveEntity->stuckFrameCount), 6);
 
-			if (liveEntity->stuckFrameCount >= 3)
+			if (liveEntity->stuckFrameCount >= 6)
 			{
 				liveEntity->direction = !liveEntity->direction;
 				liveEntity->rigidBody.gameObject.dir = !liveEntity->rigidBody.gameObject.dir;
@@ -282,7 +285,7 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 			}
 
 			//前進
-			float playerMoveForce = 5;
+			float playerMoveForce = 2;
 			if (!liveEntity->direction)
 			{
 				playerMoveForce *= -1;
@@ -367,6 +370,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	//ボタンを押す音
 	const int buttonPushSound = LoadSoundMem("Resources/SE/buttonPush.wav");
+	//ブロックを壊す音
+	const int blockBreakSound = LoadSoundMem("Resources/SE/breakBlock.wav");
 	//壊せないブロックを押す音
 	const int reflectSound = LoadSoundMem("Resources/SE/reflect.wav");
 
@@ -759,6 +764,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						if (blocks[i].breaked)
 						{
 							gameui_->blockCountT1++;
+							PlaySoundMem(blockBreakSound, DX_PLAYTYPE_BACK, true);
 							blocks.erase(blocks.begin() + i);
 							i--;
 						}
