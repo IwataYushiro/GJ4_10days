@@ -789,7 +789,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//タイトルロゴ
 			DrawGraph(0, 0, titleGraph, true);
-			DrawGraph(0, 0, operationGraph, true);
 			//権利表示
 			DrawString(
 				WIN_WIDTH / 3, WIN_HEIGHT - (FONT_SIZE * 2 + 10), "2024 TERAPETA GAMES / TEAM GJ4",
