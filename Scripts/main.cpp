@@ -72,6 +72,7 @@ struct Block
 struct LiveEntity
 {
 	RigidBody rigidBody;
+	int insideBlockCount;
 	bool isLive = true;
 	bool direction = true;
 	int stuckFrameCount = 0;
@@ -229,15 +230,30 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 	//生きていたら
 	if (liveEntity->isLive)
 	{
-		//もしブロックの中に押し込まれたら死ぬ
+		//ブロックの中に押し込まれているか判定
+		bool isInsideBlock = false;
 		for (int i = 0; i < blocks.size(); i++)
 		{
 			if (HitRectAndPoint(blocks[i].entity,
 				Vector2D{ liveEntity->rigidBody.gameObject.entity.position.x,
 				liveEntity->rigidBody.gameObject.entity.position.y }))
 			{
+				isInsideBlock = true;
+				break;
+			}
+		}
+		//もしブロックの中に押し込まれた状態が6フレーム続いたら死ぬ
+		if (isInsideBlock)
+		{
+			liveEntity->insideBlockCount++;
+			if (liveEntity->insideBlockCount >= 6)
+			{
 				liveEntity->isLive = false;
 			}
+		}
+		else
+		{
+			liveEntity->insideBlockCount = 0;
 		}
 
 		//着地していたら
@@ -559,11 +575,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					unsigned int landingBlockIndex = min(blocks[i].landingBlockIndex, blocks.size() - 1);
 					Vector2D pos = blocks[i].rigidBody.gameObject.entity.position;
 					Vector2D targetPos = blocks[landingBlockIndex].rigidBody.gameObject.entity.position;
-					if (pos.x == targetPos.x
-						&& pos.y < targetPos.y && pos.y > targetPos.y - BLOCK_DIAMETER)
+					if (pos.y >= BLOCK_DIAMETER * (PLAYPART_HEIGHT - 1)
+						|| (pos.x == targetPos.x
+						&& pos.y < targetPos.y && pos.y > targetPos.y - BLOCK_DIAMETER))
 					{
 						//支えがある場合は軽量処理
-						blocks[i].rigidBody.gameObject.entity.position.y = targetPos.y - BLOCK_DIAMETER;
+						if (pos.y < BLOCK_DIAMETER * (PLAYPART_HEIGHT - 1))
+						{
+							blocks[i].rigidBody.gameObject.entity.position.y = targetPos.y - BLOCK_DIAMETER;
+						}
 						blocks[i].latestLandingHeight = blocks[i].rigidBody.gameObject.entity.position.y;
 						//壊れる準備が出来ている状態で壊せないブロックが着地していたら壊れる
 						if (blocks[i].blockType == untappableblock || blocks[i].blockType == lethalblock)
@@ -817,8 +837,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//スクロールチェック用
 			DrawFormatString(1200, 500, GetColor(122, 112, 122), "%d", -((int)camPosition.y % WIN_HEIGHT));
-			DrawFormatString(1150, 180, GetColor(0, 0, 0), "%d", gameui_->digTimerT10);
-			DrawFormatString(1200, 180, GetColor(0, 0, 0), "%d", gameui_->digTimerT1);
+			DrawFormatString(1150, 180, GetColor(0, 0, 0), "%d", gameui_->depthT10);
+			DrawFormatString(1200, 180, GetColor(0, 0, 0), "%d", gameui_->depthT1);
 			break;
 		case credit:
 			//クレジット画面
