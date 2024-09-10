@@ -476,7 +476,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					Button{Rect{370, 460,60,50},"やめる","QUIT"},
 				};
 			}
-			else if (!player.isLive&& !isPause)
+			else if (!player.isLive)
 			{
 				buttons = {
 					Button{Rect{370, 260,100,50},"もう一回","TRY AGAIN"},
@@ -694,29 +694,30 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 				gameui_->depthT1 =
 					(player.rigidBody.gameObject.entity.position.y) / BLOCK_DIAMETER + 1;
-				
+
 				//ボタンを押した時の処理
 				if (IsButtonClicked(buttons, 0))
 				{
 					//ポーズする
 					isPause = true;
 				}
-			}
-			else if(!player.isLive)
-			{
-				//自機死亡時
-				//続ける
-				if (IsButtonClicked(buttons, 0))
+
+				if (!player.isLive)
 				{
-					gameui_->Reset();
-					//リセット
-					sceneInit = true;
-				}
-				//終わる
-				if (IsButtonClicked(buttons, 1))
-				{
-					//タイトルへ
-					nextScene = title;
+					//自機死亡時
+					//続ける
+					if (IsButtonClicked(buttons, 0))
+					{
+						gameui_->Reset();
+						//リセット
+						sceneInit = true;
+					}
+					//終わる
+					if (IsButtonClicked(buttons, 1))
+					{
+						//タイトルへ
+						nextScene = title;
+					}
 				}
 			}
 			else
@@ -757,8 +758,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				nextScene = title;
 			}
 			break;
-			
-			
+
+
 		}
 
 		// 描画処理
@@ -808,13 +809,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			if (!player.isLive)
 			{
-				
-				DrawGraph(300, 80, gameoverGraph, true);
+
+				DrawGraph(300, 50, gameoverGraph, true);
 			}
 			//このラインからはUIゾーンなのでいっそここにボックスUIおいてもいいや
 			DrawBox(GAME_LINE, 0, WIN_WIDTH, WIN_HEIGHT, GetColor(0xff, 0xff, 0xff), TRUE);
 			gameui_->Draw();
-			
+
 
 			break;
 		case credit:
