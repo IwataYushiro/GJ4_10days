@@ -40,6 +40,7 @@ struct Rect
 ///<para>entity = 矩形の情報</para>
 ///<para>graphNum = 貼り付ける画像の番号</para>
 ///<para>graphScale = 画像の大きさ</para>
+///<para>graphLocalPos = 画像の相対座標</para>
 ///<para>dir = 画像を左右反転させるか</para>
 ///<para>beforePos = １フレーム前の位置を記憶する場所、初期化する必要なし</para>
 ///<para>beforeSca = １フレーム前の大きさを記憶する場所、初期化する必要なし</para>

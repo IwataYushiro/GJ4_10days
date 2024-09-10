@@ -66,7 +66,10 @@ void SceneUpdate(float& progress, int& scene, int nextScene) {
 }
 
 void RenderObject(GameObject obj, Vector2D scroll) {
-	DrawRotaGraph(obj.entity.position.x - scroll.x, obj.entity.position.y - scroll.y, obj.graphScale, obj.rot, obj.graphNum, true, obj.dir);
+	DrawRotaGraph(
+		obj.entity.position.x + obj.graphLocalPos.x - scroll.x,
+		obj.entity.position.y + obj.graphLocalPos.y - scroll.y,
+		obj.graphScale, obj.rot, obj.graphNum, true, obj.dir);
 }
 
 void RenderAllObject(vector<GameObject> obj, Vector2D scroll) {

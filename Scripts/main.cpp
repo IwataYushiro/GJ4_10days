@@ -71,6 +71,8 @@ struct Block
 struct LiveEntity
 {
 	RigidBody rigidBody;
+	int* sprites;
+	float spriteIndex = 0;
 	int insideBlockCount;
 	bool isLive = true;
 	bool direction = true;
@@ -286,12 +288,20 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 				playerMoveForce *= -1;
 			}
 			liveEntity->rigidBody.movement.x += playerMoveForce;
+
+			liveEntity->spriteIndex = fmodf(liveEntity->spriteIndex + 0.5f,6);
 		}
 		else
 		{
 			liveEntity->stuckFrameCount = 0;
+			liveEntity->spriteIndex = fmodf(liveEntity->spriteIndex + 1.5f, 6);
 		}
 	}
+	else
+	{
+		liveEntity->spriteIndex = 6;
+	}
+	liveEntity->rigidBody.gameObject.graphNum = liveEntity->sprites[(int)liveEntity->spriteIndex];
 }
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine,
@@ -334,15 +344,16 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	//開発者ロゴ
 	const int logoGraph = LoadGraph("Resources/Textures/TERAPETAGAMES_logo.png");
-	//タイトル画面(タイトル画面からシューティングゲーム)とBGM
+	//タイトル画面
 	const int titleGraph = LoadGraph("Resources/Textures/title.png");
 	const int operationGraph = LoadGraph("Resources/Textures/sousa.png");
-	//クリア画面(シューティングゲームからクリア画面)とBGM
-	const int clearGraph = LoadGraph("Resources/Textures/clear.png");
-	//ゲームオーバー画面(シューティングゲームからゲームオーバー画面)とBGM
+	//ゲームオーバー画面
 	const int gameoverGraph = LoadGraph("Resources/Textures/gameover.png");
 	//自機
-	const int playerSprite = LoadGraph("Resources/Textures/protoplayer.png");
+	int playerSprites[7];
+	LoadDivGraph("Resources/Textures/miniminiKX.png", 7,
+		4, 4,
+		64, 64, playerSprites);
 	//ブロック各種
 	const int blocksSprite[] = {
 		LoadGraph("Resources/Textures/weakBlock.png"),
@@ -454,7 +465,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				//ポーズ解除
 				isPause = false;
 				//自機を初期座標へ
-				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 32,25,25}, playerSprite} },true,true,0 };
+				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 32,20,20},0,1,{0,-12}} },playerSprites };
 				//ブロックを初期化、生成
 				blocks = {};
 				for (int i = 0; i < PLAYPART_HEIGHT; i++)
@@ -759,8 +770,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 					//両端の壁を追従させる
 					edgeWall = {
-						GameObject{Rect{Vector2D{-WIN_WIDTH / 2,0} + camPosition,{0,WIN_HEIGHT} },playerSprite},
-						GameObject{Rect{Vector2D{-WIN_WIDTH / 2 + GAME_LINE,0} + camPosition,{0,WIN_HEIGHT}},playerSprite},
+						GameObject{Rect{Vector2D{-WIN_WIDTH / 2,0} + camPosition,{0,WIN_HEIGHT}}},
+						GameObject{Rect{Vector2D{-WIN_WIDTH / 2 + GAME_LINE,0} + camPosition,{0,WIN_HEIGHT}}},
 					};
 
 					gameui_->depthT1 =
@@ -844,7 +855,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			DrawRotaGraph(WIN_WIDTH / 2, WIN_HEIGHT / 2, 2, 0, logoGraph, TRUE);
 			DrawString(
 				WIN_WIDTH / 7 * 3, WIN_HEIGHT / 5 * 3,
-				"TEAM GJ4",
+				"TEAM 4005",
 				GetColor(0, 0, 0));
 			if (clock() % 1500 < 1000)
 			{
@@ -861,7 +872,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			DrawGraph(0, 0, titleGraph, true);
 			//権利表示
 			DrawString(
-				WIN_WIDTH / 3, WIN_HEIGHT - (FONT_SIZE * 2 + 10), "2024 TERAPETA GAMES / TEAM GJ4",
+				WIN_WIDTH / 3, WIN_HEIGHT - (FONT_SIZE * 2 + 10), "2024 TERAPETA GAMES / TEAM 4005",
 				GetColor(0, 0, 0));
 			break;
 		case playpart:
@@ -895,7 +906,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				GetColor(0, 0, 0));
 			DrawString(
 				WIN_WIDTH / 2, 0,
-				"\n\nテクニカルサポート\n　鰯ユウ\n　神無月\n\nビジュアルアドバイザー\n　てらぺた\n\nエグゼクティブプロデューサー\n　てらぺた\n\nディレクター\n　てらぺた\n\nかいはつ\n　てらぺたゲームズ\n　チームGJ4\n\n\nTERAPETA GAMES / TEAM GJ4\nAll Rights Reserved.",
+				"\n\nテクニカルサポート\n　鰯ユウ\n　神無月\n\nビジュアルアドバイザー\n　てらぺた\n\nエグゼクティブプロデューサー\n　てらぺた\n\nディレクター\n　てらぺた\n\nかいはつ\n　てらぺたゲームズ\n　チーム4005\n\n\nTERAPETA GAMES / TEAM 4005\nAll Rights Reserved.",
 				GetColor(0, 0, 0));
 			break;
 		case howtoplay:
