@@ -375,13 +375,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//壊せないブロックを押す音
 	const int reflectSound = LoadSoundMem("Resources/SE/reflect.wav");
 
-	//BGM
-	int titleSceneBgm;
-	titleSceneBgm = LoadSoundMem("Resources/BGM/title.mp3");
-	int gameSceneBgm;
-	gameSceneBgm = LoadSoundMem("Resources/BGM/game.mp3");
-	int gameoverSceneBgm;
-	gameoverSceneBgm = LoadSoundMem("Resources/BGM/gameover.mp3");
+	//このゲームで流す全てのBGM（曲を流したくないときはインデックス0番を指定）
+	const int audioClip[] = { 
+		0,
+		LoadSoundMem("Resources/BGM/title.mp3"),
+		LoadSoundMem("Resources/BGM/game.mp3"),
+		LoadSoundMem("Resources/BGM/gameover.mp3") };
 
 	// ゲームループで使う変数の宣言
 
@@ -392,11 +391,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	Scene currentScene = logo;
 	//遷移しようとしている次のシーン
 	Scene nextScene = logo;
+	//シーン遷移用のタイマー
+	float sceneTransitionProgress = 0;
 	//シーンの初期化が必要ならこれをtrueに
 	bool sceneInit = false;
 
-	//シーン遷移用のタイマー
-	float sceneTransitionProgress = 0;
+	//今流す曲のインデックス
+	int bgmNum = 0;
+
 	//Pause中のフラグ
 	bool isPause = false;
 	//ボタン
@@ -405,7 +407,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//カメラ座標
 	Vector2D camPosition = Vector2D{ 0,0 };
 	const Vector2D camPosOffset = Vector2D{ -WIN_WIDTH / 2,-WIN_HEIGHT / 2 };
-
 
 	//自機
 	LiveEntity player = {};
@@ -497,34 +498,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			sceneInit = false;
 		}
 
-		//音(BGM)の生成
-		switch (currentScene)
-		{
-		case title:
-			//タイトル画面
-			StopSoundMem(gameoverSceneBgm);
-			StopSoundMem(gameSceneBgm);
-			PlaySoundMem(titleSceneBgm, DX_PLAYTYPE_LOOP, false);
-			break;
-		case playpart:
-			//プレイパート
-			StopSoundMem(titleSceneBgm);
-			PlaySoundMem(gameSceneBgm, DX_PLAYTYPE_LOOP, false);
-			ChangeVolumeSoundMem(170, gameSceneBgm);
-			if (isPause)
-			{
-				ChangeVolumeSoundMem(70, gameSceneBgm);
-			}
-			else if (!player.isLive)
-			{
-				StopSoundMem(gameSceneBgm);
-				PlaySoundMem(gameoverSceneBgm, DX_PLAYTYPE_LOOP, false);
-				ChangeVolumeSoundMem(120, gameoverSceneBgm);
-			}
-			break;
-		}
-
-
 		//ボタンを生成
 		switch (currentScene)
 		{
@@ -591,6 +564,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		case logo:
 			//ロゴ画面
 
+			//曲を指定しない
+			bgmNum = 0;
+
 			//左クリックでタイトルへ
 			if (!mouseInputData.click && mouseInputData.preClick)
 			{
@@ -599,6 +575,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			break;
 		case title:
 			//タイトル画面
+
+			//タイトルの曲を指定
+			bgmNum = 1;
 
 			//ボタンを押した時の処理
 			if (IsButtonClicked(buttons, 0))
@@ -616,6 +595,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			break;
 		case playpart:
 			//プレイパート
+
+			//プレイパートの曲を指定
+			bgmNum = 2;
+			//曲の音量を大きく
+			ChangeVolumeSoundMem(255, audioClip[2]);
+
 			if (!isPause)
 			{
 				if (player.isLive)
@@ -804,6 +789,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						//タイトルへ
 						nextScene = title;
 					}
+
+					//曲の音量を小さく
+					ChangeVolumeSoundMem(128, audioClip[2]);
 				}
 			}
 			else
@@ -822,12 +810,17 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					//タイトルへ
 					nextScene = title;
 				}
-			}
 
+				//曲の音量を小さく
+				ChangeVolumeSoundMem(128, audioClip[2]);
+			}
 
 			break;
 		case credit:
 			//クレジット画面
+
+			//クレジットの曲を指定
+			bgmNum = 3;
 
 			//ボタンを押した時の処理
 			if (IsButtonClicked(buttons, 0))
@@ -838,14 +831,25 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		case howtoplay:
 			//遊び方説明画面
 
+			//遊び方説明の曲を指定
+			bgmNum = 3;
+
 			//ボタンを押した時の処理
 			if (IsButtonClicked(buttons, 0))
 			{
 				nextScene = title;
 			}
 			break;
+		}
 
-
+		//曲を再生、同時に流すべきでない曲を止める
+		if (!CheckSoundMem(audioClip[bgmNum])) {
+			PlaySoundMem(audioClip[bgmNum], DX_PLAYTYPE_BACK, true);
+		}
+		for (int i = 0; i < sizeof(audioClip) / sizeof(*audioClip); i++) {
+			if (i != bgmNum) {
+				StopSoundMem(audioClip[i]);
+			}
 		}
 
 		// 描画処理
