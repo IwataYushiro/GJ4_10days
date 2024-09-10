@@ -12,7 +12,8 @@ void gameUi::Reset()
 	digTimerT100 = 0;
 
 	blockCountT1 = 0;
-	blockCountT2 = 0;
+	blockCountT10 = 0;
+	blockCountT100 = 0;
 }
 
 void gameUi::Initialize()
@@ -51,6 +52,11 @@ void gameUi::Update()
 	digTimerT10 = digTimerT1 / 10;
 	//100の桁
 	digTimerT100 = digTimerT10 / 10;
+	//どこまでブロックを壊したか
+	//10の桁
+	blockCountT10 = blockCountT1 / 10;
+	//100の桁
+	blockCountT100 = blockCountT10 / 10;
 }
 
 void gameUi::Draw()
@@ -93,48 +99,31 @@ void gameUi::Draw()
 
 	//残り深層何mかのUI
 	//1の位
-	DrawDigUI(digTimerT1, 1050);
+	DrawUI(digTimerT1, 1050, 290);
 	//10の位
-	DrawDigUI(digTimerT10, 1000);
+	DrawUI(digTimerT10, 1000, 290);
 	//100の位
-	DrawDigUI(digTimerT100, 950);
+	DrawUI(digTimerT100, 950, 290);
 
 	//ブロックをいくつ壊したかのかのUI
 	//1の位
-	if (blockCountT1 <= 0) { DrawGraph(1050, 550, zeroGraph, true); }
-	else if (blockCountT1 == 1) { DrawGraph(1050, 550, oneGraph, true); }
-	else if (blockCountT1 == 2) { DrawGraph(1050, 550, twoGraph, true); }
-	else if (blockCountT1 == 3) { DrawGraph(1050, 550, threeGraph, true); }
-	else if (blockCountT1 == 4) { DrawGraph(1050, 550, fourGraph, true); }
-	else if (blockCountT1 == 5) { DrawGraph(1050, 550, fiveGraph, true); }
-	else if (blockCountT1 == 6) { DrawGraph(1050, 550, sixGraph, true); }
-	else if (blockCountT1 == 7) { DrawGraph(1050, 550, sevenGraph, true); }
-	else if (blockCountT1 == 8) { DrawGraph(1050, 550, eightGraph, true); }
-	else if (blockCountT1 == 9) { DrawGraph(1050, 550, nineGraph, true); }
+	DrawUI(blockCountT1, 1050, 550);
 	//10の位
-	if (blockCountT2 == 0) { DrawGraph(1000, 550, zeroGraph, true); }
-	else if (blockCountT2 == 1) { DrawGraph(1000, 550, oneGraph, true); }
-	else if (blockCountT2 == 2) { DrawGraph(1000, 550, twoGraph, true); }
-	else if (blockCountT2 == 3) { DrawGraph(1000, 550, threeGraph, true); }
-	else if (blockCountT2 == 4) { DrawGraph(1000, 550, fourGraph, true); }
-	else if (blockCountT2 == 5) { DrawGraph(1000, 550, fiveGraph, true); }
-	else if (blockCountT2 == 6) { DrawGraph(1000, 550, sixGraph, true); }
-	else if (blockCountT2 == 7) { DrawGraph(1000, 550, sevenGraph, true); }
-	else if (blockCountT2 == 8) { DrawGraph(1000, 550, eightGraph, true); }
-	else if (blockCountT2 == 9) { DrawGraph(1000, 550, nineGraph, true); }
-
+	DrawUI(blockCountT10, 1000, 550);
+	//10の位
+	DrawUI(blockCountT100, 950, 550);
 }
 
-void gameUi::DrawDigUI(int digTimerRank, int uiPosX)
+void gameUi::DrawUI(int digTimerRank, int uiPosX, int uiPosY)
 {
-	if (digTimerRank % 10 <= 0) { DrawGraph(uiPosX, 290, zeroGraph, true); }
-	else if (digTimerRank % 10 == 1) { DrawGraph(uiPosX, 290, oneGraph, true); }
-	else if (digTimerRank % 10 == 2) { DrawGraph(uiPosX, 290, twoGraph, true); }
-	else if (digTimerRank % 10 == 3) { DrawGraph(uiPosX, 290, threeGraph, true); }
-	else if (digTimerRank % 10 == 4) { DrawGraph(uiPosX, 290, fourGraph, true); }
-	else if (digTimerRank % 10 == 5) { DrawGraph(uiPosX, 290, fiveGraph, true); }
-	else if (digTimerRank % 10 == 6) { DrawGraph(uiPosX, 290, sixGraph, true); }
-	else if (digTimerRank % 10 == 7) { DrawGraph(uiPosX, 290, sevenGraph, true); }
-	else if (digTimerRank % 10 == 8) { DrawGraph(uiPosX, 290, eightGraph, true); }
-	else if (digTimerRank % 10 == 9) { DrawGraph(uiPosX, 290, nineGraph, true); }
+	if (digTimerRank % 10 <= 0) { DrawGraph(uiPosX, uiPosY, zeroGraph, true);}
+	else if (digTimerRank % 10 == 1) { DrawGraph(uiPosX, uiPosY, oneGraph, true); }
+	else if (digTimerRank % 10 == 2) { DrawGraph(uiPosX, uiPosY, twoGraph, true); }
+	else if (digTimerRank % 10 == 3) { DrawGraph(uiPosX, uiPosY, threeGraph, true); }
+	else if (digTimerRank % 10 == 4) { DrawGraph(uiPosX, uiPosY, fourGraph, true); }
+	else if (digTimerRank % 10 == 5) { DrawGraph(uiPosX, uiPosY, fiveGraph, true); }
+	else if (digTimerRank % 10 == 6) { DrawGraph(uiPosX, uiPosY, sixGraph, true); }
+	else if (digTimerRank % 10 == 7) { DrawGraph(uiPosX, uiPosY, sevenGraph, true); }
+	else if (digTimerRank % 10 == 8) { DrawGraph(uiPosX, uiPosY, eightGraph, true); }
+	else if (digTimerRank % 10 == 9) { DrawGraph(uiPosX, uiPosY, nineGraph, true); }
 }

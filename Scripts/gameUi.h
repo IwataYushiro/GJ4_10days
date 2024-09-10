@@ -60,11 +60,13 @@ public:
 	//1の位
 	int blockCountT1 = 0;
 	//10の位
-	int blockCountT2 = 0;
+	int blockCountT10 = 0;
+	//10の位
+	int blockCountT100 = 0;
 	//ここまで
 	////////////////////////////////////////////////////
 
 private:
 	//深層何メートルまで進んでるかのUI描画(桁数、X軸)
-	void DrawDigUI(int digTimerRank, int uiPosX);
+	void DrawUI(int digTimerRank, int uiPosX, int uiposY);
 };

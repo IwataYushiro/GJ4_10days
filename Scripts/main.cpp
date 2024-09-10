@@ -563,6 +563,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 							if (blocks[i].status == "prepareBreak")
 							{
 								blocks[i].breaked = true;
+								gameui_->blockCountT1++;
 							}
 						}
 					}
@@ -629,6 +630,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 							else if (blocks[i].status == "prepareBreak")
 							{
 								blocks[i].breaked = true;
+								gameui_->blockCountT1++;
 							}
 						}
 					}
@@ -640,6 +642,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						&& !mouseInputData.click && mouseInputData.preClick)
 					{
 						blocks[i].breaked = true;
+						gameui_->blockCountT1++;
 					}
 				}
 				//消す準備が出来たブロックを全部消す
