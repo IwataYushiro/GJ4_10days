@@ -31,6 +31,7 @@ enum Scene
 	playpart,
 	credit,
 	howtoplay,
+	gameover,
 };
 
 enum BlockType
@@ -363,6 +364,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	//自機
 	LiveEntity player = {};
+
 	//自機がフィールド外に出ないための壁
 	vector<GameObject> edgeWall = {
 		GameObject{Rect{-WIN_WIDTH / 2,0,0,WIN_HEIGHT}},
@@ -497,6 +499,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				Button{Rect{140, 60,130,50},"もどる","RETURN"},
 			};
 			break;
+		case gameover:
+			//ゲームオーバーボタン
+			buttons = {
+				Button{Rect{400, 600,100,50},"もう一回","TRY AGAIN"},
+				Button{Rect{860, 600,100,50},"もうやめる","QUIT"},
+			};
 		}
 
 		//ボタンを更新（ちょっとだけ縦に揺らす）
@@ -692,6 +700,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					//ポーズする
 					isPause = true;
 				}
+				//自機が死んだら
+				if (!player.isLive)
+				{
+					nextScene = gameover;
+					
+				}
 			}
 			else
 			{
@@ -731,6 +745,21 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				nextScene = title;
 			}
 			break;
+		case gameover:
+			//ゲームオーバー
+			gameui_->Reset();
+			//続ける
+			if (IsButtonClicked(buttons, 0))
+			{
+				//もう一回
+				nextScene = playpart;
+			}
+			//終わる
+			if (IsButtonClicked(buttons, 1))
+			{
+				//タイトルへ
+				nextScene = title;
+			}
 		}
 
 		// 描画処理
@@ -787,10 +816,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			DrawString(1150,385,"m",GetColor(0, 0, 0));
 			DrawString(950, 500, "壊したブロック数", GetColor(0, 0, 0));
 
-			//スクロールチェック用
-			DrawFormatString(1200, 500, GetColor(122, 112, 122), "%d", -((int)camPosition.y % WIN_HEIGHT));
-			DrawFormatString(1150, 180, GetColor(0, 0, 0), "%d", gameui_->digTimerT10);
-			DrawFormatString(1200, 180, GetColor(0, 0, 0), "%d", gameui_->digTimerT1);
 			break;
 		case credit:
 			//クレジット画面
@@ -804,6 +829,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				GetColor(0, 0, 0));
 			break;
 		case howtoplay:
+			DrawGraph(0, 0, operationGraph, true);
+			break;
+		case gameover:
 			DrawGraph(0, 0, operationGraph, true);
 			break;
 		}
