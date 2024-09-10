@@ -563,7 +563,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 							if (blocks[i].status == "prepareBreak")
 							{
 								blocks[i].breaked = true;
-								gameui_->blockCountT1++;
 							}
 						}
 					}
@@ -630,7 +629,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 							else if (blocks[i].status == "prepareBreak")
 							{
 								blocks[i].breaked = true;
-								gameui_->blockCountT1++;
 							}
 						}
 					}
@@ -642,7 +640,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						&& !mouseInputData.click && mouseInputData.preClick)
 					{
 						blocks[i].breaked = true;
-						gameui_->blockCountT1++;
 					}
 
 					//リーサルブロックに自機が触れたら死ぬ
@@ -658,6 +655,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				{
 					if (blocks[i].breaked)
 					{
+						gameui_->blockCountT1++;
 						blocks.erase(blocks.begin() + i);
 						i--;
 					}
