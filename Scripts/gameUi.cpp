@@ -63,6 +63,7 @@ void gameUi::Draw()
 {
 	//ビットマップフォントタイマー
 	//タイマー
+
 	//1の位
 	if (timerT1 == 0) { DrawGraph(1050, 60, zeroGraph, true); }
 	else if (timerT1 == 1) { DrawGraph(1050, 60, oneGraph, true); }
@@ -97,6 +98,9 @@ void gameUi::Draw()
 	else if (timerT3 == 8) { DrawGraph(950, 60, eightGraph, true); }
 	else if (timerT3 == 9) { DrawGraph(950, 60, nineGraph, true); }
 
+	DrawString(950, 30, "TIME", GetColor(0, 0, 0));
+	DrawFormatString(1150, 155, GetColor(0, 0, 0), "%d", autotimer);
+	
 	//残り深層何mかのUI
 	//1の位
 	DrawUI(depthT1, 1050, 290);
@@ -105,6 +109,9 @@ void gameUi::Draw()
 	//100の位
 	DrawUI(depthT100, 950, 290);
 
+	DrawString(950, 260, "DEPTH", GetColor(0, 0, 0));
+	DrawString(1150, 385, "m", GetColor(0, 0, 0));
+
 	//ブロックをいくつ壊したかのかのUI
 	//1の位
 	DrawUI(blockCountT1, 1050, 550);
@@ -112,11 +119,13 @@ void gameUi::Draw()
 	DrawUI(blockCountT10, 1000, 550);
 	//10の位
 	DrawUI(blockCountT100, 950, 550);
+
+	DrawString(950, 500, "壊したブロック数", GetColor(0, 0, 0));
 }
 
 void gameUi::DrawUI(int digTimerRank, int uiPosX, int uiPosY)
 {
-	if (digTimerRank % 10 <= 0) { DrawGraph(uiPosX, uiPosY, zeroGraph, true);}
+	if (digTimerRank % 10 <= 0) { DrawGraph(uiPosX, uiPosY, zeroGraph, true); }
 	else if (digTimerRank % 10 == 1) { DrawGraph(uiPosX, uiPosY, oneGraph, true); }
 	else if (digTimerRank % 10 == 2) { DrawGraph(uiPosX, uiPosY, twoGraph, true); }
 	else if (digTimerRank % 10 == 3) { DrawGraph(uiPosX, uiPosY, threeGraph, true); }
