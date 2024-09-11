@@ -18,7 +18,7 @@ const int PLAYPART_HEIGHT = 100;
 const int GAME_LINE = BLOCK_DIAMETER * PLAYPART_WIDTH;
 
 // ウィンドウ横幅
-const int WIN_WIDTH = 1280;
+const int WIN_WIDTH = 1280;//1280
 // ウィンドウ縦幅
 const int WIN_HEIGHT = 720;
 

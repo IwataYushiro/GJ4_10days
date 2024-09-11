@@ -35,6 +35,10 @@ void gameUi::Initialize()
 	sevenGraph = LoadGraph("Resources/Textures/timer7.png");
 	eightGraph = LoadGraph("Resources/Textures/timer8.png");
 	nineGraph = LoadGraph("Resources/Textures/timer9.png");
+
+	scoredepGraph = LoadGraph("Resources/Textures/scoredepS.png");
+	scorebloGraph = LoadGraph("Resources/Textures/scorebloS.png");
+	scorelastGraph = LoadGraph("Resources/Textures/scorelastS.png");
 }
 
 void gameUi::Update()
@@ -113,7 +117,7 @@ void gameUi::Draw()
 	DrawUI(blockCountT1000, 900, 550);
 
 	DrawString(950, 500, "壊したブロック数", GetColor(0, 0, 0));
-	DrawString(1150, 625, "個", GetColor(0, 0, 0));
+	DrawString(1140, 640, "個", GetColor(0, 0, 0));
 	//ブロック破壊カウントも9999がカンスト
 	if (blockCountT1 >= 10)
 	{
@@ -137,19 +141,19 @@ void gameUi::DrawUI(int digTimerRank, int uiPosX, int uiPosY)
 
 void gameUi::DrawRank()
 {
-	if (rankTimer>=20)
+	if (rankTimer>=5)
 	{
-		DrawString(1200, 290, "A", GetColor(0, 0, 0));
+		DrawGraph(0, 0, scoredepGraph, true);
 	}
-	if (rankTimer >= 40)
+	if (rankTimer >= 10)
 	{
-		DrawString(1200, 550, "B", GetColor(0, 0, 0));
+		DrawGraph(0, 0, scorebloGraph, true);
 	}
-	if (rankTimer >= 60)
+	if (rankTimer >= 15)
 	{
-		DrawString(450, 360, "S", GetColor(255, 255, 255));
+		DrawGraph(0, 0, scorelastGraph, true);
 	}
-	if (rankTimer >= 100)
+	if (rankTimer >= 30)
 	{
 		isrankEnd = true;
 	}

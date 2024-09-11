@@ -83,4 +83,8 @@ private:
 	int sevenGraph;
 	int eightGraph;
 	int nineGraph;
+
+	int scoredepGraph;
+	int scorebloGraph;
+	int scorelastGraph;
 };
