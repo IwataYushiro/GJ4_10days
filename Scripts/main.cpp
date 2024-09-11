@@ -77,6 +77,15 @@ struct LiveEntity
 	bool isLive = true;
 	bool direction = true;
 	int stuckFrameCount = 0;
+	float despawnAnimProgress = 1;
+	bool isDespawned = false;
+};
+
+struct Particle {
+	RigidBody rigidBody;
+	float torque = 0;
+	int maxLifeTime = 10;
+	int lifetime = 10;
 };
 
 Vector2D GetMousePositionToV2D()
@@ -231,9 +240,14 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 	//落下速度制限（ブロックと同じにする）
 	liveEntity->rigidBody.movement.y = min(liveEntity->rigidBody.movement.y, BLOCK_DIAMETER / 10);
 
+	liveEntity->rigidBody.gameObject.graphLocalPos = 
+		{ 0,-32 + liveEntity->rigidBody.gameObject.entity.scale.x };
+
 	//生きていたら
 	if (liveEntity->isLive)
 	{
+		liveEntity->despawnAnimProgress = 1;
+
 		//ブロックの中に押し込まれているか判定
 		bool isInsideBlock = false;
 		for (int i = 0; i < blocks.size(); i++)
@@ -297,14 +311,21 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 		else
 		{
 			liveEntity->stuckFrameCount = 0;
-			liveEntity->spriteIndex = fmodf(liveEntity->spriteIndex + 1.5f, 6);
+			liveEntity->spriteIndex = fmodf(liveEntity->spriteIndex + 1.4f, 6);
 		}
 	}
 	else
 	{
 		liveEntity->spriteIndex = 6;
+
+		liveEntity->rigidBody.gameObject.graphLocalPos.x =
+			sinf(clock()/10)* max(liveEntity->despawnAnimProgress - 0.75f,0) * 20;
+		liveEntity->despawnAnimProgress -= 0.015f;
 	}
 	liveEntity->rigidBody.gameObject.graphNum = liveEntity->sprites[(int)liveEntity->spriteIndex];
+
+	liveEntity->despawnAnimProgress = min(max(0, liveEntity->despawnAnimProgress),1);
+	liveEntity->isDespawned = !liveEntity->isLive && liveEntity->despawnAnimProgress <= 0;
 }
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine,
@@ -346,7 +367,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	// 画像などのリソースデータの変数宣言と読み込み
 
 	//開発者ロゴ
-	const int logoGraph = LoadGraph("Resources/Textures/TERAPETAGAMES_logo.png");
+	const int logoGraph = LoadGraph("Resources/Textures/ALHATERAPETAGAMES_logo.png");
 	//タイトル画面
 	const int titleGraph = LoadGraph("Resources/Textures/title.png");
 	const int operationGraph = LoadGraph("Resources/Textures/sousa.png");
@@ -365,6 +386,31 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		LoadGraph("Resources/Textures/unTappableBlock.png"),
 		LoadGraph("Resources/Textures/lethalBlock.png"),
 	};
+	//ボロブロックの破片
+	int weakBlockShards[8];
+	LoadDivGraph("Resources/Textures/weakBlockShard.png", 8,
+		4, 2,
+		32, 32, weakBlockShards);
+	//砂ブロックの破片
+	int sandBlockShards[8];
+	LoadDivGraph("Resources/Textures/sandBlockShard.png", 8,
+		4, 2,
+		32, 32, sandBlockShards);
+	//フレームブロックの破片
+	int frameBlockShards[8];
+	LoadDivGraph("Resources/Textures/sandBlockShard.png", 8,
+		4, 2,
+		32, 32, frameBlockShards);
+	//防壁ブロックの破片
+	int unTappableBlockShards[8];
+	LoadDivGraph("Resources/Textures/sandBlockShard.png", 8,
+		4, 2,
+		32, 32, unTappableBlockShards);
+	//リーサルブロックの破片
+	int lethalBlockShards[8];
+	LoadDivGraph("Resources/Textures/sandBlockShard.png", 8,
+		4, 2,
+		32, 32, lethalBlockShards);
 	//背景
 	const int backgroundSprite = LoadGraph("Resources/Textures/protobackground.png");
 
@@ -418,6 +464,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	};
 	//ブロック
 	vector<Block> blocks = {};
+	//パーティクル
+	vector<Particle> particles = {};
 	
 	// 最新のキーボード情報用
 	char keys[256] = { 0 };
@@ -516,15 +564,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			{
 				//ポーズメニューボタン
 				buttons = {
-					Button{Rect{370, 160,60,50},"つづける","RESUME"},
-					Button{Rect{370, 460,60,50},"やめる","QUIT"},
+					Button{Rect{GAME_LINE / 2, 160,150,50},"つづける","RESUME"},
+					Button{Rect{GAME_LINE / 2, 460,150,50},"やめる","QUIT"},
 				};
 			}
-			else if (!player.isLive)
+			else if (player.isDespawned)
 			{
 				buttons = {
-					Button{Rect{370, 260,100,50},"もう一回","TRY AGAIN"},
-					Button{Rect{370, 560,100,50},"もうやめる","QUIT"},
+					Button{Rect{GAME_LINE / 2, 260,150,50},"リトライ","TRY AGAIN"},
+					Button{Rect{GAME_LINE / 2, 560,150,50},"タイトルへ","QUIT"},
 				};
 			}
 			else
@@ -694,10 +742,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 								else if (blocks[i].status == "prepareBreak3")
 								{
 									blocks[i].status = "prepareBreak2";
+									blocks[i].rigidBody.gameObject.graphLocalPos =
+										NormalizedVector(Vector2D{ (float)(rand() % 4) - 1.5f,(float)(rand() % 4) - 1.5f }) * 4;
 								}
 								else if (blocks[i].status == "prepareBreak2")
 								{
 									blocks[i].status = "prepareBreak";
+									blocks[i].rigidBody.gameObject.graphLocalPos =
+										NormalizedVector(Vector2D{ (float)(rand() % 4) - 1.5f,(float)(rand() % 4) - 1.5f }) * 4;
 								}
 								else if (blocks[i].status == "prepareBreak")
 								{
@@ -743,27 +795,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						}
 					}
 
-					//四隅の壁とブロック（フレームブロック以外）を壁とする
-					vector<GameObject> liveEntityWalls = edgeWall;
-					for (int i = 0; i < blocks.size(); i++)
-					{
-						if (blocks[i].blockType != frameblock)
-						{
-							liveEntityWalls.push_back(blocks[i].rigidBody.gameObject);
-						}
-					}
-					//自機を更新
-					LiveEntityUpdate(&player, liveEntityWalls);
-
-					//カメラ追従
-					camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.position.y };
-
-					//両端の壁を追従させる
-					edgeWall = {
-						GameObject{Rect{Vector2D{-WIN_WIDTH / 2,0} + camPosition,{0,WIN_HEIGHT}}},
-						GameObject{Rect{Vector2D{-WIN_WIDTH / 2 + GAME_LINE,0} + camPosition,{0,WIN_HEIGHT}}},
-					};
-
 					gameui_->depthT1 =
 						(player.rigidBody.gameObject.entity.position.y) / BLOCK_DIAMETER + 1;
 
@@ -774,7 +805,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						isPause = true;
 					}
 				}
-				else
+				else if(player.isDespawned)
 				{
 					//自機死亡時
 					//続ける
@@ -793,6 +824,27 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					//曲の音量を小さく
 					ChangeVolumeSoundMem(128, audioClip[2]);
 				}
+
+				//四隅の壁とブロック（フレームブロック以外）を壁とする
+				vector<GameObject> liveEntityWalls = edgeWall;
+				for (int i = 0; i < blocks.size(); i++)
+				{
+					if (blocks[i].blockType != frameblock)
+					{
+						liveEntityWalls.push_back(blocks[i].rigidBody.gameObject);
+					}
+				}
+				//自機を更新
+				LiveEntityUpdate(&player, liveEntityWalls);
+
+				//カメラ追従
+				camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.position.y };
+
+				//両端の壁を追従させる
+				edgeWall = {
+					GameObject{Rect{Vector2D{-WIN_WIDTH / 2,0} + camPosition,{0,WIN_HEIGHT}}},
+					GameObject{Rect{Vector2D{-WIN_WIDTH / 2 + GAME_LINE,0} + camPosition,{0,WIN_HEIGHT}}},
+				};
 			}
 			else
 			{
@@ -863,7 +915,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				GetColor(0, 0, 0));
 			DrawRotaGraph(WIN_WIDTH / 2, WIN_HEIGHT / 2, 2, 0, logoGraph, TRUE);
 			DrawString(
-				WIN_WIDTH / 7 * 3, WIN_HEIGHT / 5 * 3,
+				WIN_WIDTH / 7 * 3, WIN_HEIGHT / 3 * 2,
 				"TEAM 4005",
 				GetColor(0, 0, 0));
 			if (clock() % 1500 < 1000)
@@ -881,7 +933,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			DrawGraph(0, 0, titleGraph, true);
 			//権利表示
 			DrawString(
-				WIN_WIDTH / 3, WIN_HEIGHT - (FONT_SIZE * 2 + 10), "2024 TERAPETA GAMES / TEAM 4005",
+				WIN_WIDTH / 3, WIN_HEIGHT - (FONT_SIZE * 2 + 10), "2024 ALHA TERAPETA GAMES / TEAM 4005",
 				GetColor(0, 0, 0));
 			break;
 		case playpart:
@@ -893,10 +945,17 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			for (int i = 0; i < blocks.size(); i++) {
 				RenderObject(blocks[i].rigidBody.gameObject, camPosition + camPosOffset);
 			}
+			//全てのパーティクルを描画
+			for (int i = 0; i < particles.size(); i++) {
+				RenderObject(particles[i].rigidBody.gameObject, camPosition + camPosOffset);
+			}
 			//自機を描画
-			RenderObject(player.rigidBody.gameObject, camPosition + camPosOffset);
+			if (player.despawnAnimProgress > 0.5f)
+			{
+				RenderObject(player.rigidBody.gameObject, camPosition + camPosOffset);
+			}
 
-			if (!player.isLive)
+			if (player.isDespawned)
 			{
 
 				DrawGraph(300, 50, gameoverGraph, true);
@@ -915,7 +974,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				GetColor(0, 0, 0));
 			DrawString(
 				WIN_WIDTH / 2, 0,
-				"\n\nテクニカルサポート\n　鰯ユウ\n　神無月\n\nビジュアルアドバイザー\n　てらぺた\n\nエグゼクティブプロデューサー\n　てらぺた\n\nディレクター\n　てらぺた\n\nかいはつ\n　てらぺたゲームズ\n　チーム4005\n\n\nTERAPETA GAMES / TEAM 4005\nAll Rights Reserved.",
+				"\n\nテクニカルサポート\n　鰯ユウ\n　神無月\n\nビジュアルアドバイザー\n　てらぺた\n\nエグゼクティブプロデューサー\n　てらぺた\n\nディレクター\n　てらぺた\n\nかいはつ\n　あるはてらぺたゲームズ\n　チーム4005\n\n\nALHA TERAPETA GAMES / TEAM 4005\nAll Rights Reserved.",
 				GetColor(0, 0, 0));
 			break;
 		case howtoplay:
