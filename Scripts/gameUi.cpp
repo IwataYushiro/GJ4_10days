@@ -17,6 +17,9 @@ void gameUi::Reset()
 	blockCountT10 = 0;
 	blockCountT100 = 0;
 	blockCountT1000 = 0;
+
+	rankTimer = 0; 
+	isrankEnd = false;
 }
 
 void gameUi::Initialize()
@@ -130,4 +133,25 @@ void gameUi::DrawUI(int digTimerRank, int uiPosX, int uiPosY)
 	else if (digTimerRank % 10 == 7) { DrawGraph(uiPosX, uiPosY, sevenGraph, true); }
 	else if (digTimerRank % 10 == 8) { DrawGraph(uiPosX, uiPosY, eightGraph, true); }
 	else if (digTimerRank % 10 == 9) { DrawGraph(uiPosX, uiPosY, nineGraph, true); }
+}
+
+void gameUi::DrawRank()
+{
+	if (rankTimer>=20)
+	{
+		DrawString(1200, 290, "A", GetColor(0, 0, 0));
+	}
+	if (rankTimer >= 40)
+	{
+		DrawString(1200, 550, "B", GetColor(0, 0, 0));
+	}
+	if (rankTimer >= 60)
+	{
+		DrawString(450, 360, "S", GetColor(255, 255, 255));
+	}
+	if (rankTimer >= 100)
+	{
+		isrankEnd = true;
+	}
+	rankTimer++;
 }

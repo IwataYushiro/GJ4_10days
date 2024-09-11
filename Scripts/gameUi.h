@@ -15,20 +15,6 @@ public:
 
 	void Draw();
 
-	//////////////////////////
-	////残り時間を示すタイマー////
-	/////////////////////////
-	int zeroGraph;
-	int oneGraph;
-	int twoGraph;
-	int threeGraph;
-	int fourGraph;
-	int fiveGraph;
-	int sixGraph;
-	int sevenGraph;
-	int eightGraph;
-	int nineGraph;
-
 	//常に動いてるタイマー
 	int autotimer = 0;
 	//1の位のタイマー(autotimerが60カウントになるごとに1変動)
@@ -72,7 +58,29 @@ public:
 	//ここまで
 	////////////////////////////////////////////////////
 
+	//総合評価用タイマー
+	int rankTimer = 0;
+	//ランキング清算後ボタンを出すためのフラグ
+	bool isrankEnd = false;
+	
+	//ランクの描画
+	void DrawRank();
 private:
 	//深層何メートルまで進んでるかのUI描画(桁数、X軸)
 	void DrawUI(int digTimerRank, int uiPosX, int uiposY);
+	
+private:
+	//////////////////////////
+	////残り時間を示すタイマー////
+	/////////////////////////
+	int zeroGraph;
+	int oneGraph;
+	int twoGraph;
+	int threeGraph;
+	int fourGraph;
+	int fiveGraph;
+	int sixGraph;
+	int sevenGraph;
+	int eightGraph;
+	int nineGraph;
 };
