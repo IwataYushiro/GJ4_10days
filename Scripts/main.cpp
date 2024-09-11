@@ -405,12 +405,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		32, 32, frameBlockShards);
 	//防壁ブロックの破片
 	int unTappableBlockShards[8];
-	LoadDivGraph("Resources/Textures/frameBlockShard.png", 8,
+	LoadDivGraph("Resources/Textures/unTappableBlockShard.png", 8,
 		4, 2,
 		32, 32, unTappableBlockShards);
 	//リーサルブロックの破片
 	int lethalBlockShards[8];
-	LoadDivGraph("Resources/Textures/frameBlockShard.png", 8,
+	LoadDivGraph("Resources/Textures/lethalBlockShard.png", 8,
 		4, 2,
 		32, 32, lethalBlockShards);
 	//背景
@@ -844,24 +844,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						}
 					}
 
-					//全ての破片を更新
-					for (int i = 0; i < particles.size(); i++)
-					{
-						RigidBodyUpdate(particles[i].rigidBody, { 0,0 }, { particles[i].drag,particles[i].drag });
-						particles[i].rigidBody.gameObject.rot += particles[i].torque;
-						particles[i].rigidBody.gameObject.graphScale = powf((float)particles[i].lifetime / particles[i].maxLifeTime,0.4f);
-						particles[i].lifetime--;
-					}
-					//寿命が尽きたパーティクルを消す
-					for (int i = 0; i < particles.size(); i++)
-					{
-						if (particles[i].lifetime <= 0)
-						{
-							particles.erase(particles.begin() + i);
-							i--;
-						}
-					}
-
 					gameui_->depthT1 =
 						(player.rigidBody.gameObject.entity.position.y) / BLOCK_DIAMETER + 1;
 
@@ -890,6 +872,24 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 					//曲の音量を小さく
 					ChangeVolumeSoundMem(128, audioClip[2]);
+				}
+
+				//全てのパーティクルを更新
+				for (int i = 0; i < particles.size(); i++)
+				{
+					RigidBodyUpdate(particles[i].rigidBody, { 0,0 }, { particles[i].drag,particles[i].drag });
+					particles[i].rigidBody.gameObject.rot += particles[i].torque;
+					particles[i].rigidBody.gameObject.graphScale = powf((float)particles[i].lifetime / particles[i].maxLifeTime, 0.4f);
+					particles[i].lifetime--;
+				}
+				//寿命が尽きたパーティクルを消す
+				for (int i = 0; i < particles.size(); i++)
+				{
+					if (particles[i].lifetime <= 0)
+					{
+						particles.erase(particles.begin() + i);
+						i--;
+					}
 				}
 
 				//四隅の壁とブロック（フレームブロック以外）を壁とする
