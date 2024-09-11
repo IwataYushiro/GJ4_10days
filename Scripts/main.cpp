@@ -13,7 +13,7 @@ const int BLOCK_DIAMETER = 64;
 //横列の数
 const int PLAYPART_WIDTH = 14;
 //1区画の縦の長さ
-const int PLAYPART_HEIGHT = 100;
+const int PLAYPART_HEIGHT = 5;
 //UIライン
 const int GAME_LINE = BLOCK_DIAMETER * PLAYPART_WIDTH;
 
@@ -511,6 +511,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//パーティクル
 	vector<Particle> particles = {};
 
+	unsigned int stageLevel = 0;
+
 	// 最新のキーボード情報用
 	char keys[256] = { 0 };
 
@@ -564,15 +566,18 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				gameui_->Reset();
 				//ポーズ解除
 				isPause = false;
+
+				//レベルをリセット
+				stageLevel = 0;
+
 				//自機を初期座標へ
 				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 32,20,20},0,1,{0,-12}} },playerSprites };
+
 				//ブロック生成用のランダム
 				//ランダム生成(int)
 				std::random_device seedBlock;
 				std::mt19937_64 engineBlock(seedBlock());
 				std::uniform_real_distribution<> distBlock(0, 5);
-
-
 				//ブロックを初期化、生成
 				blocks = {};
 				for (int i = 0; i < PLAYPART_HEIGHT; i++)
@@ -704,6 +709,39 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			{
 				if (player.isLive)
 				{
+					if (player.rigidBody.gameObject.entity.position.y >= BLOCK_DIAMETER * (PLAYPART_HEIGHT - 1))
+					{
+						//レベルアップ
+						stageLevel++;
+
+						player.rigidBody.gameObject.entity.position.y = -WIN_HEIGHT / 2 + 32;
+
+						//ブロック生成用のランダム
+						//ランダム生成(int)
+						std::random_device seedBlock;
+						std::mt19937_64 engineBlock(seedBlock());
+						std::uniform_real_distribution<> distBlock(0, 5);
+						//ブロックを初期化、生成
+						blocks = {};
+						for (int i = 0; i < PLAYPART_HEIGHT; i++)
+						{
+							for (int j = 0; j < PLAYPART_WIDTH; j++)
+							{
+								BlockType currentBlockType = static_cast<BlockType>(distBlock(engineBlock));
+								if (i == 0)
+								{
+									currentBlockType = weakblock;
+								}
+
+								blocks.push_back(Block{ RigidBody{GameObject{
+									Rect{(float)-WIN_WIDTH / 2 + BLOCK_DIAMETER / 2 + BLOCK_DIAMETER * j,(float)BLOCK_DIAMETER * i,
+									BLOCK_DIAMETER / 2,BLOCK_DIAMETER / 2}
+								}},currentBlockType });
+								blocks.back().latestLandingHeight = blocks.back().rigidBody.gameObject.entity.position.y;
+							}
+						}
+					}
+
 					gameui_->Update();
 
 					//全てのブロックを更新
@@ -887,7 +925,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					}
 
 					gameui_->depthT1 =
-						(player.rigidBody.gameObject.entity.position.y) / BLOCK_DIAMETER + 1;
+						stageLevel * PLAYPART_HEIGHT + max((player.rigidBody.gameObject.entity.position.y) / BLOCK_DIAMETER + 1,0);
 
 					//ボタンを押した時の処理
 					if (IsButtonClicked(buttons, 0))
