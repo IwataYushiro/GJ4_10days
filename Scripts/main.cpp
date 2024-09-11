@@ -234,7 +234,8 @@ bool IsButtonClicked(vector<Button>& buttons, int buttonIndex)
 	return buttons.size() > buttonIndex && buttons[buttonIndex].status == 3;
 }
 
-void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
+void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks,
+	int damageSound, int despawnSound, int* shardGraph, std::vector<Particle>& particles)
 {
 	//物理挙動
 	RigidBodyUpdate(liveEntity->rigidBody, { 0,1 }, { 0.5,1 }, blocks);
@@ -312,17 +313,49 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 		}
 		else
 		{
+			//空中にいる時
 			liveEntity->stuckFrameCount = 0;
 			liveEntity->spriteIndex = fmodf(liveEntity->spriteIndex + 1.4f, 6);
 		}
 	}
 	else
 	{
+		//死んだとき
+
 		liveEntity->spriteIndex = 6;
 
 		liveEntity->rigidBody.gameObject.graphLocalPos.x =
 			sinf(clock() / 10) * max(liveEntity->despawnAnimProgress - 0.75f, 0) * 20;
+
+		float prevDespawnAnimProgress = liveEntity->despawnAnimProgress;
 		liveEntity->despawnAnimProgress -= 0.015f;
+
+		if (prevDespawnAnimProgress == 1)
+		{
+			//ダメージ音を鳴らす
+			PlaySoundMem(damageSound, DX_PLAYTYPE_BACK, true);
+		}
+
+		if (prevDespawnAnimProgress > 0.5f && liveEntity->despawnAnimProgress <= 0.5f)
+		{
+			//破片を生成
+			float rotRand = rand();
+			for (int j = 0; j < 9; j++)
+			{
+				float angleRad = PI * 2 / 9 * j + rotRand;
+				int spriteIndex = rand() % 2;
+				if (j % 2 == 0)
+				{
+					spriteIndex += 2;
+				}
+				particles.push_back(Particle{ RigidBody{GameObject{
+					liveEntity->rigidBody.gameObject.entity,shardGraph[spriteIndex]},
+					Vector2D{sinf(angleRad),cosf(angleRad)} *15},
+					0.5f + (rand() % 20) * 0.01f,(float)(rand() % 7 - 3) * 0.1f });
+			}
+
+			PlaySoundMem(despawnSound, DX_PLAYTYPE_BACK, true);
+		}
 	}
 	liveEntity->rigidBody.gameObject.graphNum = liveEntity->sprites[(int)liveEntity->spriteIndex];
 
@@ -413,6 +446,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	LoadDivGraph("Resources/Textures/lethalBlockShard.png", 8,
 		4, 2,
 		32, 32, lethalBlockShards);
+	//自機の破片
+	int despawnShards[4];
+	LoadDivGraph("Resources/Textures/miniminiKXShard.png", 4,
+		2, 2,
+		32, 32, despawnShards);
 	//背景
 	const int backgroundSprite = LoadGraph("Resources/Textures/protobackground.png");
 
@@ -422,6 +460,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	const int blockBreakSound = LoadSoundMem("Resources/SE/breakBlock.wav");
 	//壊せないブロックを押す音
 	const int reflectSound = LoadSoundMem("Resources/SE/reflect.wav");
+	//ダメージ音
+	const int damageSound = LoadSoundMem("Resources/SE/damage.wav");
+	//死んだときの音
+	const int despawnSound = LoadSoundMem("Resources/SE/despawn.wav");
 
 	//このゲームで流す全てのBGM（曲を流したくないときはインデックス0番を指定）
 	const int audioClip[] = {
@@ -902,7 +944,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					}
 				}
 				//自機を更新
-				LiveEntityUpdate(&player, liveEntityWalls);
+				LiveEntityUpdate(&player, liveEntityWalls, damageSound, despawnSound, despawnShards, particles);
 
 				//カメラ追従
 				camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.position.y };
