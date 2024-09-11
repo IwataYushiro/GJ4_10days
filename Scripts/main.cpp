@@ -3,6 +3,7 @@
 #include <time.h>
 #include <string>
 #include "gameUi.h"
+#include <random>
 
 // ウィンドウのタイトルに表示する文字列
 const char TITLE[] = "GJ4_Gamejam";
@@ -474,13 +475,20 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				isPause = false;
 				//自機を初期座標へ
 				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 32,20,20},0,1,{0,-12}} },playerSprites };
+				//ブロック生成用のランダム
+				//ランダム生成(int)
+				std::random_device seedBlock;
+				std::mt19937_64 engineBlock(seedBlock());
+				std::uniform_real_distribution<> distBlock(0,5);
+
+				
 				//ブロックを初期化、生成
 				blocks = {};
 				for (int i = 0; i < PLAYPART_HEIGHT; i++)
 				{
 					for (int j = 0; j < PLAYPART_WIDTH; j++)
 					{
-						BlockType currentBlockType = (BlockType)(rand() % 5);
+						BlockType currentBlockType = static_cast<BlockType>(distBlock(engineBlock));
 						if (i == 0)
 						{
 							currentBlockType = weakblock;
