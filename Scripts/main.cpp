@@ -242,8 +242,8 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 	//落下速度制限（ブロックと同じにする）
 	liveEntity->rigidBody.movement.y = min(liveEntity->rigidBody.movement.y, BLOCK_DIAMETER / 10);
 
-	liveEntity->rigidBody.gameObject.graphLocalPos = 
-		{ 0,-32 + liveEntity->rigidBody.gameObject.entity.scale.x };
+	liveEntity->rigidBody.gameObject.graphLocalPos =
+	{ 0,-32 + liveEntity->rigidBody.gameObject.entity.scale.x };
 
 	//生きていたら
 	if (liveEntity->isLive)
@@ -308,7 +308,7 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 			}
 			liveEntity->rigidBody.movement.x += playerMoveForce;
 
-			liveEntity->spriteIndex = fmodf(liveEntity->spriteIndex + 0.5f,6);
+			liveEntity->spriteIndex = fmodf(liveEntity->spriteIndex + 0.5f, 6);
 		}
 		else
 		{
@@ -321,12 +321,12 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks)
 		liveEntity->spriteIndex = 6;
 
 		liveEntity->rigidBody.gameObject.graphLocalPos.x =
-			sinf(clock()/10)* max(liveEntity->despawnAnimProgress - 0.75f,0) * 20;
+			sinf(clock() / 10) * max(liveEntity->despawnAnimProgress - 0.75f, 0) * 20;
 		liveEntity->despawnAnimProgress -= 0.015f;
 	}
 	liveEntity->rigidBody.gameObject.graphNum = liveEntity->sprites[(int)liveEntity->spriteIndex];
 
-	liveEntity->despawnAnimProgress = min(max(0, liveEntity->despawnAnimProgress),1);
+	liveEntity->despawnAnimProgress = min(max(0, liveEntity->despawnAnimProgress), 1);
 	liveEntity->isDespawned = !liveEntity->isLive && liveEntity->despawnAnimProgress <= 0;
 }
 
@@ -424,7 +424,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	const int reflectSound = LoadSoundMem("Resources/SE/reflect.wav");
 
 	//このゲームで流す全てのBGM（曲を流したくないときはインデックス0番を指定）
-	const int audioClip[] = { 
+	const int audioClip[] = {
 		0,
 		LoadSoundMem("Resources/BGM/title.mp3"),
 		LoadSoundMem("Resources/BGM/game.mp3"),
@@ -468,7 +468,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	vector<Block> blocks = {};
 	//パーティクル
 	vector<Particle> particles = {};
-	
+
 	// 最新のキーボード情報用
 	char keys[256] = { 0 };
 
@@ -528,9 +528,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				//ランダム生成(int)
 				std::random_device seedBlock;
 				std::mt19937_64 engineBlock(seedBlock());
-				std::uniform_real_distribution<> distBlock(0,5);
+				std::uniform_real_distribution<> distBlock(0, 5);
 
-				
+
 				//ブロックを初期化、生成
 				blocks = {};
 				for (int i = 0; i < PLAYPART_HEIGHT; i++)
@@ -577,11 +577,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					Button{Rect{GAME_LINE / 2, 460,150,50},"やめる","QUIT"},
 				};
 			}
-			else if (player.isDespawned)
+			else if (player.isDespawned && gameui_->isrankEnd)
 			{
 				buttons = {
-					Button{Rect{GAME_LINE / 2, 260,150,50},"リトライ","TRY AGAIN"},
-					Button{Rect{GAME_LINE / 2, 560,150,50},"タイトルへ","QUIT"},
+					Button{Rect{GAME_LINE / 4, 560,150,50},"リトライ","TRY AGAIN"},
+					Button{Rect{GAME_LINE - (GAME_LINE / 4), 560,150,50},"タイトルへ","QUIT"},
 				};
 			}
 			else
@@ -872,7 +872,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						isPause = true;
 					}
 				}
-				else if(player.isDespawned)
+				else if (player.isDespawned)
 				{
 					//自機死亡時
 					//続ける
@@ -1022,15 +1022,15 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				RenderObject(player.rigidBody.gameObject, camPosition + camPosOffset);
 			}
 
-			if (player.isDespawned)
-			{
 
-				DrawGraph(300, 50, gameoverGraph, true);
-			}
 			//このラインからはUIゾーンなのでいっそここにボックスUIおいてもいいや
 			DrawBox(GAME_LINE, 0, WIN_WIDTH, WIN_HEIGHT, GetColor(0xff, 0xff, 0xff), TRUE);
 			gameui_->Draw();
-
+			if (player.isDespawned)
+			{
+				DrawGraph(300, 50, gameoverGraph, true);
+				gameui_->DrawRank();
+			}
 
 			break;
 		case credit:
