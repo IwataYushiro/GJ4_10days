@@ -141,6 +141,7 @@ void gameUi::DrawUI(int digTimerRank, int uiPosX, int uiPosY)
 
 void gameUi::DrawRank()
 {
+
 	if (rankTimer>=5)
 	{
 		DrawGraph(0, 0, scoredepGraph, true);
