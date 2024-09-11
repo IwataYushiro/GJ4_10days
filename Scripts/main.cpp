@@ -84,9 +84,10 @@ struct LiveEntity
 
 struct Particle {
 	RigidBody rigidBody;
+	float drag = 1;
 	float torque = 0;
-	int maxLifeTime = 10;
-	int lifetime = 10;
+	int maxLifeTime = 20;
+	int lifetime = 20;
 };
 
 Vector2D GetMousePositionToV2D()
@@ -399,17 +400,17 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		32, 32, sandBlockShards);
 	//フレームブロックの破片
 	int frameBlockShards[8];
-	LoadDivGraph("Resources/Textures/sandBlockShard.png", 8,
+	LoadDivGraph("Resources/Textures/frameBlockShard.png", 8,
 		4, 2,
 		32, 32, frameBlockShards);
 	//防壁ブロックの破片
 	int unTappableBlockShards[8];
-	LoadDivGraph("Resources/Textures/sandBlockShard.png", 8,
+	LoadDivGraph("Resources/Textures/frameBlockShard.png", 8,
 		4, 2,
 		32, 32, unTappableBlockShards);
 	//リーサルブロックの破片
 	int lethalBlockShards[8];
-	LoadDivGraph("Resources/Textures/sandBlockShard.png", 8,
+	LoadDivGraph("Resources/Textures/frameBlockShard.png", 8,
 		4, 2,
 		32, 32, lethalBlockShards);
 	//背景
@@ -797,8 +798,66 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						if (blocks[i].breaked)
 						{
 							gameui_->blockCountT1++;
+
+							//破片に貼り付ける画像を決める
+							int* shardGraph;
+							switch (blocks[i].blockType)
+							{
+							case weakblock:
+								shardGraph = weakBlockShards;
+								break;
+							case sandblock:
+								shardGraph = sandBlockShards;
+								break;
+							case frameblock:
+								shardGraph = frameBlockShards;
+								break;
+							case untappableblock:
+								shardGraph = unTappableBlockShards;
+								break;
+							case lethalblock:
+								shardGraph = lethalBlockShards;
+								break;
+							default:
+								shardGraph = frameBlockShards;
+								break;
+							}
+							//破片を生成
+							float rotRand = rand();
+							for (int j = 0; j < 9; j++)
+							{
+								float angleRad = PI * 2 / 9 * j + rotRand;
+								int spriteIndex = rand() % 4;
+								if (j % 2 == 0)
+								{
+									spriteIndex += 4;
+								}
+								particles.push_back(Particle{ RigidBody{GameObject{
+									blocks[i].rigidBody.gameObject.entity,shardGraph[spriteIndex]},
+									Vector2D{sinf(angleRad),cosf(angleRad)} * 15},
+									0.5f + (rand() % 20) * 0.01f,(float)(rand() % 7 - 3)*0.1f });
+							}
+
 							PlaySoundMem(blockBreakSound, DX_PLAYTYPE_BACK, true);
 							blocks.erase(blocks.begin() + i);
+							i--;
+						}
+					}
+
+					//全ての破片を更新
+					for (int i = 0; i < particles.size(); i++)
+					{
+						RigidBodyUpdate(particles[i].rigidBody, { 0,0 }, { particles[i].drag,particles[i].drag });
+						particles[i].rigidBody.gameObject.rot += particles[i].torque;
+						particles[i].rigidBody.gameObject.graphScale = powf((float)particles[i].lifetime / particles[i].maxLifeTime,0.4f);
+						particles[i].lifetime--;
+					}
+					//寿命が尽きたパーティクルを消す
+					for (int i = 0; i < particles.size(); i++)
+					{
+						if (particles[i].lifetime <= 0)
+						{
+							particles.erase(particles.begin() + i);
 							i--;
 						}
 					}
