@@ -4,16 +4,19 @@ void gameUi::Reset()
 {
 	autotimer = 0;
 	timerT1 = 0;
-	timerT2 = 0;
-	timerT3 = 0;
+	timerT10 = 0;
+	timerT100 = 0;
+	timerT1000 = 0;
 
 	depthT1 = 0;
 	depthT10 = 0;
 	depthT100 = 0;
+	depthT1000 = 0;
 
 	blockCountT1 = 0;
 	blockCountT10 = 0;
 	blockCountT100 = 0;
+	blockCountT1000 = 0;
 }
 
 void gameUi::Initialize()
@@ -38,65 +41,42 @@ void gameUi::Update()
 		timerT1++;
 		autotimer = 0;
 	}
-	if (timerT1 >= 10) {
-		timerT2++;
-		timerT1 = 0;
-	}
-	if (timerT2 >= 10) {
-		timerT3++;
-		timerT2 = 0;
-	}
+
+	//10の桁
+	timerT10 = timerT1 / 10;
+	//100の桁
+	timerT100 = timerT10 / 10;
+	//1000の桁
+	timerT1000 = timerT100 / 10;
 
 	//どこまで掘ったか
 	//10の桁
 	depthT10 = depthT1 / 10;
 	//100の桁
 	depthT100 = depthT10 / 10;
+	//1000の桁
+	depthT1000 = depthT100 / 10;
+
 	//どこまでブロックを壊したか
 	//10の桁
 	blockCountT10 = blockCountT1 / 10;
 	//100の桁
 	blockCountT100 = blockCountT10 / 10;
+	//1000の桁
+	blockCountT1000 = blockCountT100 / 10;
 }
 
 void gameUi::Draw()
 {
 	//ビットマップフォントタイマー
 	//タイマー
-
-	//1の位
-	if (timerT1 == 0) { DrawGraph(1050, 60, zeroGraph, true); }
-	else if (timerT1 == 1) { DrawGraph(1050, 60, oneGraph, true); }
-	else if (timerT1 == 2) { DrawGraph(1050, 60, twoGraph, true); }
-	else if (timerT1 == 3) { DrawGraph(1050, 60, threeGraph, true); }
-	else if (timerT1 == 4) { DrawGraph(1050, 60, fourGraph, true); }
-	else if (timerT1 == 5) { DrawGraph(1050, 60, fiveGraph, true); }
-	else if (timerT1 == 6) { DrawGraph(1050, 60, sixGraph, true); }
-	else if (timerT1 == 7) { DrawGraph(1050, 60, sevenGraph, true); }
-	else if (timerT1 == 8) { DrawGraph(1050, 60, eightGraph, true); }
-	else if (timerT1 == 9) { DrawGraph(1050, 60, nineGraph, true); }
+	DrawUI(timerT1, 1050, 60);
 	//10の位
-	if (timerT2 == 0) { DrawGraph(1000, 60, zeroGraph, true); }
-	else if (timerT2 == 1) { DrawGraph(1000, 60, oneGraph, true); }
-	else if (timerT2 == 2) { DrawGraph(1000, 60, twoGraph, true); }
-	else if (timerT2 == 3) { DrawGraph(1000, 60, threeGraph, true); }
-	else if (timerT2 == 4) { DrawGraph(1000, 60, fourGraph, true); }
-	else if (timerT2 == 5) { DrawGraph(1000, 60, fiveGraph, true); }
-	else if (timerT2 == 6) { DrawGraph(1000, 60, sixGraph, true); }
-	else if (timerT2 == 7) { DrawGraph(1000, 60, sevenGraph, true); }
-	else if (timerT2 == 8) { DrawGraph(1000, 60, eightGraph, true); }
-	else if (timerT2 == 9) { DrawGraph(1000, 60, nineGraph, true); }
+	DrawUI(timerT10, 1000, 60);
 	//100の位
-	if (timerT3 == 0) { DrawGraph(950, 60, zeroGraph, true); }
-	else if (timerT3 == 1) { DrawGraph(950, 60, oneGraph, true); }
-	else if (timerT3 == 2) { DrawGraph(950, 60, twoGraph, true); }
-	else if (timerT3 == 3) { DrawGraph(950, 60, threeGraph, true); }
-	else if (timerT3 == 4) { DrawGraph(950, 60, fourGraph, true); }
-	else if (timerT3 == 5) { DrawGraph(950, 60, fiveGraph, true); }
-	else if (timerT3 == 6) { DrawGraph(950, 60, sixGraph, true); }
-	else if (timerT3 == 7) { DrawGraph(950, 60, sevenGraph, true); }
-	else if (timerT3 == 8) { DrawGraph(950, 60, eightGraph, true); }
-	else if (timerT3 == 9) { DrawGraph(950, 60, nineGraph, true); }
+	DrawUI(timerT100, 950, 60);
+	//1000の位
+	DrawUI(timerT1000, 900, 60);
 
 	DrawString(950, 30, "TIME", GetColor(0, 0, 0));
 	DrawFormatString(1150, 155, GetColor(0, 0, 0), "%d", autotimer);
@@ -108,19 +88,34 @@ void gameUi::Draw()
 	DrawUI(depthT10, 1000, 290);
 	//100の位
 	DrawUI(depthT100, 950, 290);
+	//1000の位
+	DrawUI(depthT1000, 900, 290);
 
 	DrawString(950, 260, "DEPTH", GetColor(0, 0, 0));
 	DrawString(1150, 385, "m", GetColor(0, 0, 0));
+	//深層値は9999がカンスト
+	if (depthT1 >= 10)
+	{
+		DrawString(1150, 350, "+", GetColor(0, 0, 0));
+	}
 
 	//ブロックをいくつ壊したかのかのUI
 	//1の位
 	DrawUI(blockCountT1, 1050, 550);
 	//10の位
 	DrawUI(blockCountT10, 1000, 550);
-	//10の位
+	//100の位
 	DrawUI(blockCountT100, 950, 550);
+	//1000の位
+	DrawUI(blockCountT1000, 900, 550);
 
 	DrawString(950, 500, "壊したブロック数", GetColor(0, 0, 0));
+	DrawString(1150, 625, "個", GetColor(0, 0, 0));
+	//ブロック破壊カウントも9999がカンスト
+	if (blockCountT1 >= 10)
+	{
+		DrawString(1150, 590, "+", GetColor(0, 0, 0));
+	}
 }
 
 void gameUi::DrawUI(int digTimerRank, int uiPosX, int uiPosY)
