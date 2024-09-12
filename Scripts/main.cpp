@@ -13,7 +13,7 @@ const int BLOCK_DIAMETER = 64;
 //横列の数
 const int PLAYPART_WIDTH = 14;
 //1区画の縦の長さ
-const int PLAYPART_HEIGHT = 5;
+const int PLAYPART_HEIGHT = 25;
 //UIライン
 const int GAME_LINE = BLOCK_DIAMETER * PLAYPART_WIDTH;
 
@@ -363,6 +363,72 @@ void LiveEntityUpdate(LiveEntity* liveEntity, std::vector<GameObject> blocks,
 	liveEntity->isDespawned = !liveEntity->isLive && liveEntity->despawnAnimProgress <= 0;
 }
 
+void GenerateLevel(std::vector<Block>& blocks, int stageLevel)
+{
+	//ブロック生成用のランダム
+	//ランダム生成(int)
+	std::random_device seedBlock;
+	std::mt19937_64 engineBlock(seedBlock());
+	std::uniform_real_distribution<> distTappableBlock(0, 3);
+	std::uniform_real_distribution<> distUnTappableBlock(3, 5);
+	std::uniform_real_distribution<> distRandomGenerate(0, 5);
+
+	//ブロックを初期化、生成
+	int tappableBlockCount = 0;
+	int unTappableBlockCount = 0;
+	int tappableBlockCount2 = 0;
+	int randomGenerateCount = 0;
+	blocks = {};
+	for (int i = 0; i < PLAYPART_HEIGHT; i++)
+	{
+		for (int j = 0; j < PLAYPART_WIDTH; j++)
+		{
+			if (tappableBlockCount <= 0 && unTappableBlockCount <= 0 && tappableBlockCount2 <= 0  && randomGenerateCount <= 0)
+			{
+				tappableBlockCount = rand() % 5 + PLAYPART_WIDTH / 3;
+				unTappableBlockCount = rand() % 5 + min(max(0,(stageLevel - 1) * 4),PLAYPART_WIDTH * 3);
+				tappableBlockCount2 = rand() % 5 + PLAYPART_WIDTH / 3;
+				randomGenerateCount = rand() % 5 + min(max(0, (stageLevel - 1) * 8), PLAYPART_WIDTH * 3);
+			}
+
+			BlockType currentBlockType = weakblock;
+			if (i == PLAYPART_HEIGHT - 1)
+			{
+				currentBlockType = static_cast<BlockType>(distTappableBlock(engineBlock));
+			}
+			else if(i > 0)
+			{
+				if (tappableBlockCount > 0)
+				{
+					currentBlockType = static_cast<BlockType>(distTappableBlock(engineBlock));
+					tappableBlockCount--;
+				}
+				else if (unTappableBlockCount > 0)
+				{
+					currentBlockType = static_cast<BlockType>(distUnTappableBlock(engineBlock));
+					unTappableBlockCount--;
+				}
+				else if (tappableBlockCount2 > 0)
+				{
+					currentBlockType = static_cast<BlockType>(distTappableBlock(engineBlock));
+					tappableBlockCount2--;
+				}
+				else
+				{
+					currentBlockType = static_cast<BlockType>(distRandomGenerate(engineBlock));
+					randomGenerateCount--;
+				}
+			}
+
+			blocks.push_back(Block{ RigidBody{GameObject{
+				Rect{(float)-WIN_WIDTH / 2 + BLOCK_DIAMETER / 2 + BLOCK_DIAMETER * j,(float)BLOCK_DIAMETER * i,
+				BLOCK_DIAMETER / 2,BLOCK_DIAMETER / 2}
+			}},currentBlockType });
+			blocks.back().latestLandingHeight = blocks.back().rigidBody.gameObject.entity.position.y;
+		}
+	}
+}
+
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine,
 	_In_ int nCmdShow) {
 
@@ -485,7 +551,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	float sceneTransitionProgress = 0;
 	//シーンの初期化が必要ならこれをtrueに
 	bool sceneInit = false;
-
+	//フェードインアウト(イン、アウト)
+	int fadeInOutCount = 0;
 	//今流す曲のインデックス
 	int bgmNum = 0;
 
@@ -511,6 +578,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//パーティクル
 	vector<Particle> particles = {};
 
+	//ステージの難易度、区画の一番下まで到達するたびに１ずつ上がる
 	unsigned int stageLevel = 0;
 
 	// 最新のキーボード情報用
@@ -539,10 +607,19 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		if (nextScene == currentScene)
 		{
+			fadeInOutCount += 15;
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, fadeInOutCount);
+			if (fadeInOutCount >= 255)
+			{
+				//カウントリセット
+				fadeInOutCount = 255;
+			}
 			sceneTransitionProgress = 0;
 		}
 		else
 		{
+			fadeInOutCount -= 10;
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, fadeInOutCount);
 			//シーンを切り替えのカウントダウン
 			sceneTransitionProgress++;
 			if (sceneTransitionProgress >= 30) {
@@ -573,30 +650,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				//自機を初期座標へ
 				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 32,20,20},0,1,{0,-12}} },playerSprites };
 
-				//ブロック生成用のランダム
-				//ランダム生成(int)
-				std::random_device seedBlock;
-				std::mt19937_64 engineBlock(seedBlock());
-				std::uniform_real_distribution<> distBlock(0, 5);
-				//ブロックを初期化、生成
-				blocks = {};
-				for (int i = 0; i < PLAYPART_HEIGHT; i++)
-				{
-					for (int j = 0; j < PLAYPART_WIDTH; j++)
-					{
-						BlockType currentBlockType = static_cast<BlockType>(distBlock(engineBlock));
-						if (i == 0)
-						{
-							currentBlockType = weakblock;
-						}
-
-						blocks.push_back(Block{ RigidBody{GameObject{
-							Rect{(float)-WIN_WIDTH / 2 + BLOCK_DIAMETER / 2 + BLOCK_DIAMETER * j,(float)BLOCK_DIAMETER * i,
-							BLOCK_DIAMETER / 2,BLOCK_DIAMETER / 2}
-						}},currentBlockType });
-						blocks.back().latestLandingHeight = blocks.back().rigidBody.gameObject.entity.position.y;
-					}
-				}
+				//地層生成
+				GenerateLevel(blocks, stageLevel);
 				break;
 			}
 			sceneInit = false;
@@ -714,32 +769,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						//レベルアップ
 						stageLevel++;
 
+						//自機を上へ
 						player.rigidBody.gameObject.entity.position.y = -WIN_HEIGHT / 2 + 32;
 
-						//ブロック生成用のランダム
-						//ランダム生成(int)
-						std::random_device seedBlock;
-						std::mt19937_64 engineBlock(seedBlock());
-						std::uniform_real_distribution<> distBlock(0, 5);
-						//ブロックを初期化、生成
-						blocks = {};
-						for (int i = 0; i < PLAYPART_HEIGHT; i++)
-						{
-							for (int j = 0; j < PLAYPART_WIDTH; j++)
-							{
-								BlockType currentBlockType = static_cast<BlockType>(distBlock(engineBlock));
-								if (i == 0)
-								{
-									currentBlockType = weakblock;
-								}
-
-								blocks.push_back(Block{ RigidBody{GameObject{
-									Rect{(float)-WIN_WIDTH / 2 + BLOCK_DIAMETER / 2 + BLOCK_DIAMETER * j,(float)BLOCK_DIAMETER * i,
-									BLOCK_DIAMETER / 2,BLOCK_DIAMETER / 2}
-								}},currentBlockType });
-								blocks.back().latestLandingHeight = blocks.back().rigidBody.gameObject.entity.position.y;
-							}
-						}
+						//地層生成
+						GenerateLevel(blocks, stageLevel);
 					}
 
 					gameui_->Update();
@@ -914,8 +948,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 								}
 								particles.push_back(Particle{ RigidBody{GameObject{
 									blocks[i].rigidBody.gameObject.entity,shardGraph[spriteIndex]},
-									Vector2D{sinf(angleRad),cosf(angleRad)} * 15},
-									0.5f + (rand() % 20) * 0.01f,(float)(rand() % 7 - 3)*0.1f });
+									Vector2D{sinf(angleRad),cosf(angleRad)} *15},
+									0.5f + (rand() % 20) * 0.01f,(float)(rand() % 7 - 3) * 0.1f });
 							}
 
 							PlaySoundMem(blockBreakSound, DX_PLAYTYPE_BACK, true);
@@ -925,7 +959,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					}
 
 					gameui_->depthT1 =
-						stageLevel * PLAYPART_HEIGHT + max((player.rigidBody.gameObject.entity.position.y) / BLOCK_DIAMETER + 1,0);
+						stageLevel * PLAYPART_HEIGHT + max((player.rigidBody.gameObject.entity.position.y) / BLOCK_DIAMETER + 1, 0);
 
 					//ボタンを押した時の処理
 					if (IsButtonClicked(buttons, 0))
@@ -1134,7 +1168,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		{
 			DrawButton(buttons[i]);
 		}
-
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 		//---------  ここまでにプログラムを記述  ---------//
 		// (ダブルバッファ)裏面
 		ScreenFlip();
