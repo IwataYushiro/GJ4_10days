@@ -184,13 +184,13 @@ void gameUi::DrawRank()
 		else if (depthT1 + blockCountT1 >= 56 && depthT1 + blockCountT1 <= 110) {
 			DrawGraph(0, 0, scorelastGraph[C], true);
 		}
-		else if (blockCountT1 >= 111 && blockCountT1 <= 165) {
+		else if (depthT1 + blockCountT1 >= 111 && depthT1 + blockCountT1 <= 165) {
 			DrawGraph(0, 0, scorelastGraph[B], true);
 		}
-		else if (blockCountT1 >= 166 && blockCountT1 <= 300) {
+		else if (depthT1 + blockCountT1 >= 166 && depthT1 + blockCountT1 <= 300) {
 			DrawGraph(0, 0, scorelastGraph[A], true);
 		}
-		else if (blockCountT1 >= 301) {
+		else if (depthT1 + blockCountT1 >= 301) {
 			DrawGraph(0, 0, scorelastGraph[S], true);
 		}
 
