@@ -177,8 +177,23 @@ void gameUi::DrawRank()
 	}
 	if (rankTimer >= 15)
 	{
-		
-		DrawGraph(0, 0, scorelastGraph[A], true);
+		//ÅI‚Ì‡ŽZƒXƒRƒA‚Ì•]‰¿ˆê——
+		if ( depthT1 + blockCountT1 >= 0 && depthT1 + blockCountT1 <= 55) {
+			DrawGraph(0, 0, scorelastGraph[D], true);
+		}
+		else if (depthT1 + blockCountT1 >= 56 && depthT1 + blockCountT1 <= 110) {
+			DrawGraph(0, 0, scorelastGraph[C], true);
+		}
+		else if (blockCountT1 >= 111 && blockCountT1 <= 165) {
+			DrawGraph(0, 0, scorelastGraph[B], true);
+		}
+		else if (blockCountT1 >= 166 && blockCountT1 <= 300) {
+			DrawGraph(0, 0, scorelastGraph[A], true);
+		}
+		else if (blockCountT1 >= 301) {
+			DrawGraph(0, 0, scorelastGraph[S], true);
+		}
+
 	}
 	if (rankTimer >= 30)
 	{
