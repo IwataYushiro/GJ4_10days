@@ -3,6 +3,16 @@
 #include <time.h>
 #include <string>
 
+enum scoreRank
+{
+	S,
+	A,
+	B,
+	C,
+	D,
+	MaxRank
+};
+
 class gameUi
 {
 public:
@@ -70,9 +80,9 @@ private:
 	void DrawUI(int digTimerRank, int uiPosX, int uiposY);
 	
 private:
-	//////////////////////////
-	////残り時間を示すタイマー////
-	/////////////////////////
+	///////////////////////////
+	//残り時間を示すタイマー(画像)//
+	///////////////////////////
 	int zeroGraph;
 	int oneGraph;
 	int twoGraph;
@@ -84,7 +94,11 @@ private:
 	int eightGraph;
 	int nineGraph;
 
-	int scoredepGraph;
-	int scorebloGraph;
-	int scorelastGraph;
+	//スコア表示用の画像
+	//depthのスコア
+	int scoredepGraph[MaxRank];
+	//壊したブロックのスコア
+	int scorebloGraph[MaxRank];
+	//2つを合わせた最終スコア
+	int scorelastGraph[MaxRank];
 };
