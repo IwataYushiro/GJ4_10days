@@ -116,7 +116,7 @@ void gameUi::Draw()
 	DrawString(950, 260, "DEPTH", GetColor(0, 0, 0));
 	DrawString(1150, 385, "m", GetColor(0, 0, 0));
 	//[‘w’l‚Í9999‚ªƒJƒ“ƒXƒg
-	if (depthT1 >= 10)
+	if (depthT1 >= 9999)
 	{
 		DrawString(1150, 350, "+", GetColor(0, 0, 0));
 	}
@@ -159,26 +159,31 @@ void gameUi::DrawRank()
 
 	if (rankTimer>=5){
 		//depth‚Ì•]‰¿ˆê——
-		if (depthT1 >= 0 && depthT1 <=5) {DrawGraph(0, 0, scoredepGraph[D], true);}
-		else if (depthT1 >= 6 && depthT1 <= 10) {DrawGraph(0, 0, scoredepGraph[C], true);}
-		else if (depthT1 >= 11 && depthT1 <= 15) {DrawGraph(0, 0, scoredepGraph[B], true);}
-		else if (depthT1 >= 16 && depthT1 <= 99) {DrawGraph(0, 0, scoredepGraph[A], true);}
-		else if (depthT1 >= 100) {DrawGraph(0, 0, scoredepGraph[S], true);}
+		if (depthT1 >= 0 && depthT1 <=20) {DrawGraph(0, 0, scoredepGraph[D], true);}
+		else if (depthT1 >= 21 && depthT1 <= 60) {DrawGraph(0, 0, scoredepGraph[C], true);}
+		else if (depthT1 >= 61 && depthT1 <= 100) {DrawGraph(0, 0, scoredepGraph[B], true);}
+		else if (depthT1 >= 101 && depthT1 <= 140) {DrawGraph(0, 0, scoredepGraph[A], true);}
+		else if (depthT1 >= 141) {DrawGraph(0, 0, scoredepGraph[S], true);}
 
 	}
 	if (rankTimer >= 10){
 		//‰ó‚µ‚½ƒuƒƒbƒN‚Ì•]‰¿ˆê——
-		if (blockCountT1>=0 && blockCountT1 <= 50) {DrawGraph(0, 0, scorebloGraph[D], true);}
-		else if (blockCountT1 >= 51 && blockCountT1 <= 100) {DrawGraph(0, 0, scorebloGraph[C], true);}
-		else if (blockCountT1 >= 101 && blockCountT1 <= 150) {DrawGraph(0, 0, scorebloGraph[B], true);}
-		else if (blockCountT1 >= 151 && blockCountT1 <= 200) {DrawGraph(0, 0, scorebloGraph[A], true);}
-		else if (blockCountT1 >= 201) {DrawGraph(0, 0, scorebloGraph[S], true);}
+		if (blockCountT1>=0 && blockCountT1 <= 100) {DrawGraph(0, 0, scorebloGraph[D], true);}
+		else if (blockCountT1 >= 101 && blockCountT1 <= 200) {DrawGraph(0, 0, scorebloGraph[C], true);}
+		else if (blockCountT1 >= 201 && blockCountT1 <= 300) {DrawGraph(0, 0, scorebloGraph[B], true);}
+		else if (blockCountT1 >= 301 && blockCountT1 <= 500) {DrawGraph(0, 0, scorebloGraph[A], true);}
+		else if (blockCountT1 >= 501) {DrawGraph(0, 0, scorebloGraph[S], true);}
 
 	}
 	if (rankTimer >= 15)
 	{
-		
-		DrawGraph(0, 0, scorelastGraph[A], true);
+		//ÅI‚Ì‡ŽZƒXƒRƒA‚Ì•]‰¿ˆê——
+		if ( depthT1 + blockCountT1 >= 0 && depthT1 + blockCountT1 <= 120) {DrawGraph(0, 0, scorelastGraph[D], true);}
+		else if (depthT1 + blockCountT1 >= 121 && depthT1 + blockCountT1 <= 260) {DrawGraph(0, 0, scorelastGraph[C], true);}
+		else if (depthT1 + blockCountT1 >= 261 && depthT1 + blockCountT1 <= 400) {DrawGraph(0, 0, scorelastGraph[B], true);}
+		else if (depthT1 + blockCountT1 >= 401 && depthT1 + blockCountT1 <= 640) {DrawGraph(0, 0, scorelastGraph[A], true);}
+		else if (depthT1 + blockCountT1 >= 641) {DrawGraph(0, 0, scorelastGraph[S], true);}
+
 	}
 	if (rankTimer >= 30)
 	{

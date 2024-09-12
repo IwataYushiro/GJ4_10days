@@ -6,7 +6,7 @@
 #include <random>
 
 // ウィンドウのタイトルに表示する文字列
-const char TITLE[] = "GJ4_Gamejam";
+const char TITLE[] = "4005_全手動地層割り機";
 
 //ブロックの大きさ
 const int BLOCK_DIAMETER = 64;
