@@ -13,7 +13,7 @@ const int BLOCK_DIAMETER = 64;
 //横列の数
 const int PLAYPART_WIDTH = 14;
 //1区画の縦の長さ
-const int PLAYPART_HEIGHT = 5;
+const int PLAYPART_HEIGHT = 100;
 //UIライン
 const int GAME_LINE = BLOCK_DIAMETER * PLAYPART_WIDTH;
 
@@ -485,7 +485,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	float sceneTransitionProgress = 0;
 	//シーンの初期化が必要ならこれをtrueに
 	bool sceneInit = false;
-
+	//フェードインアウト(イン、アウト)
+	int fadeInOutCount = 0;
 	//今流す曲のインデックス
 	int bgmNum = 0;
 
@@ -539,10 +540,19 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		if (nextScene == currentScene)
 		{
+			fadeInOutCount += 15;
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, fadeInOutCount);
+			if (fadeInOutCount >= 255)
+			{
+				//カウントリセット
+				fadeInOutCount = 255;
+			}
 			sceneTransitionProgress = 0;
 		}
 		else
 		{
+			fadeInOutCount -= 10;
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, fadeInOutCount);
 			//シーンを切り替えのカウントダウン
 			sceneTransitionProgress++;
 			if (sceneTransitionProgress >= 30) {
@@ -914,8 +924,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 								}
 								particles.push_back(Particle{ RigidBody{GameObject{
 									blocks[i].rigidBody.gameObject.entity,shardGraph[spriteIndex]},
-									Vector2D{sinf(angleRad),cosf(angleRad)} * 15},
-									0.5f + (rand() % 20) * 0.01f,(float)(rand() % 7 - 3)*0.1f });
+									Vector2D{sinf(angleRad),cosf(angleRad)} *15},
+									0.5f + (rand() % 20) * 0.01f,(float)(rand() % 7 - 3) * 0.1f });
 							}
 
 							PlaySoundMem(blockBreakSound, DX_PLAYTYPE_BACK, true);
@@ -925,7 +935,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					}
 
 					gameui_->depthT1 =
-						stageLevel * PLAYPART_HEIGHT + max((player.rigidBody.gameObject.entity.position.y) / BLOCK_DIAMETER + 1,0);
+						stageLevel * PLAYPART_HEIGHT + max((player.rigidBody.gameObject.entity.position.y) / BLOCK_DIAMETER + 1, 0);
 
 					//ボタンを押した時の処理
 					if (IsButtonClicked(buttons, 0))
@@ -1134,7 +1144,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		{
 			DrawButton(buttons[i]);
 		}
-
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 		//---------  ここまでにプログラムを記述  ---------//
 		// (ダブルバッファ)裏面
 		ScreenFlip();
