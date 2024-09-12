@@ -36,9 +36,24 @@ void gameUi::Initialize()
 	eightGraph = LoadGraph("Resources/Textures/timer8.png");
 	nineGraph = LoadGraph("Resources/Textures/timer9.png");
 
-	scoredepGraph = LoadGraph("Resources/Textures/scoredepS.png");
-	scorebloGraph = LoadGraph("Resources/Textures/scorebloS.png");
-	scorelastGraph = LoadGraph("Resources/Textures/scorelastS.png");
+	//depthのスコア
+	scoredepGraph[S] = LoadGraph("Resources/Textures/scoredepS.png");
+	scoredepGraph[A] = LoadGraph("Resources/Textures/scoredepA.png");
+	scoredepGraph[B] = LoadGraph("Resources/Textures/scoredepB.png");
+	scoredepGraph[C] = LoadGraph("Resources/Textures/scoredepC.png");
+	scoredepGraph[D] = LoadGraph("Resources/Textures/scoredepD.png");
+	//壊したブロックのスコア
+	scorebloGraph[S] = LoadGraph("Resources/Textures/scorebloS.png");
+	scorebloGraph[A] = LoadGraph("Resources/Textures/scorebloA.png");
+	scorebloGraph[B] = LoadGraph("Resources/Textures/scorebloB.png");
+	scorebloGraph[C] = LoadGraph("Resources/Textures/scorebloC.png");
+	scorebloGraph[D] = LoadGraph("Resources/Textures/scorebloD.png");
+	//2つを合わせた最終スコア
+	scorelastGraph[S] = LoadGraph("Resources/Textures/scorelastS.png");
+	scorelastGraph[A] = LoadGraph("Resources/Textures/scorelastA.png");
+	scorelastGraph[B] = LoadGraph("Resources/Textures/scorelastB.png");
+	scorelastGraph[C] = LoadGraph("Resources/Textures/scorelastC.png");
+	scorelastGraph[D] = LoadGraph("Resources/Textures/scorelastD.png");
 }
 
 void gameUi::Update()
@@ -119,7 +134,7 @@ void gameUi::Draw()
 	DrawString(950, 500, "壊したブロック数", GetColor(0, 0, 0));
 	DrawString(1140, 640, "個", GetColor(0, 0, 0));
 	//ブロック破壊カウントも9999がカンスト
-	if (blockCountT1 >= 10)
+	if (blockCountT1 >= 9999)
 	{
 		DrawString(1150, 590, "+", GetColor(0, 0, 0));
 	}
@@ -142,17 +157,28 @@ void gameUi::DrawUI(int digTimerRank, int uiPosX, int uiPosY)
 void gameUi::DrawRank()
 {
 
-	if (rankTimer>=5)
-	{
-		DrawGraph(0, 0, scoredepGraph, true);
+	if (rankTimer>=5){
+		//depthの評価一覧
+		if (depthT1 >= 0 && depthT1 <=5) {DrawGraph(0, 0, scoredepGraph[D], true);}
+		else if (depthT1 >= 6 && depthT1 <= 10) {DrawGraph(0, 0, scoredepGraph[C], true);}
+		else if (depthT1 >= 11 && depthT1 <= 15) {DrawGraph(0, 0, scoredepGraph[B], true);}
+		else if (depthT1 >= 16 && depthT1 <= 99) {DrawGraph(0, 0, scoredepGraph[A], true);}
+		else if (depthT1 >= 100) {DrawGraph(0, 0, scoredepGraph[S], true);}
+
 	}
-	if (rankTimer >= 10)
-	{
-		DrawGraph(0, 0, scorebloGraph, true);
+	if (rankTimer >= 10){
+		//壊したブロックの評価一覧
+		if (blockCountT1>=0 && blockCountT1 <= 50) {DrawGraph(0, 0, scorebloGraph[D], true);}
+		else if (blockCountT1 >= 51 && blockCountT1 <= 100) {DrawGraph(0, 0, scorebloGraph[C], true);}
+		else if (blockCountT1 >= 101 && blockCountT1 <= 150) {DrawGraph(0, 0, scorebloGraph[B], true);}
+		else if (blockCountT1 >= 151 && blockCountT1 <= 200) {DrawGraph(0, 0, scorebloGraph[A], true);}
+		else if (blockCountT1 >= 201) {DrawGraph(0, 0, scorebloGraph[S], true);}
+
 	}
 	if (rankTimer >= 15)
 	{
-		DrawGraph(0, 0, scorelastGraph, true);
+		
+		DrawGraph(0, 0, scorelastGraph[A], true);
 	}
 	if (rankTimer >= 30)
 	{
