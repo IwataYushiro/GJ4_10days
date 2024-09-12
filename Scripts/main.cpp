@@ -607,22 +607,20 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		if (nextScene == currentScene)
 		{
-			fadeInOutCount += 15;
-			SetDrawBlendMode(DX_BLENDMODE_ALPHA, fadeInOutCount);
-			if (fadeInOutCount >= 255)
+			if (sceneTransitionProgress >= 10 && sceneTransitionProgress < 20)
 			{
-				//カウントリセット
-				fadeInOutCount = 255;
+				sceneTransitionProgress++;
 			}
-			sceneTransitionProgress = 0;
+			else
+			{
+				sceneTransitionProgress = 0;
+			}
 		}
 		else
 		{
-			fadeInOutCount -= 10;
-			SetDrawBlendMode(DX_BLENDMODE_ALPHA, fadeInOutCount);
-			//シーンを切り替えのカウントダウン
+			//シーン切り替えのカウントダウン
 			sceneTransitionProgress++;
-			if (sceneTransitionProgress >= 30) {
+			if (sceneTransitionProgress >= 10) {
 				//シーンを切り替え、初期化フラグを立てる
 				currentScene = nextScene;
 				sceneInit = true;
@@ -1145,7 +1143,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				DrawGraph(300, 50, gameoverGraph, true);
 				gameui_->DrawRank();
 			}
-
 			break;
 		case credit:
 			//クレジット画面
@@ -1168,7 +1165,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		{
 			DrawButton(buttons[i]);
 		}
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+		//シーン遷移シャッター
+		DrawRotaGraph(WIN_WIDTH / 2, WIN_HEIGHT / 2,
+			WIN_WIDTH / 64 * sinf(sceneTransitionProgress / 20.0f * PI),
+			(sceneTransitionProgress - 10)/10.0f, blocksSprite[0], true);
+
 		//---------  ここまでにプログラムを記述  ---------//
 		// (ダブルバッファ)裏面
 		ScreenFlip();
