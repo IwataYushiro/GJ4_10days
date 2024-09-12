@@ -379,7 +379,7 @@ void GenerateLevel(std::vector<Block>& blocks, int stageLevel)
 	int tappableBlockCount2 = 0;
 	int randomGenerateCount = 0;
 	blocks = {};
-	for (int i = 0; i < PLAYPART_HEIGHT; i++)
+	for (int i = -1; i < PLAYPART_HEIGHT; i++)
 	{
 		for (int j = 0; j < PLAYPART_WIDTH; j++)
 		{
@@ -395,6 +395,10 @@ void GenerateLevel(std::vector<Block>& blocks, int stageLevel)
 			if (i == PLAYPART_HEIGHT - 1)
 			{
 				currentBlockType = static_cast<BlockType>(distTappableBlock(engineBlock));
+			}
+			else if (i == -1)
+			{
+				currentBlockType = frameblock;
 			}
 			else if(i > 0)
 			{
@@ -449,7 +453,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	SetWindowSizeExtendRate(1.0);
 
 	// 画面の背景色を設定する
-	SetBackgroundColor(0xff, 0xee, 0xaa);
+	SetBackgroundColor(0xff, 0xd8, 0x86);
 
 	// DXlibの初期化
 	if (DxLib_Init() == -1) { return -1; }
@@ -469,6 +473,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	//開発者ロゴ
 	const int logoGraph = LoadGraph("Resources/Textures/ALHATERAPETAGAMES_logo.png");
+	//タイトル画面背景
+	const int bgGraph = LoadGraph("Resources/Textures/backGround.png");
 	//タイトル画面
 	const int titleGraph = LoadGraph("Resources/Textures/title.png");
 	//チュートリアル
@@ -519,8 +525,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	LoadDivGraph("Resources/Textures/miniminiKXShard.png", 4,
 		2, 2,
 		32, 32, despawnShards);
-	//背景
-	const int backgroundSprite = LoadGraph("Resources/Textures/protobackground.png");
+	//プレイパート背景
+	const int playPartBGGraph = LoadGraph("Resources/Textures/playPartBackGround.png");
 
 	//ボタンを押す音
 	const int buttonPushSound = LoadSoundMem("Resources/SE/buttonPush.wav");
@@ -648,7 +654,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				stageLevel = 0;
 
 				//自機を初期座標へ
-				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 + 32,20,20},0,1,{0,-12}} },playerSprites };
+				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 - BLOCK_DIAMETER * 2,20,20},0,1,{0,-12}} },playerSprites };
 
 				//地層生成
 				GenerateLevel(blocks, stageLevel);
@@ -770,7 +776,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						stageLevel++;
 
 						//自機を上へ
-						player.rigidBody.gameObject.entity.position.y = -WIN_HEIGHT / 2 + 32;
+						player.rigidBody.gameObject.entity.position.y = -WIN_HEIGHT / 2 - BLOCK_DIAMETER * 2;
 
 						//地層生成
 						GenerateLevel(blocks, stageLevel);
@@ -1088,6 +1094,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		}
 
 		// 描画処理
+
+		//背景画像
+		DrawRotaGraph(WIN_WIDTH / 2, WIN_HEIGHT / 2 - fmodf(clock() * 0.00005f,1) * 320 + 160, 1, 0, bgGraph, TRUE);
+
 		switch (currentScene)
 		{
 		case logo:
@@ -1122,8 +1132,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		case playpart:
 			//プレイパート
 
-			//まずは背景を描画(スクロール付き　画像の縦軸はWIN_HEIGHTの三倍に長くなったよ)
-			DrawGraph(0, -((int)camPosition.y % WIN_HEIGHT) - WIN_HEIGHT, backgroundSprite, true);
+			//まずは背景を描画(スクロール付き)
+			DrawRotaGraph(GAME_LINE / 2, WIN_HEIGHT / 2 - fmodf(camPosition.y + 640, 320) + 160, 1, 0, playPartBGGraph, true);
 			//全てのブロックを描画
 			for (int i = 0; i < blocks.size(); i++) {
 				RenderObject(blocks[i].rigidBody.gameObject, camPosition + camPosOffset);
@@ -1152,7 +1162,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//クレジット画面
 			DrawString(
 				WIN_WIDTH / 4, 0,
-				"\n\nプログラマー\n　鰯ユウ\n　神無月\n\nチーフプログラマー\n　てらぺた\n\nアート\n　てらぺた\n\nエフェクト\n　てらぺた\n\nサウンドエフェクト\n　てらぺた\n\nコンポーサー\n　てらぺた",
+				"\n\nプログラマー\n　鰯ユウ\n　神無月\n\nチーフプログラマー\n　てらぺた\n\nエフェクト\n　てらぺた\n\nキャラクターデザイン\n　あるは\n\nアート\n　あるは\n\nサウンドエフェクト\n　あるは\n\nコンポーサー\n　あるは\n\nUIデザイン\n　神無月\n　てらぺた",
 				GetColor(0, 0, 0));
 			DrawString(
 				WIN_WIDTH / 2, 0,
