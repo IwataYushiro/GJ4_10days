@@ -25,16 +25,9 @@ void gameUi::Reset()
 void gameUi::Initialize()
 {
 	//ビットマップフォント用の数字画像とタイマー
-	zeroGraph = LoadGraph("Resources/Textures/timer0.png");
-	oneGraph = LoadGraph("Resources/Textures/timer1.png");
-	twoGraph = LoadGraph("Resources/Textures/timer2.png");
-	threeGraph = LoadGraph("Resources/Textures/timer3.png");
-	fourGraph = LoadGraph("Resources/Textures/timer4.png");
-	fiveGraph = LoadGraph("Resources/Textures/timer5.png");
-	sixGraph = LoadGraph("Resources/Textures/timer6.png");
-	sevenGraph = LoadGraph("Resources/Textures/timer7.png");
-	eightGraph = LoadGraph("Resources/Textures/timer8.png");
-	nineGraph = LoadGraph("Resources/Textures/timer9.png");
+	LoadDivGraph("Resources/Textures/alhaDigital.png", 10,
+		4, 4,
+		64, 64, numGraph);
 
 	//depthのスコア
 	scoredepGraph[S] = LoadGraph("Resources/Textures/scoredepS.png");
@@ -142,16 +135,7 @@ void gameUi::Draw()
 
 void gameUi::DrawUI(int digTimerRank, int uiPosX, int uiPosY)
 {
-	if (digTimerRank % 10 <= 0) { DrawGraph(uiPosX, uiPosY, zeroGraph, true); }
-	else if (digTimerRank % 10 == 1) { DrawGraph(uiPosX, uiPosY, oneGraph, true); }
-	else if (digTimerRank % 10 == 2) { DrawGraph(uiPosX, uiPosY, twoGraph, true); }
-	else if (digTimerRank % 10 == 3) { DrawGraph(uiPosX, uiPosY, threeGraph, true); }
-	else if (digTimerRank % 10 == 4) { DrawGraph(uiPosX, uiPosY, fourGraph, true); }
-	else if (digTimerRank % 10 == 5) { DrawGraph(uiPosX, uiPosY, fiveGraph, true); }
-	else if (digTimerRank % 10 == 6) { DrawGraph(uiPosX, uiPosY, sixGraph, true); }
-	else if (digTimerRank % 10 == 7) { DrawGraph(uiPosX, uiPosY, sevenGraph, true); }
-	else if (digTimerRank % 10 == 8) { DrawGraph(uiPosX, uiPosY, eightGraph, true); }
-	else if (digTimerRank % 10 == 9) { DrawGraph(uiPosX, uiPosY, nineGraph, true); }
+	DrawGraph(uiPosX, uiPosY, numGraph[digTimerRank % 10], true);
 }
 
 void gameUi::DrawRank()

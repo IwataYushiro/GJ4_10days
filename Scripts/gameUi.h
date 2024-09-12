@@ -83,16 +83,7 @@ private:
 	///////////////////////////
 	//残り時間を示すタイマー(画像)//
 	///////////////////////////
-	int zeroGraph;
-	int oneGraph;
-	int twoGraph;
-	int threeGraph;
-	int fourGraph;
-	int fiveGraph;
-	int sixGraph;
-	int sevenGraph;
-	int eightGraph;
-	int nineGraph;
+	int numGraph[10];
 
 	//スコア表示用の画像
 	//depthのスコア
