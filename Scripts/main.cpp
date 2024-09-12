@@ -471,7 +471,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	const int logoGraph = LoadGraph("Resources/Textures/ALHATERAPETAGAMES_logo.png");
 	//タイトル画面
 	const int titleGraph = LoadGraph("Resources/Textures/title.png");
-	const int operationGraph = LoadGraph("Resources/Textures/sousa.png");
+	//チュートリアル
+	const int tutorialGraph0 = LoadGraph("Resources/Textures/howToPlay0.png");
+	const int tutorialGraph1 = LoadGraph("Resources/Textures/howToPlay1.png");
 	//ゲームオーバー画面
 	const int gameoverGraph = LoadGraph("Resources/Textures/gameover.png");
 	//自機
@@ -852,6 +854,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 								&& VectorScale(blocks[i].rigidBody.gameObject.entity.position - player.rigidBody.gameObject.entity.position) <= BLOCK_DIAMETER)
 							{
 								blocks[i].status = "touched";
+								blocks[i].rigidBody.gameObject.graphLocalPos =
+									NormalizedVector(Vector2D{ (float)(rand() % 4) - 1.5f,(float)(rand() % 4) - 1.5f }) * 1;
 							}
 							else
 							{
@@ -1156,7 +1160,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				GetColor(0, 0, 0));
 			break;
 		case howtoplay:
-			DrawGraph(0, 0, operationGraph, true);
+			DrawRotaGraph(WIN_WIDTH / 4, WIN_HEIGHT / 2, 1, 0, tutorialGraph0, true);
+			DrawRotaGraph(WIN_WIDTH / 4 * 3, WIN_HEIGHT / 2, 1, 0, tutorialGraph1, true);
 			break;
 		}
 
