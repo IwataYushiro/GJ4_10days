@@ -18,7 +18,7 @@ const int PLAYPART_HEIGHT = 25;
 const int GAME_LINE = BLOCK_DIAMETER * PLAYPART_WIDTH;
 
 // ウィンドウ横幅
-const int WIN_WIDTH = 1280;//1280
+const int WIN_WIDTH = 1280;
 // ウィンドウ縦幅
 const int WIN_HEIGHT = 720;
 
@@ -1152,7 +1152,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 
 			//このラインからはUIゾーンなのでいっそここにボックスUIおいてもいいや
-			DrawBox(GAME_LINE, 0, WIN_WIDTH, WIN_HEIGHT, GetColor(0xff, 0xff, 0xff), TRUE);
+			DrawBox(GAME_LINE, 0, WIN_WIDTH, WIN_HEIGHT, 0xffffff, TRUE);
+			DrawBox(GAME_LINE, 0, WIN_WIDTH, WIN_HEIGHT, GetColor(0xff, 0xd8, 0x86), FALSE);
+			DrawTriangle(
+				WIN_WIDTH,0,
+				WIN_WIDTH,WIN_HEIGHT,
+				GAME_LINE,WIN_HEIGHT,
+				GetColor(0xff, 0xd8, 0x86), TRUE);
 			gameui_->Draw();
 			if (player.isDespawned)
 			{

@@ -1,5 +1,7 @@
 #include "gameUi.h"
 
+const int textColor = 0x000080;
+
 void gameUi::Reset()
 {
 	autotimer = 0;
@@ -79,8 +81,8 @@ void gameUi::Draw()
 	//1000の位
 	DrawUI(timerT1000, 920, 100);
 
-	DrawString(950, 30, "TIME", GetColor(0, 0, 0));
-	DrawFormatString(1150, 155, GetColor(0, 0, 0), "%d", autotimer);
+	DrawString(950, 30, "TIME", textColor);
+	DrawFormatString(1150, 155, textColor, "%d", autotimer);
 	
 	//残り深層何mかのUI
 	//1の位
@@ -92,12 +94,12 @@ void gameUi::Draw()
 	//1000の位
 	DrawUI(depthT1000, 920, 330);
 
-	DrawString(950, 260, "DEPTH", GetColor(0, 0, 0));
-	DrawString(1150, 385, "m", GetColor(0, 0, 0));
+	DrawString(950, 260, "DEPTH", textColor);
+	DrawString(1150, 385, "cm", textColor);
 	//深層値は9999がカンスト
 	if (depthT1 >= 9999)
 	{
-		DrawString(1150, 350, "+", GetColor(0, 0, 0));
+		DrawString(1150, 350, "+", textColor);
 	}
 
 	//ブロックをいくつ壊したかのかのUI
@@ -110,12 +112,12 @@ void gameUi::Draw()
 	//1000の位
 	DrawUI(blockCountT1000, 920, 590);
 
-	DrawString(950, 500, "壊したブロック数", GetColor(0, 0, 0));
-	DrawString(1140, 640, "個", GetColor(0, 0, 0));
+	DrawString(950, 500, "壊したブロック数", textColor);
+	DrawString(1140, 640, "個", textColor);
 	//ブロック破壊カウントも9999がカンスト
 	if (blockCountT1 >= 9999)
 	{
-		DrawString(1150, 590, "+", GetColor(0, 0, 0));
+		DrawString(1150, 590, "+", textColor);
 	}
 }
 
