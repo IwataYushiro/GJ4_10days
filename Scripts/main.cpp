@@ -13,7 +13,7 @@ const int BLOCK_DIAMETER = 64;
 //横列の数
 const int PLAYPART_WIDTH = 14;
 //1区画の縦の長さ
-const int PLAYPART_HEIGHT = 25;
+const int PLAYPART_HEIGHT = 50;
 //UIライン
 const int GAME_LINE = BLOCK_DIAMETER * PLAYPART_WIDTH;
 
@@ -37,6 +37,7 @@ enum Scene
 	logo,
 	title,
 	playpart,
+	option,
 	credit,
 	howtoplay,
 };
@@ -490,6 +491,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//チュートリアル
 	const int tutorialGraph0 = LoadGraph("Resources/Textures/howToPlay0.png");
 	const int tutorialGraph1 = LoadGraph("Resources/Textures/howToPlay1.png");
+	//掘れない状態の時に表示する画像
+	const int unDigableMark = LoadGraph("Resources/Textures/unDigableMark.png");
 	//自機
 	int playerSprites[7];
 	LoadDivGraph("Resources/Textures/miniminiKX.png", 7,
@@ -576,10 +579,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	float sceneTransitionProgress = 0;
 	//シーンの初期化が必要ならこれをtrueに
 	bool sceneInit = false;
-	//フェードインアウト(イン、アウト)
-	int fadeInOutCount = 0;
+
 	//今流す曲のインデックス
 	int bgmNum = 0;
+
+	//長押し連続掘りフラグ
+	bool autoDig = false;
+	//掘れる状態か
+	bool digable = false;
 
 	//Pause中のフラグ
 	bool isPause = false;
@@ -674,6 +681,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 				//自機を初期座標へ
 				player = LiveEntity{ RigidBody{ GameObject{ Rect{-WIN_WIDTH / 2 + GAME_LINE / 2,-WIN_HEIGHT / 2 - BLOCK_DIAMETER * 2,20,20},0,1,{0,-12}} },playerSprites };
+				//一旦掘れなくする
+				digable = false;
 
 				//地層生成
 				GenerateLevel(blocks, stageLevel);
@@ -690,7 +699,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//スタートボタンとクレジットボタン
 			buttons = {
 				Button{Rect{WIN_WIDTH / 2, WIN_HEIGHT / 4 * 3,200,100},"スタート","START"},
-				Button{Rect{140, 60,130,50},"クレジット","CREDITS"},
+				Button{Rect{140, 60,130,50},"オプション","SETTINGS"},
 				Button{Rect{WIN_WIDTH - 140, 60,130,50},"遊び方","HOW TO PLAY"} ,
 			};
 			break;
@@ -719,10 +728,33 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				};
 			}
 			break;
+		case option:
+			//オプション画面
+
+		{
+			string autoDigStat = "オフ";
+			string autoDigStatE = "OFF";
+			if (autoDig)
+			{
+				autoDigStat = "オン";
+				autoDigStatE = "ON";
+			}
+
+			//戻るボタンと設定項目とクレジットボタン
+			buttons = {
+				Button{Rect{140, 60,130,50},"もどる","RETURN"},
+				Button{Rect{WIN_WIDTH - 240, 60,150,50},autoDigStat,autoDigStatE,true,autoDig},
+				Button{Rect{WIN_WIDTH - 320, WIN_HEIGHT / 2 - 150,70,50},"+","+"},Button{Rect{WIN_WIDTH - 160, WIN_HEIGHT / 2 - 150,70,50},"-","-"},
+				Button{Rect{WIN_WIDTH - 320, WIN_HEIGHT / 2,70,50},"+","+"},Button{Rect{WIN_WIDTH - 160, WIN_HEIGHT / 2,70,50},"-","-"},
+				Button{Rect{WIN_WIDTH - 320, WIN_HEIGHT / 2 + 150,70,50},"+","+"},Button{Rect{WIN_WIDTH - 160, WIN_HEIGHT / 2 + 150,70,50},"-","-"},
+				Button{Rect{WIN_WIDTH - 240, WIN_HEIGHT - 60,150,50},"クレジット","CREDITS"},
+			};
+		}
+			break;
 		case credit:
 			//クレジット画面
 
-			//タイトルに戻るボタン
+			//戻るボタン
 			buttons = {
 				Button{Rect{140, 60,130,50},"もどる","RETURN"},
 			};
@@ -730,7 +762,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		case howtoplay:
 			//遊び方説明画面
 
-			//タイトルに戻るボタン
+			//戻るボタン
 			buttons = {
 				Button{Rect{140, 60,130,50},"もどる","RETURN"},
 			};
@@ -770,7 +802,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			}
 			if (IsButtonClicked(buttons, 1))
 			{
-				nextScene = credit;
+				nextScene = option;
 			}
 			if (IsButtonClicked(buttons, 2))
 			{
@@ -794,6 +826,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 						//自機を上へ
 						player.rigidBody.gameObject.entity.position.y = -WIN_HEIGHT / 2 - BLOCK_DIAMETER * 2;
+						//一旦掘れなくする
+						digable = false;
 
 						//地層生成
 						GenerateLevel(blocks, stageLevel);
@@ -907,9 +941,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						}
 
 						//クリックされたら消す準備、壊せないブロックは少し演出を起こすだけ
-						if (HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.position + (camPosition + camPosOffset))
-							&& HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.pin + (camPosition + camPosOffset))
-							&& !mouseInputData.click && mouseInputData.preClick)
+						if (digable && HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.position + (camPosition + camPosOffset))
+							&& ((autoDig && mouseInputData.click)
+							|| (!autoDig && HitRectAndPoint(blocks[i].rigidBody.gameObject.entity, mouseInputData.pin + (camPosition + camPosOffset))
+							&& !mouseInputData.click && mouseInputData.preClick)))
 						{
 							if (blocks[i].blockType == untappableblock || blocks[i].blockType == lethalblock)
 							{
@@ -920,6 +955,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 							else
 							{
 								blocks[i].breaked = true;
+								//一旦掘れなくする
+								digable = false;
 							}
 						}
 
@@ -1042,6 +1079,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				}
 				//自機を更新
 				LiveEntityUpdate(&player, liveEntityWalls, damageSound, despawnSound, despawnShards, particles);
+				//着地していたら再度掘れるようにする
+				if (player.rigidBody.landing)
+				{
+					digable = true;
+				}
 
 				//カメラ追従
 				camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.position.y };
@@ -1074,6 +1116,56 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			}
 
 			break;
+		case option:
+			//オプション画面
+
+			//クレジットの曲を指定
+			bgmNum = 3;
+
+			//ボタンを押した時の処理
+			if (IsButtonClicked(buttons, 0))
+			{
+				nextScene = title;
+			}
+			if (IsButtonClicked(buttons, 1))
+			{
+				autoDig = !autoDig;
+			}
+			if (IsButtonClicked(buttons, 2))
+			{
+				masterVolume += 0.1f;
+			}
+			if (IsButtonClicked(buttons, 3))
+			{
+				masterVolume -= 0.1f;
+			}
+			if (IsButtonClicked(buttons, 4))
+			{
+				bgmVolume += 0.1f;
+			}
+			if (IsButtonClicked(buttons, 5))
+			{
+				bgmVolume -= 0.1f;
+			}
+			if (IsButtonClicked(buttons, 6))
+			{
+				seVolume += 0.1f;
+			}
+			if (IsButtonClicked(buttons, 7))
+			{
+				seVolume -= 0.1f;
+			}
+			if (IsButtonClicked(buttons, 8))
+			{
+				nextScene = credit;
+			}
+
+			//ボリュームを0~1の範囲に収める
+			masterVolume = min(max(0, masterVolume), 1);
+			bgmVolume = min(max(0, bgmVolume), 1);
+			seVolume = min(max(0, seVolume), 1);
+
+			break;
 		case credit:
 			//クレジット画面
 
@@ -1083,7 +1175,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//ボタンを押した時の処理
 			if (IsButtonClicked(buttons, 0))
 			{
-				nextScene = title;
+				nextScene = option;
 			}
 			break;
 		case howtoplay:
@@ -1125,7 +1217,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		//背景画像
 		int currentBGGraph = bgGraph;
 
-		if (currentScene == credit)
+		if (currentScene == option || currentScene == credit)
 		{
 			SetBackgroundColor(0x86, 0xc7, 0xff);
 			currentBGGraph = optionBGGraph;
@@ -1201,6 +1293,18 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			{
 				gameui_->DrawRank();
 			}
+
+			//掘れないときはマークを表示
+			if (!digable)
+			{
+				DrawRotaGraph(mouseInputData.position.x, mouseInputData.position.y, 1, 0, unDigableMark, true);
+			}
+			break;
+		case option:
+			DrawString(WIN_WIDTH / 2, 60, "長押し連続掘り", 0x000000);
+			DrawFormatString(WIN_WIDTH / 2, WIN_HEIGHT / 2 - 150, 0x000000, "マスター　%d\%", (int)roundf(masterVolume * 100));
+			DrawFormatString(WIN_WIDTH / 2, WIN_HEIGHT / 2, 0x000000, "音楽　　　%d\%", (int)roundf(bgmVolume * 100));
+			DrawFormatString(WIN_WIDTH / 2, WIN_HEIGHT / 2 + 150, 0x000000, "効果音　　%d\%", (int)roundf(seVolume * 100));
 			break;
 		case credit:
 			//クレジット画面
