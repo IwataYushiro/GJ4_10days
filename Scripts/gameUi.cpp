@@ -126,23 +126,26 @@ void gameUi::DrawUI(int digTimerRank, int uiPosX, int uiPosY)
 
 void gameUi::DrawRank()
 {
-
+	const int scoreDepthX = 1180;
+	const int scoreDepthY = 350;
+	const int scoreBlockX = 1180;
+	const int scoreBlockY = 600;
 	if (rankTimer>=5){
 		//depth‚Ì•]‰¿ˆê——
-		if (depthT1 >= 0 && depthT1 <=20) {DrawGraph(0, 0, rankGraph[D], true);}
-		else if (depthT1 >= 21 && depthT1 <= 60) {DrawGraph(0, 0, rankGraph[C], true);}
-		else if (depthT1 >= 61 && depthT1 <= 100) {DrawGraph(0, 0, rankGraph[B], true);}
-		else if (depthT1 >= 101 && depthT1 <= 140) {DrawGraph(0, 0, rankGraph[A], true);}
-		else if (depthT1 >= 141) {DrawGraph(0, 0, rankGraph[S], true);}
+		if (depthT1 >= 0 && depthT1 <=20) {DrawGraph(scoreDepthX, scoreDepthY, rankGraph[D], true);}
+		else if (depthT1 >= 21 && depthT1 <= 60) {DrawGraph(scoreDepthX, scoreDepthY, rankGraph[C], true);}
+		else if (depthT1 >= 61 && depthT1 <= 100) {DrawGraph(scoreDepthX, scoreDepthY, rankGraph[B], true);}
+		else if (depthT1 >= 101 && depthT1 <= 140) {DrawGraph(scoreDepthX, scoreDepthY, rankGraph[A], true);}
+		else if (depthT1 >= 141) {DrawGraph(scoreDepthX, scoreDepthY, rankGraph[S], true);}
 
 	}
 	if (rankTimer >= 10){
 		//‰ó‚µ‚½ƒuƒƒbƒN‚Ì•]‰¿ˆê——
-		if (blockCountT1>=0 && blockCountT1 <= 100) {DrawGraph(0, 0, rankGraph[D], true);}
-		else if (blockCountT1 >= 101 && blockCountT1 <= 200) {DrawGraph(0, 0, rankGraph[C], true);}
-		else if (blockCountT1 >= 201 && blockCountT1 <= 300) {DrawGraph(0, 0, rankGraph[B], true);}
-		else if (blockCountT1 >= 301 && blockCountT1 <= 500) {DrawGraph(0, 0, rankGraph[A], true);}
-		else if (blockCountT1 >= 501) {DrawGraph(0, 0, rankGraph[S], true);}
+		if (blockCountT1>=0 && blockCountT1 <= 100) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[D], true);}
+		else if (blockCountT1 >= 101 && blockCountT1 <= 200) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[C], true);}
+		else if (blockCountT1 >= 201 && blockCountT1 <= 300) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[B], true);}
+		else if (blockCountT1 >= 301 && blockCountT1 <= 500) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[A], true);}
+		else if (blockCountT1 >= 501) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[S], true);}
 
 	}
 	if (rankTimer >= 15)
