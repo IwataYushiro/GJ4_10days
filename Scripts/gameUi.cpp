@@ -132,6 +132,7 @@ void gameUi::DrawRank()
 	const int scoreDepthY = 350;
 	const int scoreBlockX = 1180;
 	const int scoreBlockY = 600;
+	const int rankrate = 4;
 	if (rankTimer>=5){
 		//depth‚Ì•]‰¿ˆê——
 		if (depthT1 >= 0 && depthT1 <=20) {DrawGraph(scoreDepthX, scoreDepthY, rankGraph[D], true);}
@@ -143,22 +144,22 @@ void gameUi::DrawRank()
 	}
 	if (rankTimer >= 10){
 		//‰ó‚µ‚½ƒuƒƒbƒN‚Ì•]‰¿ˆê——
-		if (blockCountT1/4>=0 && blockCountT1/4 <= 100) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[D], true);}
-		else if (blockCountT1/4 >= 101 && blockCountT1/4 <= 200) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[C], true);}
-		else if (blockCountT1/4 >= 201 && blockCountT1/4 <= 300) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[B], true);}
-		else if (blockCountT1/4 >= 301 && blockCountT1/4 <= 500) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[A], true);}
-		else if (blockCountT1/4 >= 501) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[S], true);}
+		if (blockCountT1/ rankrate >=0 && blockCountT1/rankrate <= 100) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[D], true);}
+		else if (blockCountT1/rankrate >= 101 && blockCountT1/rankrate <= 200) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[C], true);}
+		else if (blockCountT1/rankrate >= 201 && blockCountT1/rankrate <= 300) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[B], true);}
+		else if (blockCountT1/rankrate >= 301 && blockCountT1/rankrate <= 500) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[A], true);}
+		else if (blockCountT1/rankrate >= 501) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[S], true);}
 
 	}
 	if (rankTimer >= 15)
 	{
 		//ÅI‚Ì‡ŽZƒXƒRƒA‚Ì•]‰¿ˆê——(‘¼‚æ‚è‘å‚«‚­)
 		scoreRank currentRank = D;
-		if (depthT1 + blockCountT1/4 >= 0 && depthT1 + blockCountT1/4 <= 120) { currentRank = D; }
-		else if (depthT1 + blockCountT1/4 >= 121 && depthT1 + blockCountT1/4 <= 260) { currentRank = C; }
-		else if (depthT1 + blockCountT1/4 >= 261 && depthT1 + blockCountT1/4 <= 400) { currentRank = B; }
-		else if (depthT1 + blockCountT1/4 >= 401 && depthT1 + blockCountT1/4 <= 640) { currentRank = A; }
-		else if (depthT1 + blockCountT1/4>= 641) { currentRank = S; }
+		if (depthT1 + blockCountT1/ rankrate >= 0 && depthT1 + blockCountT1/ rankrate <= 120) { currentRank = D; }
+		else if (depthT1 + blockCountT1/rankrate >= 121 && depthT1 + blockCountT1/rankrate <= 260) { currentRank = C; }
+		else if (depthT1 + blockCountT1/rankrate >= 261 && depthT1 + blockCountT1/rankrate <= 400) { currentRank = B; }
+		else if (depthT1 + blockCountT1/rankrate >= 401 && depthT1 + blockCountT1/rankrate <= 640) { currentRank = A; }
+		else if (depthT1 + blockCountT1/rankrate>= 641) { currentRank = S; }
 
 		DrawRotaGraph(500, 300, 4, 0, rankGraph[currentRank], true);
 	}
