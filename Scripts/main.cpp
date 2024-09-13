@@ -1077,13 +1077,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 						liveEntityWalls.push_back(blocks[i].rigidBody.gameObject);
 					}
 				}
-				//自機を更新
-				LiveEntityUpdate(&player, liveEntityWalls, damageSound, despawnSound, despawnShards, particles);
 				//着地していたら再度掘れるようにする
 				if (player.rigidBody.landing)
 				{
 					digable = true;
 				}
+				//自機を更新
+				LiveEntityUpdate(&player, liveEntityWalls, damageSound, despawnSound, despawnShards, particles);
 
 				//カメラ追従
 				camPosition = Vector2D{ 0,player.rigidBody.gameObject.entity.position.y };
