@@ -154,11 +154,11 @@ void gameUi::DrawRank()
 	{
 		//ÅI‚Ì‡ŽZƒXƒRƒA‚Ì•]‰¿ˆê——(‘¼‚æ‚è‘å‚«‚­)
 		scoreRank currentRank = D;
-		if (depthT1 + blockCountT1 >= 0 && depthT1 + blockCountT1 <= 120) { currentRank = D; }
-		else if (depthT1 + blockCountT1 >= 121 && depthT1 + blockCountT1 <= 260) { currentRank = C; }
-		else if (depthT1 + blockCountT1 >= 261 && depthT1 + blockCountT1 <= 400) { currentRank = B; }
-		else if (depthT1 + blockCountT1 >= 401 && depthT1 + blockCountT1 <= 640) { currentRank = A; }
-		else if (depthT1 + blockCountT1 >= 641) { currentRank = S; }
+		if (depthT1 + blockCountT1/4 >= 0 && depthT1 + blockCountT1/4 <= 120) { currentRank = D; }
+		else if (depthT1 + blockCountT1/4 >= 121 && depthT1 + blockCountT1/4 <= 260) { currentRank = C; }
+		else if (depthT1 + blockCountT1/4 >= 261 && depthT1 + blockCountT1/4 <= 400) { currentRank = B; }
+		else if (depthT1 + blockCountT1/4 >= 401 && depthT1 + blockCountT1/4 <= 640) { currentRank = A; }
+		else if (depthT1 + blockCountT1/4>= 641) { currentRank = S; }
 
 		DrawRotaGraph(500, 300, 4, 0, rankGraph[currentRank], true);
 	}
