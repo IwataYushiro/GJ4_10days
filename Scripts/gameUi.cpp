@@ -143,11 +143,11 @@ void gameUi::DrawRank()
 	}
 	if (rankTimer >= 10){
 		//‰ó‚µ‚½ƒuƒƒbƒN‚Ì•]‰¿ˆê——
-		if (blockCountT1>=0 && blockCountT1 <= 100) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[D], true);}
-		else if (blockCountT1 >= 101 && blockCountT1 <= 200) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[C], true);}
-		else if (blockCountT1 >= 201 && blockCountT1 <= 300) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[B], true);}
-		else if (blockCountT1 >= 301 && blockCountT1 <= 500) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[A], true);}
-		else if (blockCountT1 >= 501) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[S], true);}
+		if (blockCountT1/4>=0 && blockCountT1/4 <= 100) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[D], true);}
+		else if (blockCountT1/4 >= 101 && blockCountT1/4 <= 200) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[C], true);}
+		else if (blockCountT1/4 >= 201 && blockCountT1/4 <= 300) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[B], true);}
+		else if (blockCountT1/4 >= 301 && blockCountT1/4 <= 500) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[A], true);}
+		else if (blockCountT1/4 >= 501) {DrawGraph(scoreBlockX, scoreBlockY, rankGraph[S], true);}
 
 	}
 	if (rankTimer >= 15)
