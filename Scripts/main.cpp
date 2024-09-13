@@ -372,6 +372,7 @@ void GenerateLevel(std::vector<Block>& blocks, int stageLevel)
 	std::uniform_real_distribution<> distTappableBlock(0, 3);
 	std::uniform_real_distribution<> distUnTappableBlock(3, 5);
 	std::uniform_real_distribution<> distRandomGenerate(0, 5);
+	std::uniform_real_distribution<> distRandomCount(0, 5);
 
 	//ブロックを初期化、生成
 	int tappableBlockCount = 0;
@@ -385,10 +386,10 @@ void GenerateLevel(std::vector<Block>& blocks, int stageLevel)
 		{
 			if (tappableBlockCount <= 0 && unTappableBlockCount <= 0 && tappableBlockCount2 <= 0  && randomGenerateCount <= 0)
 			{
-				tappableBlockCount = rand() % 5 + PLAYPART_WIDTH / 3;
-				unTappableBlockCount = rand() % 5 + min(max(0,(stageLevel - 1) * 4),PLAYPART_WIDTH * 3);
-				tappableBlockCount2 = rand() % 5 + PLAYPART_WIDTH / 3;
-				randomGenerateCount = rand() % 5 + min(max(0, (stageLevel - 1) * 8), PLAYPART_WIDTH * 3);
+				tappableBlockCount = static_cast<int>(distRandomCount(engineBlock)) + PLAYPART_WIDTH / 3;
+				unTappableBlockCount = static_cast<int>(distRandomCount(engineBlock)) + min(max(0, (stageLevel - 1) * 4), PLAYPART_WIDTH * 3);
+				tappableBlockCount2 = static_cast<int>(distRandomCount(engineBlock)) + PLAYPART_WIDTH / 3;
+				randomGenerateCount = static_cast<int>(distRandomCount(engineBlock)) + min(max(0, (stageLevel - 1) * 8), PLAYPART_WIDTH * 3);
 			}
 
 			BlockType currentBlockType = weakblock;
