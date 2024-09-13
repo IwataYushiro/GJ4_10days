@@ -1139,7 +1139,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//タイトル画面
 
 			//タイトルロゴ
-			DrawGraph(0, 0, titleGraph, true);
+			DrawRotaGraph(WIN_WIDTH / 2, WIN_HEIGHT / 3 + sin(clock() / PI / 300 - 2.0) * 5, 1, 0, titleGraph, true);
 			//権利表示
 			DrawString(
 				WIN_WIDTH / 3, WIN_HEIGHT - (FONT_SIZE * 2 + 10), "2024 ALHA TERAPETA GAMES / TEAM 4005",
