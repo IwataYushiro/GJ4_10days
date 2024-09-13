@@ -25,6 +25,13 @@ const int WIN_HEIGHT = 720;
 //フォントのサイズ
 const int FONT_SIZE = 24;
 
+
+//BGM、SEのボリューム(関数内でも使うためここで宣言)
+float masterVolume = 1;
+float bgmVolume = 1;
+float seVolume = 1;
+
+
 enum Scene
 {
 	logo,
@@ -540,13 +547,21 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//死んだときの音
 	const int despawnSound = LoadSoundMem("Resources/SE/despawn.wav");
 
+	//全ての効果音
+	const int seClip[] = {
+		buttonPushSound,
+		blockBreakSound,
+		reflectSound,
+		damageSound,
+		despawnSound,};
+
 	//このゲームで流す全てのBGM（曲を流したくないときはインデックス0番を指定）
 	const int audioClip[] = {
 		0,
 		LoadSoundMem("Resources/BGM/title.mp3"),
 		LoadSoundMem("Resources/BGM/howToPlay.mp3"),
 		LoadSoundMem("Resources/BGM/option.mp3"),
-		LoadSoundMem("Resources/BGM/game.mp3"), };
+		LoadSoundMem("Resources/BGM/game.mp3"),};
 
 	// ゲームループで使う変数の宣言
 
@@ -565,9 +580,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	int fadeInOutCount = 0;
 	//今流す曲のインデックス
 	int bgmNum = 0;
-	//BGM、SEのボリューム
-	float bgmVolume = 1;
-	float seVolume = 1;
 
 	//Pause中のフラグ
 	bool isPause = false;
@@ -617,6 +629,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		//ボタン配列をリセット
 		buttons = {};
 
+		//ゲーム内で動的に制御できる音量
+		float dynamicBgmVolume = 1;
 
 		if (nextScene == currentScene)
 		{
@@ -768,8 +782,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 			//プレイパートの曲を指定
 			bgmNum = 4;
-			//曲の音量を大きく
-			ChangeVolumeSoundMem(255, audioClip[2]);
 
 			if (!isPause)
 			{
@@ -998,7 +1010,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 					}
 
 					//曲の音量を小さく
-					ChangeVolumeSoundMem(128, audioClip[2]);
+					dynamicBgmVolume = 0.5f;
 				}
 
 				//全てのパーティクルを更新
@@ -1058,7 +1070,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 				}
 
 				//曲の音量を小さく
-				ChangeVolumeSoundMem(128, audioClip[2]);
+				dynamicBgmVolume = 0.5f;
 			}
 
 			break;
@@ -1093,9 +1105,16 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			PlaySoundMem(audioClip[bgmNum], DX_PLAYTYPE_BACK, true);
 		}
 		for (int i = 0; i < sizeof(audioClip) / sizeof(*audioClip); i++) {
+			ChangeVolumeSoundMem(255 * bgmVolume * dynamicBgmVolume * masterVolume, audioClip[i]);
+
 			if (i != bgmNum) {
 				StopSoundMem(audioClip[i]);
 			}
+		}
+
+		//全ての効果音のボリュームを調整
+		for (int i = 0; i < sizeof(seClip) / sizeof(*seClip); i++) {
+			ChangeVolumeSoundMem(255 * seVolume * masterVolume, seClip[i]);
 		}
 
 		// 描画処理
