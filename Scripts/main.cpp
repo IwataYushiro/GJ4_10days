@@ -476,6 +476,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	const int logoGraph = LoadGraph("Resources/Textures/ALHATERAPETAGAMES_logo.png");
 	//タイトル画面背景
 	const int bgGraph = LoadGraph("Resources/Textures/backGround.png");
+	//オプション画面背景
+	const int optionBGGraph = LoadGraph("Resources/Textures/optionBackGround.png");
 	//タイトル画面
 	const int titleGraph = LoadGraph("Resources/Textures/title.png");
 	//チュートリアル
@@ -542,8 +544,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	const int audioClip[] = {
 		0,
 		LoadSoundMem("Resources/BGM/title.mp3"),
-		LoadSoundMem("Resources/BGM/game.mp3"),
-		LoadSoundMem("Resources/BGM/gameover.mp3") };
+		LoadSoundMem("Resources/BGM/howToPlay.mp3"),
+		LoadSoundMem("Resources/BGM/option.mp3"),
+		LoadSoundMem("Resources/BGM/game.mp3"), };
 
 	// ゲームループで使う変数の宣言
 
@@ -764,7 +767,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//プレイパート
 
 			//プレイパートの曲を指定
-			bgmNum = 2;
+			bgmNum = 4;
 			//曲の音量を大きく
 			ChangeVolumeSoundMem(255, audioClip[2]);
 
@@ -1075,7 +1078,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//遊び方説明画面
 
 			//遊び方説明の曲を指定
-			bgmNum = 3;
+			bgmNum = 2;
 
 			//ボタンを押した時の処理
 			if (IsButtonClicked(buttons, 0))
@@ -1097,8 +1100,19 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		// 描画処理
 
+		// 画面の背景色を設定する
+		SetBackgroundColor(0xff, 0xd8, 0x86);
+
 		//背景画像
-		DrawRotaGraph(WIN_WIDTH / 2, WIN_HEIGHT / 2 - fmodf(clock() * 0.00005f,1) * 320 + 160, 1, 0, bgGraph, TRUE);
+		int currentBGGraph = bgGraph;
+
+		if (currentScene == credit)
+		{
+			SetBackgroundColor(0x86, 0xc7, 0xff);
+			currentBGGraph = optionBGGraph;
+		}
+
+		DrawRotaGraph(WIN_WIDTH / 2, WIN_HEIGHT / 2 - fmodf(clock() * 0.00005f,1) * 320 + 160, 1, 0, currentBGGraph, TRUE);
 
 		switch (currentScene)
 		{
@@ -1129,6 +1143,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			//権利表示
 			DrawString(
 				WIN_WIDTH / 3, WIN_HEIGHT - (FONT_SIZE * 2 + 10), "2024 ALHA TERAPETA GAMES / TEAM 4005",
+				GetColor(0, 0, 0));
+			//バージョン表示
+			DrawString(
+				WIN_WIDTH / 6 * 5, WIN_HEIGHT - (FONT_SIZE * 2 + 10), "Ver. 1.0.0",
 				GetColor(0, 0, 0));
 			break;
 		case playpart:
