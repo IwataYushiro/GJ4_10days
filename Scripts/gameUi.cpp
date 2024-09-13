@@ -71,26 +71,26 @@ void gameUi::Draw()
 {
 	//ビットマップフォントタイマー
 	//タイマー
-	DrawUI(timerT1, 1050, 60);
+	DrawUI(timerT1, 1070, 100);
 	//10の位
-	DrawUI(timerT10, 1000, 60);
+	DrawUI(timerT10, 1020, 100);
 	//100の位
-	DrawUI(timerT100, 950, 60);
+	DrawUI(timerT100, 970, 100);
 	//1000の位
-	DrawUI(timerT1000, 900, 60);
+	DrawUI(timerT1000, 920, 100);
 
 	DrawString(950, 30, "TIME", GetColor(0, 0, 0));
 	DrawFormatString(1150, 155, GetColor(0, 0, 0), "%d", autotimer);
 	
 	//残り深層何mかのUI
 	//1の位
-	DrawUI(depthT1, 1050, 290);
+	DrawUI(depthT1, 1070, 330);
 	//10の位
-	DrawUI(depthT10, 1000, 290);
+	DrawUI(depthT10, 1020, 330);
 	//100の位
-	DrawUI(depthT100, 950, 290);
+	DrawUI(depthT100, 970, 330);
 	//1000の位
-	DrawUI(depthT1000, 900, 290);
+	DrawUI(depthT1000, 920, 330);
 
 	DrawString(950, 260, "DEPTH", GetColor(0, 0, 0));
 	DrawString(1150, 385, "m", GetColor(0, 0, 0));
@@ -102,13 +102,13 @@ void gameUi::Draw()
 
 	//ブロックをいくつ壊したかのかのUI
 	//1の位
-	DrawUI(blockCountT1, 1050, 550);
+	DrawUI(blockCountT1, 1070, 590);
 	//10の位
-	DrawUI(blockCountT10, 1000, 550);
+	DrawUI(blockCountT10, 1020, 590);
 	//100の位
-	DrawUI(blockCountT100, 950, 550);
+	DrawUI(blockCountT100, 970, 590);
 	//1000の位
-	DrawUI(blockCountT1000, 900, 550);
+	DrawUI(blockCountT1000, 920, 590);
 
 	DrawString(950, 500, "壊したブロック数", GetColor(0, 0, 0));
 	DrawString(1140, 640, "個", GetColor(0, 0, 0));
