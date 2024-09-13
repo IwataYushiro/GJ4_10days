@@ -85,11 +85,6 @@ private:
 	///////////////////////////
 	int numGraph[10];
 
-	//スコア表示用の画像
-	//depthのスコア
-	int scoredepGraph[MaxRank];
-	//壊したブロックのスコア
-	int scorebloGraph[MaxRank];
-	//2つを合わせた最終スコア
-	int scorelastGraph[MaxRank];
+	//ランク表示用の画像
+	int rankGraph[MaxRank];
 };

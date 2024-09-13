@@ -480,8 +480,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//チュートリアル
 	const int tutorialGraph0 = LoadGraph("Resources/Textures/howToPlay0.png");
 	const int tutorialGraph1 = LoadGraph("Resources/Textures/howToPlay1.png");
-	//ゲームオーバー画面
-	const int gameoverGraph = LoadGraph("Resources/Textures/gameover.png");
 	//自機
 	int playerSprites[7];
 	LoadDivGraph("Resources/Textures/miniminiKX.png", 7,
@@ -563,6 +561,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	int fadeInOutCount = 0;
 	//今流す曲のインデックス
 	int bgmNum = 0;
+	//BGM、SEのボリューム
+	float bgmVolume = 1;
+	float seVolume = 1;
 
 	//Pause中のフラグ
 	bool isPause = false;
@@ -1154,7 +1155,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			gameui_->Draw();
 			if (player.isDespawned)
 			{
-				DrawGraph(300, 50, gameoverGraph, true);
 				gameui_->DrawRank();
 			}
 			break;

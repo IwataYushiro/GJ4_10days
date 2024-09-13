@@ -29,24 +29,10 @@ void gameUi::Initialize()
 		4, 4,
 		64, 64, numGraph);
 
-	//depthのスコア
-	scoredepGraph[S] = LoadGraph("Resources/Textures/scoredepS.png");
-	scoredepGraph[A] = LoadGraph("Resources/Textures/scoredepA.png");
-	scoredepGraph[B] = LoadGraph("Resources/Textures/scoredepB.png");
-	scoredepGraph[C] = LoadGraph("Resources/Textures/scoredepC.png");
-	scoredepGraph[D] = LoadGraph("Resources/Textures/scoredepD.png");
-	//壊したブロックのスコア
-	scorebloGraph[S] = LoadGraph("Resources/Textures/scorebloS.png");
-	scorebloGraph[A] = LoadGraph("Resources/Textures/scorebloA.png");
-	scorebloGraph[B] = LoadGraph("Resources/Textures/scorebloB.png");
-	scorebloGraph[C] = LoadGraph("Resources/Textures/scorebloC.png");
-	scorebloGraph[D] = LoadGraph("Resources/Textures/scorebloD.png");
-	//2つを合わせた最終スコア
-	scorelastGraph[S] = LoadGraph("Resources/Textures/scorelastS.png");
-	scorelastGraph[A] = LoadGraph("Resources/Textures/scorelastA.png");
-	scorelastGraph[B] = LoadGraph("Resources/Textures/scorelastB.png");
-	scorelastGraph[C] = LoadGraph("Resources/Textures/scorelastC.png");
-	scorelastGraph[D] = LoadGraph("Resources/Textures/scorelastD.png");
+	//ランク
+	LoadDivGraph("Resources/Textures/rank.png", MaxRank,
+		4, 2,
+		64, 64, rankGraph);
 }
 
 void gameUi::Update()
@@ -143,31 +129,33 @@ void gameUi::DrawRank()
 
 	if (rankTimer>=5){
 		//depthの評価一覧
-		if (depthT1 >= 0 && depthT1 <=20) {DrawGraph(0, 0, scoredepGraph[D], true);}
-		else if (depthT1 >= 21 && depthT1 <= 60) {DrawGraph(0, 0, scoredepGraph[C], true);}
-		else if (depthT1 >= 61 && depthT1 <= 100) {DrawGraph(0, 0, scoredepGraph[B], true);}
-		else if (depthT1 >= 101 && depthT1 <= 140) {DrawGraph(0, 0, scoredepGraph[A], true);}
-		else if (depthT1 >= 141) {DrawGraph(0, 0, scoredepGraph[S], true);}
+		if (depthT1 >= 0 && depthT1 <=20) {DrawGraph(0, 0, rankGraph[D], true);}
+		else if (depthT1 >= 21 && depthT1 <= 60) {DrawGraph(0, 0, rankGraph[C], true);}
+		else if (depthT1 >= 61 && depthT1 <= 100) {DrawGraph(0, 0, rankGraph[B], true);}
+		else if (depthT1 >= 101 && depthT1 <= 140) {DrawGraph(0, 0, rankGraph[A], true);}
+		else if (depthT1 >= 141) {DrawGraph(0, 0, rankGraph[S], true);}
 
 	}
 	if (rankTimer >= 10){
 		//壊したブロックの評価一覧
-		if (blockCountT1>=0 && blockCountT1 <= 100) {DrawGraph(0, 0, scorebloGraph[D], true);}
-		else if (blockCountT1 >= 101 && blockCountT1 <= 200) {DrawGraph(0, 0, scorebloGraph[C], true);}
-		else if (blockCountT1 >= 201 && blockCountT1 <= 300) {DrawGraph(0, 0, scorebloGraph[B], true);}
-		else if (blockCountT1 >= 301 && blockCountT1 <= 500) {DrawGraph(0, 0, scorebloGraph[A], true);}
-		else if (blockCountT1 >= 501) {DrawGraph(0, 0, scorebloGraph[S], true);}
+		if (blockCountT1>=0 && blockCountT1 <= 100) {DrawGraph(0, 0, rankGraph[D], true);}
+		else if (blockCountT1 >= 101 && blockCountT1 <= 200) {DrawGraph(0, 0, rankGraph[C], true);}
+		else if (blockCountT1 >= 201 && blockCountT1 <= 300) {DrawGraph(0, 0, rankGraph[B], true);}
+		else if (blockCountT1 >= 301 && blockCountT1 <= 500) {DrawGraph(0, 0, rankGraph[A], true);}
+		else if (blockCountT1 >= 501) {DrawGraph(0, 0, rankGraph[S], true);}
 
 	}
 	if (rankTimer >= 15)
 	{
-		//最終の合算スコアの評価一覧
-		if ( depthT1 + blockCountT1 >= 0 && depthT1 + blockCountT1 <= 120) {DrawGraph(0, 0, scorelastGraph[D], true);}
-		else if (depthT1 + blockCountT1 >= 121 && depthT1 + blockCountT1 <= 260) {DrawGraph(0, 0, scorelastGraph[C], true);}
-		else if (depthT1 + blockCountT1 >= 261 && depthT1 + blockCountT1 <= 400) {DrawGraph(0, 0, scorelastGraph[B], true);}
-		else if (depthT1 + blockCountT1 >= 401 && depthT1 + blockCountT1 <= 640) {DrawGraph(0, 0, scorelastGraph[A], true);}
-		else if (depthT1 + blockCountT1 >= 641) {DrawGraph(0, 0, scorelastGraph[S], true);}
+		//最終の合算スコアの評価一覧(他より大きく)
+		scoreRank currentRank = D;
+		if (depthT1 + blockCountT1 >= 0 && depthT1 + blockCountT1 <= 120) { currentRank = D; }
+		else if (depthT1 + blockCountT1 >= 121 && depthT1 + blockCountT1 <= 260) { currentRank = C; }
+		else if (depthT1 + blockCountT1 >= 261 && depthT1 + blockCountT1 <= 400) { currentRank = B; }
+		else if (depthT1 + blockCountT1 >= 401 && depthT1 + blockCountT1 <= 640) { currentRank = A; }
+		else if (depthT1 + blockCountT1 >= 641) { currentRank = S; }
 
+		DrawRotaGraph(500, 300, 4, 0, rankGraph[currentRank], true);
 	}
 	if (rankTimer >= 30)
 	{
